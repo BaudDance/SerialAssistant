@@ -6,12 +6,11 @@ import { ref } from "vue";
  *  type: "read" | "write",
  *  data: Uint8Array,
  *  timestamp: Date,
- *  display: "hex" | "ascii" | "utf8",
+ *  display: "hex" | "ascii",
  * }
  */
+const records = ref([]);
+const readingRecord = ref(undefined);
 export function useRecordStore() {
-  const records = ref([]);
-  const readingRecord = ref(undefined);
-
   return { records, readingRecord };
 }

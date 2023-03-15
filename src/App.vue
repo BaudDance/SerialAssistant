@@ -1,4 +1,5 @@
 <script setup>
+import SendPanel from "@/components/SendPanel/SendPanel.vue";
 import SettingPanel from "@/components/SettingPanel/SettingPanel.vue";
 import { useRecordStore } from "@/store/useRecordStore";
 import { arrayBuffer2Hex } from "@/utils/displayConvert";
@@ -50,7 +51,7 @@ provide("serial", serial);
       <div class="w-7"></div>
       <div class="flex flex-col flex-grow basis-3/4">
         <div
-          class="basis-3/4 border-solid border-2 border-gray-400 rounded-3xl overflow-y-scroll p-x-5"
+          class="basis-3/4 border-solid border-2 border-gray-400 rounded-3xl overflow-y-scroll scroll-smooth p-x-5"
         >
           <template v-for="record in records">
             <div class="chat chat-start">
@@ -72,9 +73,9 @@ provide("serial", serial);
           </div>
         </div>
         <div class="h-8"></div>
-        <div
+        <SendPanel
           class="basis-1/4 border-solid border-2 border-gray-400 rounded-3xl"
-        ></div>
+        ></SendPanel>
       </div>
     </div>
   </div>

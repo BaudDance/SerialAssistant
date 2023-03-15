@@ -89,11 +89,10 @@ export function useSerial(
     startReadLoop();
   }
 
-  async function sendHex(hex) {
+  async function sendHex(hexBuffer) {
     const writer = port.value.writable.getWriter();
-
-    const data = new Uint8Array([104, 101, 108, 108, 111]); // hello
-    await writer.write(data);
+    console.log("发送数据", hexBuffer);
+    await writer.write(hexBuffer);
 
     // 允许稍后关闭串口。
     writer.releaseLock();
