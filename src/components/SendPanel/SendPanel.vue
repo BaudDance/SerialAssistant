@@ -28,19 +28,36 @@ async function send() {
     // sendHex(sendData.value);
   }
 }
+
+// 将字符串分为两个字符一组，然后转换为16进制
+function splitString(str) {
+  const result = [];
+  for (let i = 0; i < str.length; i += 2) {
+    result.push("0x" + str.slice(i, i + 2));
+  }
+  return result;
+}
+function onInput() {
+  if (sendType.value == "hex") {
+    const value = sendData.value.replaceAll(", ", "").replaceAll("0x", "");
+    const result = splitString(value);
+    sendData.value = result.join(", ");
+  }
+}
 </script>
 
 <template>
-  <div class="relative" @click="focused = true">
-    <input
+  <div class="relative">
+    <textarea
       id="send-panel-input"
       ref="inputRef"
       type="text-area"
-      class="w-0"
+      class="w-full h-full rounded-xl px-3 bg-transparent pb-10"
       autocomplete="send-panel-input"
+      @input="onInput"
       v-model="sendData"
-    />
-    {{ sendData }}
+    ></textarea>
+
     <button class="btn absolute right-3 bottom-3 px-10" @click="send">
       发 送
     </button>
