@@ -22,7 +22,7 @@ function onReadData(data) {
       type: "read",
       data: data,
       time: new Date(),
-      display: readType.type,
+      display: readType.value,
     };
   }
 }
@@ -33,7 +33,7 @@ function onReadFrame(frame) {
     type: "read",
     data: frame,
     time: new Date(),
-    display: readType.type,
+    display: readType.value,
   });
   readingRecord.value = undefined;
 }

@@ -1,6 +1,6 @@
 <script setup>
 import { useRecordStore } from "@/store/useRecordStore";
-import { arrayBuffer2Hex } from "@/utils/bufferConvert";
+import { bufferToHexFormat, bufferToStr } from "@/utils/bufferConvert";
 import { format } from "date-fns";
 
 const { records, readingRecord } = useRecordStore();
@@ -17,7 +17,11 @@ const { records, readingRecord } = useRecordStore();
           </div>
         </div>
         <div class="chat-bubble break-words text-lg">
-          {{ arrayBuffer2Hex(record.data) }}
+          {{
+            record.display == "hex"
+              ? bufferToHexFormat(record.data)
+              : bufferToStr(record.data)
+          }}
         </div>
       </div>
       <div v-if="record.type == 'write'" class="chat chat-end">
@@ -28,7 +32,11 @@ const { records, readingRecord } = useRecordStore();
           </div>
         </div>
         <div class="chat-bubble break-words text-lg">
-          {{ arrayBuffer2Hex(record.data) }}
+          {{
+            record.display == "hex"
+              ? bufferToHexFormat(record.data)
+              : bufferToStr(record.data)
+          }}
         </div>
       </div>
     </template>
@@ -40,7 +48,11 @@ const { records, readingRecord } = useRecordStore();
         </div>
       </div>
       <div class="chat-bubble break-all text-lg">
-        {{ arrayBuffer2Hex(readingRecord.data) }}
+        {{
+          readingRecord.display == "hex"
+            ? bufferToHexFormat(readingRecord.data)
+            : bufferToStr(readingRecord.data)
+        }}
       </div>
     </div>
     <!-- 接收类型标签 -->

@@ -1,9 +1,9 @@
 <script setup>
 import { useRecordStore } from "@/store/useRecordStore";
 import {
-  hex2ArrayBuffer,
   hexFormatToHexStr,
   hexFormatToStr,
+  hexStrToBuffer,
   hexStrToHexFormat,
   isHexStr,
   strToHexFormat,
@@ -11,6 +11,7 @@ import {
 import { useFocus } from "@vueuse/core";
 import { inject, ref, watch } from "vue";
 import { useSerialStore } from "../../store/useSerialStore";
+import { strToBuffer } from "../../utils/bufferConvert";
 
 const { sendHex } = inject("serial");
 const { records } = useRecordStore();
@@ -22,17 +23,24 @@ const { focused } = useFocus(inputRef);
 
 async function send() {
   if (sendType.value == "hex") {
-    const data = hex2ArrayBuffer(hexFormatToHexStr(sendData.value));
+    const data = hexStrToBuffer(hexFormatToHexStr(sendData.value));
     console.log("send", data);
     await sendHex(data);
     records.value.push({
       type: "write",
       data: data,
       time: new Date(),
-      display: "hex",
+      display: sendType.value,
     });
   } else {
-    // sendHex(sendData.value);
+    const data = strToBuffer(sendData.value);
+    await sendHex(data);
+    records.value.push({
+      type: "write",
+      data: data,
+      time: new Date(),
+      display: sendType.value,
+    });
   }
 }
 

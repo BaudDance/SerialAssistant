@@ -8,16 +8,10 @@
 
 import str2gbk from "str2gbk";
 const gbkDecoder = new TextDecoder("gbk");
-export function arrayBuffer2Hex(buffer) {
+export function bufferToHexFormat(buffer) {
   return Array.from(buffer)
     .map((i) => "0x" + i.toString(16).padStart(2, "0"))
-    .join(",");
-}
-
-export function hex2ArrayBuffer(hexString) {
-  return Uint8Array.from(
-    hexString.match(/.{1,2}/g).map((byte) => parseInt(byte, 16))
-  );
+    .join(", ");
 }
 
 /**
@@ -50,7 +44,6 @@ export function bufferToHexStr(buffer) {
 }
 
 export function hexStrToBuffer(str) {
-  console.log(str);
   return Uint8Array.from(
     str.match(/.{1,2}/g).map((byte) => parseInt(byte, 16))
   );
