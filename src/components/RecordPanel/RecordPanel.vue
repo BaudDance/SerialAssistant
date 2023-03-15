@@ -1,15 +1,44 @@
 <script setup>
 import { useRecordStore } from "@/store/useRecordStore";
 import { bufferToHexFormat, bufferToStr } from "@/utils/bufferConvert";
+import { useScroll } from "@vueuse/core";
 import { format } from "date-fns";
+import { ref, watch } from "vue";
 
-const { records, readingRecord } = useRecordStore();
+const { records, readingRecord, pinBottom } = useRecordStore();
+const rootEl = ref(null);
+const { x, y, isScrolling, arrivedState, directions } = useScroll(rootEl, {
+  behavior: "smooth",
+});
+async function scrollToBottom() {
+  rootEl.value.scrollTop = rootEl.value.scrollHeight;
+}
+watch(
+  [records, readingRecord],
+  () => {
+    // if (arrivedState.bottom) {
+    // TODO readingRecord很长时,只有接收完才会滚动到底部
+    if (pinBottom.value) {
+      // scrollToBottom();
+      setTimeout(() => scrollToBottom(), 0);
+    }
+    // }
+  },
+  { deep: true }
+);
 </script>
 
 <template>
-  <div class="overflow-y-auto scroll-smooth p-2 relative record-panel">
-    <template v-for="record in records">
-      <div v-if="record.type == 'read'" class="chat chat-start">
+  <div
+    ref="rootEl"
+    class="overflow-y-auto scroll-smooth p-2 relative record-panel"
+  >
+    <template v-for="record in records" :key="record.time">
+      <div
+        v-if="record.type == 'read'"
+        class="chat chat-start"
+        @click="scrollToBottom"
+      >
         <div class="chat-header mx-2">
           <!-- TODO 点击可以切换时间显示格式(是否显示日期) -->
           <div class="text-sm opacity-70">
@@ -55,7 +84,6 @@ const { records, readingRecord } = useRecordStore();
         }}
       </div>
     </div>
-    <!-- 接收类型标签 -->
   </div>
 </template>
 

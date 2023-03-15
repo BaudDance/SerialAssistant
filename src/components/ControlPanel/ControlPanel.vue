@@ -1,6 +1,8 @@
 <script setup>
+import { useRecordStore } from "@/store/useRecordStore";
 import { useSerialStore } from "@/store/useSerialStore";
 const { readType, sendType } = useSerialStore();
+const { pinBottom } = useRecordStore();
 
 function toggleReadType() {
   readType.value = readType.value == "hex" ? "ascii" : "hex";
@@ -8,6 +10,9 @@ function toggleReadType() {
 
 function toggleSendType() {
   sendType.value = sendType.value == "hex" ? "ascii" : "hex";
+}
+function togglePinBottom() {
+  pinBottom.value = !pinBottom.value;
 }
 </script>
 <template>
@@ -35,6 +40,17 @@ function toggleSendType() {
       >
         <div class="swap-on fill-current w-15 m-2">发送:HEX</div>
         <div class="swap-off fill-current w-15 m-2">发送:ASCII</div>
+      </label>
+    </div>
+    <div class="flex-1"></div>
+    <div class="tooltip" data-tip="点击切换发送格式">
+      <label
+        class="swap badge badge-outline text-white text-center"
+        :class="pinBottom ? ['swap-active', ' badge-info'] : ['badge-warning']"
+        @click="togglePinBottom"
+      >
+        <div class="swap-on fill-current w-15 m-2">自动滚动</div>
+        <div class="swap-off fill-current w-15 m-2">不滚动</div>
       </label>
     </div>
   </div>

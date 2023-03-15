@@ -11,7 +11,6 @@ const { records, readingRecord } = useRecordStore();
 const { readType } = useSerialStore();
 
 function onReadData(data) {
-  console.log("onReadData", data);
   if (readingRecord.value) {
     readingRecord.value = {
       ...readingRecord.value,
@@ -28,7 +27,6 @@ function onReadData(data) {
 }
 
 function onReadFrame(frame) {
-  console.log("onReadFrame", frame);
   records.value.push({
     type: "read",
     data: frame,

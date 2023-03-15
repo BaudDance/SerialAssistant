@@ -11,6 +11,7 @@ import { ref } from "vue";
  */
 const records = ref([]);
 const readingRecord = ref(undefined);
+const pinBottom = ref(true);
 export function useRecordStore() {
-  return { records, readingRecord };
+  return { records, readingRecord, pinBottom };
 }
