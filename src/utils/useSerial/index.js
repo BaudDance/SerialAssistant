@@ -1,12 +1,12 @@
 import USBJson from "@/assets/usb-device.json";
 import { useSupported, useTimeoutFn } from "@vueuse/core";
-import { computed, shallowRef } from "vue";
+import { computed, ref } from "vue";
 /**
  *  Get device name from USBJson
  * @param {SerialPort} port
  * @returns
  */
-function getDeviceName(port) {
+export function getDeviceName(port) {
   if (!port) return undefined;
   const { usbProductId, usbVendorId } = port.getInfo();
   if (!usbVendorId) return undefined;
@@ -26,14 +26,14 @@ export function useSerial(
   const { onReadData, onReadFrame } = options;
   const isSupported = useSupported(() => navigator && "serial" in navigator);
   const serial = navigator.serial;
-  const port = shallowRef(undefined);
+  const port = ref(undefined);
   const portName = computed(() => getDeviceName(port.value));
-  const ports = shallowRef([]);
-
-  function updatePorts() {
-    serial.getPorts().then((ports) => {
-      ports.value = ports;
-    });
+  const ports = ref([]);
+  const connected = ref(false);
+  let keepReading;
+  let readingClosed;
+  async function updatePorts() {
+    ports.value = await serial.getPorts();
   }
 
   async function requestPort() {
@@ -42,12 +42,13 @@ export function useSerial(
       port.value = p;
       updatePorts();
     }
+    return p;
   }
 
   function setPort(p) {
     port.value = p;
   }
-
+  let reader;
   async function startReadLoop() {
     let buffer = new Uint8Array();
     const { start, stop } = useTimeoutFn(
@@ -58,10 +59,11 @@ export function useSerial(
       20,
       { immediate: false }
     );
-    while (port.value.readable) {
-      const reader = port.value.readable.getReader();
+    keepReading = true;
+    while (port.value.readable && keepReading) {
+      reader = port.value.readable.getReader();
       try {
-        while (true) {
+        while (keepReading) {
           const { value, done } = await reader.read();
           if (value) {
             stop();
@@ -74,9 +76,9 @@ export function useSerial(
             break;
           }
         }
-        reader.releaseLock();
       } catch (error) {
         console.error(error);
+      } finally {
         reader.releaseLock();
       }
     }
@@ -84,19 +86,40 @@ export function useSerial(
   }
 
   async function openPort(options = { baudRate: 9600 }) {
-    console.log("打开串口", options);
-    await port.value.open({ baudRate: 9600 });
-    startReadLoop();
+    await port.value.open(options);
+    readingClosed = startReadLoop();
+    connected.value = true;
   }
 
+  async function reopenPort(options = { baudRate: 9600 }) {
+    await closePort();
+    await openPort(options);
+  }
+
+  async function closePort() {
+    keepReading = false;
+    console.log("keepReading = false");
+    reader?.cancel();
+    await readingClosed;
+    console.log("readingClosed");
+    await port.value.close();
+    connected.value = false;
+  }
   async function sendHex(hexBuffer) {
     const writer = port.value.writable.getWriter();
     console.log("发送数据", hexBuffer);
     await writer.write(hexBuffer);
 
     // 允许稍后关闭串口。
+    writer.close();
     writer.releaseLock();
   }
+
+  serial.addEventListener("disconnect", async (event) => {
+    if (port.value == event.target) {
+      await closePort();
+    }
+  });
 
   updatePorts();
   return {
@@ -107,6 +130,9 @@ export function useSerial(
     portName,
     ports,
     openPort,
+    reopenPort,
+    closePort,
     sendHex,
+    connected,
   };
 }
