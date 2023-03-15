@@ -1,6 +1,6 @@
 import USBJson from "@/assets/usb-device.json";
-import { useSupported } from "@vueuse/core";
-import { computed, ref, shallowRef } from "vue";
+import { useSupported, useTimeoutFn } from "@vueuse/core";
+import { computed, shallowRef } from "vue";
 /**
  *  Get device name from USBJson
  * @param {SerialPort} port
@@ -17,10 +17,16 @@ function getDeviceName(port) {
   return product ? product.devname : undefined;
 }
 
-export function useSerial(options = {}) {
+export function useSerial(
+  options = {
+    onReadData: (data) => {},
+    onReadFrame: (frame) => {},
+  }
+) {
+  const { onReadData, onReadFrame } = options;
   const isSupported = useSupported(() => navigator && "serial" in navigator);
   const serial = navigator.serial;
-  const port = ref(undefined);
+  const port = shallowRef(undefined);
   const portName = computed(() => getDeviceName(port.value));
   const ports = shallowRef([]);
 
@@ -30,18 +36,78 @@ export function useSerial(options = {}) {
     });
   }
 
-  const requestPort = async () => {
+  async function requestPort() {
     const p = await serial.requestPort(options);
     if (p) {
       port.value = p;
       updatePorts();
     }
-  };
+  }
 
-  const setPort = (p) => {
+  function setPort(p) {
     port.value = p;
-  };
+  }
+
+  async function startReadLoop() {
+    let buffer = new Uint8Array();
+    const { start, stop } = useTimeoutFn(
+      () => {
+        onReadFrame(buffer);
+        buffer = new Uint8Array();
+      },
+      20,
+      { immediate: false }
+    );
+    while (port.value.readable) {
+      const reader = port.value.readable.getReader();
+      try {
+        while (true) {
+          const { value, done } = await reader.read();
+          if (value) {
+            stop();
+            buffer = new Uint8Array([...buffer, ...value]);
+            onReadData(value);
+            start();
+          }
+          if (done) {
+            reader.releaseLock();
+            break;
+          }
+        }
+        reader.releaseLock();
+      } catch (error) {
+        console.error(error);
+        reader.releaseLock();
+      }
+    }
+    console.log("串口读取循环已关闭");
+  }
+
+  async function openPort(options = { baudRate: 9600 }) {
+    console.log("打开串口", options);
+    await port.value.open({ baudRate: 9600 });
+    startReadLoop();
+  }
+
+  async function sendHex(hex) {
+    const writer = port.value.writable.getWriter();
+
+    const data = new Uint8Array([104, 101, 108, 108, 111]); // hello
+    await writer.write(data);
+
+    // 允许稍后关闭串口。
+    writer.releaseLock();
+  }
 
   updatePorts();
-  return { isSupported, requestPort, setPort, port, portName, ports };
+  return {
+    isSupported,
+    requestPort,
+    setPort,
+    port,
+    portName,
+    ports,
+    openPort,
+    sendHex,
+  };
 }
