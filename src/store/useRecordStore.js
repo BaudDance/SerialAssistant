@@ -3,7 +3,7 @@ import { ref } from "vue";
  *
  * record definition:
  * {
- *  type: "read" | "write",
+ *  type: "read" | "write" |"system"",
  *  data: Uint8Array,
  *  timestamp: Date,
  *  display: "hex" | "ascii",

@@ -67,6 +67,5 @@ function sendTest() {
     </select>
     <div class="h-3"></div>
     <button class="btn" @click="openSerialPort">连 接</button>
-    <button class="btn" @click="sendTest">发生</button>
   </div>
 </template>

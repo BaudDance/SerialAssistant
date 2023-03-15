@@ -6,6 +6,9 @@ const stopBits = ref(1);
 const parity = ref("none");
 const flowControl = ref("none");
 
+const readType = ref("hex");
+const sendType = ref("hex");
+
 export function useSerialStore() {
   return {
     baudRate,
@@ -13,5 +16,7 @@ export function useSerialStore() {
     stopBits,
     parity,
     flowControl,
+    readType,
+    sendType,
   };
 }

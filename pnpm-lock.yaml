@@ -5,6 +5,7 @@ specifiers:
   '@vueuse/core': ^9.13.0
   autoprefixer: ^10.4.13
   daisyui: ^2.51.0
+  date-fns: ^2.29.3
   postcss: ^8.4.21
   tailwindcss: ^3.2.7
   vite: ^4.1.0
@@ -13,6 +14,7 @@ specifiers:
 dependencies:
   '@vueuse/core': 9.13.0_vue@3.2.47
   daisyui: 2.51.0_gbtt6ss3tbiz4yjtvdr6fbrj44
+  date-fns: 2.29.3
   vue: 3.2.47
 
 devDependencies:
@@ -512,6 +514,11 @@ packages:
       tailwindcss: 3.2.7_postcss@8.4.21
     transitivePeerDependencies:
       - ts-node
+    dev: false
+
+  /date-fns/2.29.3:
+    resolution: {integrity: sha512-dDCnyH2WnnKusqvZZ6+jA1O51Ibt8ZMRNkDZdyAyK4YfbDwa/cEmuztzG5pk6hqlp9aSBPYcjOlktquahGwGeA==}
+    engines: {node: '>=0.11'}
     dev: false
 
   /defined/1.0.1:
