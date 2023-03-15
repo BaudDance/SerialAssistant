@@ -7,6 +7,7 @@ specifiers:
   daisyui: ^2.51.0
   date-fns: ^2.29.3
   postcss: ^8.4.21
+  str2gbk: ^0.0.5
   tailwindcss: ^3.2.7
   vite: ^4.1.0
   vue: ^3.2.45
@@ -15,6 +16,7 @@ dependencies:
   '@vueuse/core': 9.13.0_vue@3.2.47
   daisyui: 2.51.0_gbtt6ss3tbiz4yjtvdr6fbrj44
   date-fns: 2.29.3
+  str2gbk: 0.0.5
   vue: 3.2.47
 
 devDependencies:
@@ -844,6 +846,10 @@ packages:
   /sourcemap-codec/1.4.8:
     resolution: {integrity: sha512-9NykojV5Uih4lgo5So5dtw+f0JgJX30KCNI8gwhz2J9A15wD0Ml6tjHKwf6fTSa6fAdVBdZeNOs9eJ71qCk8vA==}
     deprecated: Please use @jridgewell/sourcemap-codec instead
+
+  /str2gbk/0.0.5:
+    resolution: {integrity: sha512-YOtJmOo1nBSoYEHwcCdAb+nyzkhQrx8tMkCuAdmvRrK2dwwUvEm62SSnA7I4DONdPB/WiiF14VXl4y5lJO94MQ==}
+    dev: false
 
   /supports-preserve-symlinks-flag/1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}

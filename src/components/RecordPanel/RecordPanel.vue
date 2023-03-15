@@ -1,6 +1,6 @@
 <script setup>
 import { useRecordStore } from "@/store/useRecordStore";
-import { arrayBuffer2Hex } from "@/utils/displayConvert";
+import { arrayBuffer2Hex } from "@/utils/bufferConvert";
 import { format } from "date-fns";
 
 const { records, readingRecord } = useRecordStore();

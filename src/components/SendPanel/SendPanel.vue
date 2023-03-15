@@ -1,8 +1,15 @@
 <script setup>
 import { useRecordStore } from "@/store/useRecordStore";
-import { hex2ArrayBuffer } from "@/utils/displayConvert";
+import {
+  hex2ArrayBuffer,
+  hexFormatToHexStr,
+  hexFormatToStr,
+  hexStrToHexFormat,
+  isHexStr,
+  strToHexFormat,
+} from "@/utils/bufferConvert";
 import { useFocus } from "@vueuse/core";
-import { inject, ref } from "vue";
+import { inject, ref, watch } from "vue";
 import { useSerialStore } from "../../store/useSerialStore";
 
 const { sendHex } = inject("serial");
@@ -15,7 +22,7 @@ const { focused } = useFocus(inputRef);
 
 async function send() {
   if (sendType.value == "hex") {
-    const data = hex2ArrayBuffer(sendData.value);
+    const data = hex2ArrayBuffer(hexFormatToHexStr(sendData.value));
     console.log("send", data);
     await sendHex(data);
     records.value.push({
@@ -39,11 +46,24 @@ function splitString(str) {
 }
 function onInput() {
   if (sendType.value == "hex") {
-    const value = sendData.value.replaceAll(", ", "").replaceAll("0x", "");
-    const result = splitString(value);
-    sendData.value = result.join(", ");
+    sendData.value = hexStrToHexFormat(sendData.value);
   }
 }
+
+watch(sendType, (value) => {
+  if (!sendData.value) return;
+  if (value == "hex") {
+    // 如果是纯hex字符,就直接转换为hex格式
+    if (isHexStr(sendData.value)) {
+      sendData.value = hexStrToHexFormat(sendData.value);
+    } else {
+      // 否则作为普通字符串,先取GBK编码,然后转换为hex格式
+      sendData.value = strToHexFormat(sendData.value);
+    }
+  } else {
+    sendData.value = hexFormatToStr(sendData.value);
+  }
+});
 </script>
 
 <template>
