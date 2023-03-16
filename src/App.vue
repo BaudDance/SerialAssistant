@@ -1,30 +1,70 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+import SendPanel from "@/components/SendPanel/SendPanel.vue";
+import SettingPanel from "@/components/SettingPanel/SettingPanel.vue";
+import { useRecordStore } from "@/store/useRecordStore";
+import { useSerialStore } from "@/store/useSerialStore";
+import { useSerial } from "@/utils/useSerial";
+import { provide } from "vue";
+import ControlPanel from "./components/ControlPanel/ControlPanel.vue";
+import RecordPanel from "./components/RecordPanel/RecordPanel.vue";
+const { records, readingRecord } = useRecordStore();
+const { readType } = useSerialStore();
+
+function onReadData(data) {
+  if (readingRecord.value) {
+    readingRecord.value = {
+      ...readingRecord.value,
+      data: Uint8Array.from([...readingRecord.value.data, ...data]),
+    };
+  } else {
+    readingRecord.value = {
+      type: "read",
+      data: data,
+      time: new Date(),
+      display: readType.value,
+    };
+  }
+}
+
+function onReadFrame(frame) {
+  records.value.push({
+    type: "read",
+    data: frame,
+    time: new Date(),
+    display: readType.value,
+  });
+  readingRecord.value = undefined;
+}
+
+const serial = useSerial({
+  onReadData,
+  onReadFrame,
+});
+provide("serial", serial);
 </script>
 
 <template>
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+  <div class="flex justify-center items-center h-screen">
+    <div class="container aspect-video flex flex-nowrap relative">
+      <SettingPanel
+        class="basis-1/4 border-solid border-2 border-gray-400 rounded-xl p-5"
+      />
+      <div class="w-7"></div>
+      <div class="flex flex-col flex-grow basis-3/4">
+        <RecordPanel
+          class="basis-3/4 border-solid border-2 border-gray-400 rounded-xl"
+        />
+        <ControlPanel class="h-10" />
+        <SendPanel
+          class="basis-1/4 border-solid border-2 border-gray-400 rounded-xl"
+        />
+      </div>
+
+      <div class="text-sm m-2 absolute -bottom-8 right-0">
+        powered by 波特律动
+      </div>
+    </div>
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
-</style>
+<style scoped></style>
