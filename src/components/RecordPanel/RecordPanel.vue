@@ -13,6 +13,14 @@ const { x, y, isScrolling, arrivedState, directions } = useScroll(rootEl, {
 async function scrollToBottom() {
   rootEl.value.scrollTop = rootEl.value.scrollHeight;
 }
+
+async function toggoleRecordDisplay(record) {
+  if (record.display == "hex") {
+    record.display = "str";
+  } else {
+    record.display = "hex";
+  }
+}
 watch(
   [records, readingRecord],
   () => {
@@ -39,10 +47,17 @@ watch(
         class="chat chat-start"
         @click="scrollToBottom"
       >
-        <div class="chat-header mx-2">
+        <div class="chat-header mx-2 flex">
           <!-- TODO 点击可以切换时间显示格式(是否显示日期) -->
           <div class="text-sm opacity-70">
             {{ format(record.time, "HH:mm:ss:SSS") }}
+          </div>
+          <div class="w-4"></div>
+          <div
+            class="cursor-pointer"
+            @click="() => toggoleRecordDisplay(record)"
+          >
+            {{ record.display }}
           </div>
         </div>
         <div class="chat-bubble break-words text-lg">
@@ -54,10 +69,17 @@ watch(
         </div>
       </div>
       <div v-if="record.type == 'write'" class="chat chat-end">
-        <div class="chat-header mx-2">
+        <div class="chat-header mx-2 flex">
           <!-- TODO 点击可以切换时间显示格式(是否显示日期) -->
           <div class="text-sm opacity-70">
             {{ format(record.time, "HH:mm:ss:SSS") }}
+          </div>
+          <div class="w-4"></div>
+          <div
+            class="cursor-pointer"
+            @click="() => toggoleRecordDisplay(record)"
+          >
+            {{ record.display }}
           </div>
         </div>
         <div class="chat-bubble break-words text-lg">
