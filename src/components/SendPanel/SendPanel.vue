@@ -1,0 +1,93 @@
+<script setup>
+import { useRecordStore } from "@/store/useRecordStore";
+import {
+  hexFormatToHexStr,
+  hexFormatToStr,
+  hexStrToBuffer,
+  hexStrToHexFormat,
+  isHexStr,
+  strToHexFormat,
+} from "@/utils/bufferConvert";
+import { useFocus } from "@vueuse/core";
+import { inject, ref, watch } from "vue";
+import { useSerialStore } from "../../store/useSerialStore";
+import { strToBuffer } from "../../utils/bufferConvert";
+
+const { sendHex } = inject("serial");
+const { records } = useRecordStore();
+const { sendType } = useSerialStore();
+
+const sendData = ref("");
+const inputRef = ref();
+const { focused } = useFocus(inputRef);
+
+async function send() {
+  if (sendType.value == "hex") {
+    const data = hexStrToBuffer(hexFormatToHexStr(sendData.value));
+    console.log("send", data);
+    await sendHex(data);
+    records.value.push({
+      type: "write",
+      data: data,
+      time: new Date(),
+      display: sendType.value,
+    });
+  } else {
+    const data = strToBuffer(sendData.value);
+    await sendHex(data);
+    records.value.push({
+      type: "write",
+      data: data,
+      time: new Date(),
+      display: sendType.value,
+    });
+  }
+}
+
+// 将字符串分为两个字符一组，然后转换为16进制
+function splitString(str) {
+  const result = [];
+  for (let i = 0; i < str.length; i += 2) {
+    result.push("0x" + str.slice(i, i + 2));
+  }
+  return result;
+}
+function onInput() {
+  if (sendType.value == "hex") {
+    sendData.value = hexStrToHexFormat(sendData.value);
+  }
+}
+
+watch(sendType, (value) => {
+  if (!sendData.value) return;
+  if (value == "hex") {
+    // 如果是纯hex字符,就直接转换为hex格式
+    if (isHexStr(sendData.value)) {
+      sendData.value = hexStrToHexFormat(sendData.value);
+    } else {
+      // 否则作为普通字符串,先取GBK编码,然后转换为hex格式
+      sendData.value = strToHexFormat(sendData.value);
+    }
+  } else {
+    sendData.value = hexFormatToStr(sendData.value);
+  }
+});
+</script>
+
+<template>
+  <div class="relative">
+    <textarea
+      id="send-panel-input"
+      ref="inputRef"
+      type="text-area"
+      class="w-full h-full rounded-xl px-3 bg-transparent pb-10"
+      autocomplete="send-panel-input"
+      @input="onInput"
+      v-model="sendData"
+    ></textarea>
+
+    <button class="btn absolute right-3 bottom-3 px-10" @click="send">
+      发 送
+    </button>
+  </div>
+</template>
