@@ -93,5 +93,14 @@ async function selectPort() {
     <button class="btn" @click="openSerialPort" v-if="!connected && port">
       重 连
     </button>
+    <div class="flex-1"></div>
+    <div class="flex gap-x-2">
+      <a href="https://github.com/BaudDance/SerialAssistant" target="_blank">
+        <img src="/github.svg" class="w-7 h-7" />
+      </a>
+      <a href="https://space.bilibili.com/6100925" target="_blank">
+        <img src="/bilibili.svg" class="w-7 h-7" />
+      </a>
+    </div>
   </div>
 </template>
