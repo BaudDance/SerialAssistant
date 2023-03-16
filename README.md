@@ -6,12 +6,20 @@
     <em>A serial port assistant that can be used directly in the browser.</em>
 </p>
 
+在线使用: [菜鸟教程](https://serial.keysking.com/)(https://serial.keysking.com/)
 ## TODO
 - 字数统计
+- 清屏按钮
 - 点击时间切换时间显示格式
 - 对话气泡复制按钮
-- 切换对话气泡显示格式
 - 对话记录保存
 - 快捷输入按钮面板
 - 快捷发送键(绑定例如WASD等按键)
 - 画数据曲线 (自定义正则表达式甚至js脚本提取数据)
+- 自动添加换行符(可以选择不同的换行符)
+- 自定义波特率
+- 周期发送
+- 选择中文编码
+- 搜索功能
+- 类似于命令行的彩色显示(类似于\033[30m)
+- 关键词彩色显示

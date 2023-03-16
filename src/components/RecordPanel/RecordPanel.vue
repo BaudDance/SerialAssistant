@@ -1,6 +1,10 @@
 <script setup>
 import { useRecordStore } from "@/store/useRecordStore";
-import { bufferToHexFormat, bufferToStr } from "@/utils/bufferConvert";
+import {
+  bufferToHexFormat,
+  bufferToStr,
+  strToHtml,
+} from "@/utils/bufferConvert";
 import { useScroll } from "@vueuse/core";
 import { format } from "date-fns";
 import { ref, watch } from "vue";
@@ -61,11 +65,15 @@ watch(
           </div>
         </div>
         <div class="chat-bubble break-words text-lg">
-          {{
+          <div v-if="record.display == 'hex'">
+            {{ bufferToHexFormat(record.data) }}
+          </div>
+          <div v-else v-html="strToHtml(bufferToStr(record.data))"></div>
+          <!-- {{
             record.display == "hex"
               ? bufferToHexFormat(record.data)
-              : bufferToStr(record.data)
-          }}
+              : strToHtml(bufferToStr(record.data))
+          }} -->
         </div>
       </div>
       <div v-if="record.type == 'write'" class="chat chat-end">
@@ -83,11 +91,10 @@ watch(
           </div>
         </div>
         <div class="chat-bubble break-words text-lg">
-          {{
-            record.display == "hex"
-              ? bufferToHexFormat(record.data)
-              : bufferToStr(record.data)
-          }}
+          <div v-if="record.display == 'hex'">
+            {{ bufferToHexFormat(record.data) }}
+          </div>
+          <div v-else v-html="strToHtml(bufferToStr(record.data))"></div>
         </div>
       </div>
     </template>
@@ -99,11 +106,10 @@ watch(
         </div>
       </div>
       <div class="chat-bubble break-all text-lg">
-        {{
-          readingRecord.display == "hex"
-            ? bufferToHexFormat(readingRecord.data)
-            : bufferToStr(readingRecord.data)
-        }}
+        <div v-if="readingRecord.display == 'hex'">
+          {{ bufferToHexFormat(readingRecord.data) }}
+        </div>
+        <div v-else v-html="strToHtml(bufferToStr(readingRecord.data))"></div>
       </div>
     </div>
   </div>
