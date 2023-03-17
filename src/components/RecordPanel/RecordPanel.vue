@@ -5,7 +5,7 @@ import {
   bufferToStr,
   strToHtml,
 } from "@/utils/bufferConvert";
-import { useScroll } from "@vueuse/core";
+import { refThrottled, useScroll } from "@vueuse/core";
 import { format } from "date-fns";
 import { ref, watch } from "vue";
 
@@ -26,15 +26,11 @@ async function toggoleRecordDisplay(record) {
   }
 }
 watch(
-  [records, readingRecord],
+  [records, refThrottled(readingRecord, 150)],
   () => {
-    // if (arrivedState.bottom) {
-    // TODO readingRecord很长时,只有接收完才会滚动到底部
     if (pinBottom.value) {
-      // scrollToBottom();
       setTimeout(() => scrollToBottom(), 0);
     }
-    // }
   },
   { deep: true }
 );

@@ -2,7 +2,8 @@
 import { useRecordStore } from "@/store/useRecordStore";
 import { useSerialStore } from "@/store/useSerialStore";
 const { readType, sendType } = useSerialStore();
-const { pinBottom, clearRecords } = useRecordStore();
+const { pinBottom, clearRecords, readingRecord, rxCount, txCount } =
+  useRecordStore();
 
 function toggleReadType() {
   readType.value = readType.value == "hex" ? "ascii" : "hex";
@@ -42,6 +43,10 @@ function togglePinBottom() {
         <div class="swap-off m-2">发送:ASCII</div>
       </label>
     </div>
+    <div class="w-3"></div>
+    <div>Rx: {{ rxCount + (readingRecord?.data.length || 0) }} Bytes</div>
+    <div class="w-3"></div>
+    <div>Tx: {{ txCount }} Bytes</div>
     <div class="flex-1"></div>
     <!-- <button class="btn btn-outline btn-error btn-sm">清 屏</button> -->
 

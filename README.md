@@ -8,8 +8,6 @@
 
 在线使用: [菜鸟教程](https://serial.keysking.com/)(https://serial.keysking.com/)
 ## TODO
-- 字数统计
-- 清屏按钮
 - 点击时间切换时间显示格式
 - 对话气泡复制按钮
 - 对话记录保存
