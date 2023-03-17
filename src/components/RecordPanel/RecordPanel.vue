@@ -15,7 +15,7 @@ const { x, y, isScrolling, arrivedState, directions } = useScroll(rootEl, {
   behavior: "smooth",
 });
 async function scrollToBottom() {
-  rootEl.value.scrollTop = rootEl.value.scrollHeight;
+  rootEl.value.scrollTop = rootEl.value.scrollHeight + 2000;
 }
 
 async function toggoleRecordDisplay(record) {
@@ -43,7 +43,7 @@ watch(
 <template>
   <div
     ref="rootEl"
-    class="overflow-y-auto scroll-smooth p-2 relative record-panel"
+    class="overflow-y-auto scroll-smooth p-2 relative record-panel pb-10"
   >
     <template v-for="record in records" :key="record.time">
       <div

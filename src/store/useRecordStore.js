@@ -12,6 +12,10 @@ import { ref } from "vue";
 const records = ref([]);
 const readingRecord = ref(undefined);
 const pinBottom = ref(true);
+
+function clearRecords() {
+  records.value = [];
+}
 export function useRecordStore() {
-  return { records, readingRecord, pinBottom };
+  return { records, readingRecord, pinBottom, clearRecords };
 }
