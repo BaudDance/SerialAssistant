@@ -7,7 +7,7 @@ import { useSerial } from "@/utils/useSerial";
 import { provide } from "vue";
 import ControlPanel from "./components/ControlPanel/ControlPanel.vue";
 import RecordPanel from "./components/RecordPanel/RecordPanel.vue";
-const { records, readingRecord } = useRecordStore();
+const { records, readingRecord, addRecord } = useRecordStore();
 const { readType } = useSerialStore();
 
 function onReadData(data) {
@@ -27,7 +27,7 @@ function onReadData(data) {
 }
 
 function onReadFrame(frame) {
-  records.value.push({
+  addRecord({
     type: "read",
     data: frame,
     time: new Date(),
