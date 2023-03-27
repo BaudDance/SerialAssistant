@@ -1,7 +1,11 @@
 <script setup>
 import { useRecordStore } from "@/store/useRecordStore";
-import { bufferToHexFormat, bufferToStr } from "@/utils/bufferConvert";
-import { useScroll } from "@vueuse/core";
+import {
+  bufferToHexFormat,
+  bufferToStr,
+  strToHtml,
+} from "@/utils/bufferConvert";
+import { refThrottled, useScroll } from "@vueuse/core";
 import { format } from "date-fns";
 import { ref, watch } from "vue";
 
@@ -11,7 +15,7 @@ const { x, y, isScrolling, arrivedState, directions } = useScroll(rootEl, {
   behavior: "smooth",
 });
 async function scrollToBottom() {
-  rootEl.value.scrollTop = rootEl.value.scrollHeight;
+  rootEl.value.scrollTop = rootEl.value.scrollHeight + 2000;
 }
 
 async function toggoleRecordDisplay(record) {
@@ -22,15 +26,11 @@ async function toggoleRecordDisplay(record) {
   }
 }
 watch(
-  [records, readingRecord],
+  [records, refThrottled(readingRecord, 150)],
   () => {
-    // if (arrivedState.bottom) {
-    // TODO readingRecord很长时,只有接收完才会滚动到底部
     if (pinBottom.value) {
-      // scrollToBottom();
       setTimeout(() => scrollToBottom(), 0);
     }
-    // }
   },
   { deep: true }
 );
@@ -39,7 +39,7 @@ watch(
 <template>
   <div
     ref="rootEl"
-    class="overflow-y-auto scroll-smooth p-2 relative record-panel"
+    class="overflow-y-auto scroll-smooth p-2 relative record-panel pb-10"
   >
     <template v-for="record in records" :key="record.time">
       <div
@@ -61,11 +61,15 @@ watch(
           </div>
         </div>
         <div class="chat-bubble break-words text-lg">
-          {{
+          <div v-if="record.display == 'hex'">
+            {{ bufferToHexFormat(record.data) }}
+          </div>
+          <div v-else v-html="strToHtml(bufferToStr(record.data))"></div>
+          <!-- {{
             record.display == "hex"
               ? bufferToHexFormat(record.data)
-              : bufferToStr(record.data)
-          }}
+              : strToHtml(bufferToStr(record.data))
+          }} -->
         </div>
       </div>
       <div v-if="record.type == 'write'" class="chat chat-end">
@@ -83,11 +87,10 @@ watch(
           </div>
         </div>
         <div class="chat-bubble break-words text-lg">
-          {{
-            record.display == "hex"
-              ? bufferToHexFormat(record.data)
-              : bufferToStr(record.data)
-          }}
+          <div v-if="record.display == 'hex'">
+            {{ bufferToHexFormat(record.data) }}
+          </div>
+          <div v-else v-html="strToHtml(bufferToStr(record.data))"></div>
         </div>
       </div>
     </template>
@@ -99,11 +102,10 @@ watch(
         </div>
       </div>
       <div class="chat-bubble break-all text-lg">
-        {{
-          readingRecord.display == "hex"
-            ? bufferToHexFormat(readingRecord.data)
-            : bufferToStr(readingRecord.data)
-        }}
+        <div v-if="readingRecord.display == 'hex'">
+          {{ bufferToHexFormat(readingRecord.data) }}
+        </div>
+        <div v-else v-html="strToHtml(bufferToStr(readingRecord.data))"></div>
       </div>
     </div>
   </div>

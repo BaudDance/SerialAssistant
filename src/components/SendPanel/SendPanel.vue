@@ -14,7 +14,7 @@ import { useSerialStore } from "../../store/useSerialStore";
 import { strToBuffer } from "../../utils/bufferConvert";
 
 const { sendHex } = inject("serial");
-const { records } = useRecordStore();
+const { records, addRecord } = useRecordStore();
 const { sendType } = useSerialStore();
 
 const sendData = ref("");
@@ -26,7 +26,7 @@ async function send() {
     const data = hexStrToBuffer(hexFormatToHexStr(sendData.value));
     console.log("send", data);
     await sendHex(data);
-    records.value.push({
+    addRecord({
       type: "write",
       data: data,
       time: new Date(),
@@ -35,7 +35,7 @@ async function send() {
   } else {
     const data = strToBuffer(sendData.value);
     await sendHex(data);
-    records.value.push({
+    addRecord({
       type: "write",
       data: data,
       time: new Date(),

@@ -97,3 +97,12 @@ export function isHexStr(str) {
   let clearStr = hexFormatToHexStr(str);
   return true && clearStr.match(/^[0-9a-fA-F]+$/);
 }
+
+export function strToHtml(str) {
+  console.log("strToHtml", str);
+  return str
+    .replaceAll(" ", "&nbsp;")
+    .replaceAll("\r\n", "<br/>")
+    .replaceAll("\n", "<br/>")
+    .replaceAll("\r", "<br/>");
+}
