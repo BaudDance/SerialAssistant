@@ -1,20 +1,22 @@
 <script setup>
 import { useRecordStore } from "@/store/useRecordStore";
+import { useSerialStore } from "@/store/useSerialStore";
+import { useSettingStore } from "@/store/useSettingStore";
 import {
   hexFormatToHexStr,
   hexFormatToStr,
   hexStrToBuffer,
   hexStrToHexFormat,
   isHexStr,
+  strToBuffer,
   strToHexFormat,
 } from "@/utils/bufferConvert";
 import { useFocus } from "@vueuse/core";
 import { inject, ref, watch } from "vue";
-import { useSerialStore } from "../../store/useSerialStore";
-import { strToBuffer } from "../../utils/bufferConvert";
 
 const { sendHex } = inject("serial");
 const { records, addRecord } = useRecordStore();
+const { lineEnding } = useSettingStore();
 const { sendType } = useSerialStore();
 
 const sendData = ref("");
@@ -33,7 +35,7 @@ async function send() {
       display: sendType.value,
     });
   } else {
-    const data = strToBuffer(sendData.value);
+    const data = strToBuffer(sendData.value + lineEnding.value);
     await sendHex(data);
     addRecord({
       type: "write",
@@ -44,14 +46,6 @@ async function send() {
   }
 }
 
-// 将字符串分为两个字符一组，然后转换为16进制
-function splitString(str) {
-  const result = [];
-  for (let i = 0; i < str.length; i += 2) {
-    result.push("0x" + str.slice(i, i + 2));
-  }
-  return result;
-}
 function onInput() {
   if (sendType.value == "hex") {
     sendData.value = hexStrToHexFormat(sendData.value);

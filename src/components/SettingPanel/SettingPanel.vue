@@ -114,7 +114,11 @@ async function selectPort() {
           <li class="menu-title">
             <span>设置</span>
           </li>
-          <li tabindex="0"><a>软件设置</a></li>
+          <a>
+            <li tabindex="0">
+              <label for="setting-modal">软件设置</label>
+            </li>
+          </a>
         </ul>
       </div>
       <div class="flex-1"></div>

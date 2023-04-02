@@ -4,6 +4,7 @@ import RecordPanel from "@/components/RecordPanel/RecordPanel.vue";
 import SendPanel from "@/components/SendPanel/SendPanel.vue";
 import SettingPanel from "@/components/SettingPanel/SettingPanel.vue";
 import DownloadDriverModal from "@/modals/DownloadDriverModal/DownloadDriverModal.vue";
+import SettingModal from "@/modals/SettingModal/SettingModal.vue";
 import { useRecordStore } from "@/store/useRecordStore";
 import { useSerialStore } from "@/store/useSerialStore";
 import { useSerial } from "@/utils/useSerial";
@@ -67,6 +68,7 @@ provide("serial", serial);
     </div>
   </div>
   <DownloadDriverModal />
+  <SettingModal />
 </template>
 
 <style scoped></style>
