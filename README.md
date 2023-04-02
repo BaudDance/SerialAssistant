@@ -6,7 +6,7 @@
     <em>A serial port assistant that can be used directly in the browser.</em>
 </p>
 
-在线使用: [波特律动串口助手](https://serial.keysking.com/)(https://serial.keysking.com/)
+在线使用: [波特律动串口助手](https://serial.keysking.com/)
 ## TODO
 - 提供常见串口驱动下载
 - 点击时间切换时间显示格式

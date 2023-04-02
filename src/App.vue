@@ -1,12 +1,13 @@
 <script setup>
+import ControlPanel from "@/components/ControlPanel/ControlPanel.vue";
+import RecordPanel from "@/components/RecordPanel/RecordPanel.vue";
 import SendPanel from "@/components/SendPanel/SendPanel.vue";
 import SettingPanel from "@/components/SettingPanel/SettingPanel.vue";
+import DownloadDriverModal from "@/modals/DownloadDriverModal/DownloadDriverModal.vue";
 import { useRecordStore } from "@/store/useRecordStore";
 import { useSerialStore } from "@/store/useSerialStore";
 import { useSerial } from "@/utils/useSerial";
 import { provide } from "vue";
-import ControlPanel from "./components/ControlPanel/ControlPanel.vue";
-import RecordPanel from "./components/RecordPanel/RecordPanel.vue";
 const { records, readingRecord, addRecord } = useRecordStore();
 const { readType } = useSerialStore();
 
@@ -65,6 +66,7 @@ provide("serial", serial);
       </div>
     </div>
   </div>
+  <DownloadDriverModal />
 </template>
 
 <style scoped></style>

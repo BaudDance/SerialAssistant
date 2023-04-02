@@ -95,11 +95,38 @@ async function selectPort() {
     </button>
     <div class="flex-1"></div>
     <div class="flex gap-x-2">
+      <div class="dropdown dropdown-top">
+        <label tabindex="0" class="btn btn-square btn-ghost">
+          <img src="/menu.svg" class="w-7 h-7" />
+        </label>
+        <ul
+          tabindex="0"
+          class="dropdown-content menu p-2 shadow bg-base-200 rounded-box w-52"
+        >
+          <li class="menu-title">
+            <span>小工具</span>
+          </li>
+          <a>
+            <li tabindex="0">
+              <label for="download-driver-modal">常见驱动下载</label>
+            </li>
+          </a>
+          <li class="menu-title">
+            <span>设置</span>
+          </li>
+          <li tabindex="0"><a>软件设置</a></li>
+        </ul>
+      </div>
+      <div class="flex-1"></div>
       <a href="https://github.com/BaudDance/SerialAssistant" target="_blank">
-        <img src="/github.svg" class="w-7 h-7" />
+        <label class="btn btn-square btn-ghost">
+          <img src="/github.svg" class="w-7 h-7" />
+        </label>
       </a>
       <a href="https://space.bilibili.com/6100925" target="_blank">
-        <img src="/bilibili.svg" class="w-7 h-7" />
+        <label class="btn btn-square btn-ghost">
+          <img src="/bilibili.svg" class="w-7 h-7" />
+        </label>
       </a>
     </div>
   </div>
