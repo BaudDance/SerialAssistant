@@ -1,13 +1,14 @@
+import { useLocalStorage } from "@vueuse/core";
 import { ref } from "vue";
 
-const baudRate = ref(9600);
+const baudRate = useLocalStorage("baudRate", 9600);
 const dataBits = ref(8);
 const stopBits = ref(1);
 const parity = ref("none");
 const flowControl = ref("none");
 
-const readType = ref("hex");
-const sendType = ref("hex");
+const readType = useLocalStorage("readType", "hex");
+const sendType = useLocalStorage("sendType", "hex");
 
 export function useSerialStore() {
   return {

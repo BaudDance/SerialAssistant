@@ -13,6 +13,7 @@ import {
 } from "@/utils/bufferConvert";
 import { useFocus } from "@vueuse/core";
 import { inject, ref, watch } from "vue";
+import AutoSendButton from "./components/AutoSendButton.vue";
 
 const { sendHex } = inject("serial");
 const { records, addRecord } = useRecordStore();
@@ -79,7 +80,7 @@ watch(sendType, (value) => {
       @input="onInput"
       v-model="sendData"
     ></textarea>
-
+    <AutoSendButton class="absolute right-36 bottom-3" @send="send" />
     <button class="btn absolute right-3 bottom-3 px-10" @click="send">
       发 送
     </button>

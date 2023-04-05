@@ -9,6 +9,7 @@ import { useRecordStore } from "@/store/useRecordStore";
 import { useSerialStore } from "@/store/useSerialStore";
 import { useSerial } from "@/utils/useSerial";
 import { provide } from "vue";
+import ASCIIModel from "./modals/AsciiModel/ASCIIModel.vue";
 const { records, readingRecord, addRecord } = useRecordStore();
 const { readType } = useSerialStore();
 
@@ -69,6 +70,7 @@ provide("serial", serial);
   </div>
   <DownloadDriverModal />
   <SettingModal />
+  <ASCIIModel />
 </template>
 
 <style scoped></style>
