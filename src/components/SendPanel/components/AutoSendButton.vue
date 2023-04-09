@@ -1,6 +1,6 @@
 <script setup>
 import { useElementHover } from "@vueuse/core";
-import { computed, defineEmits, ref } from "vue";
+import { computed, ref } from "vue";
 const el = ref();
 const isHovered = useElementHover(el);
 
@@ -9,7 +9,7 @@ const emit = defineEmits(["send"]);
 const autoSendTime = ref(1000);
 const isAutoSending = ref(false);
 
-const timer = undefined;
+let timer = undefined;
 
 const content = computed(() => {
   if (isAutoSending.value) {

@@ -13,6 +13,7 @@
     "daisyui": "^2.51.0",
     "date-fns": "^2.29.3",
     "str2gbk": "^0.0.5",
+    "uuid": "^9.0.0",
     "vue": "^3.2.45"
   },
   "devDependencies": {
