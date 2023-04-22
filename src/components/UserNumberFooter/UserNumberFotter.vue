@@ -16,9 +16,7 @@ const userNumber = computed(() => {
   const message = JSON.parse(data.value);
   return message?.number || 0;
 });
-watch(data, (d) => {
-  console.log("data", d);
-});
+watch(data, (d) => {});
 </script>
 
 <template>

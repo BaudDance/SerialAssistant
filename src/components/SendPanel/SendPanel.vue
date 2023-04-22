@@ -27,7 +27,6 @@ const { focused } = useFocus(inputRef);
 async function send() {
   if (sendType.value == "hex") {
     const data = hexStrToBuffer(hexFormatToHexStr(sendData.value));
-    console.log("send", data);
     await sendHex(data);
     addRecord({
       type: "write",

@@ -15,7 +15,6 @@ const { x, y, isScrolling, arrivedState, directions } = useScroll(rootEl, {
   behavior: "smooth",
 });
 async function scrollToBottom() {
-  console.log(56);
   rootEl.value.scrollTop = rootEl.value.scrollHeight + 2000;
 }
 
@@ -29,7 +28,6 @@ async function toggoleRecordDisplay(record) {
 watch(
   [records, refThrottled(readingRecord, 150)],
   () => {
-    console.log(12);
     if (pinBottom.value) {
       setTimeout(() => scrollToBottom(), 0);
     }

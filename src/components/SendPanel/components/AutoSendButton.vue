@@ -34,7 +34,6 @@ async function timeoutFunc() {
 }
 
 async function toggleAutoSend() {
-  console.log("toggleAutoSend");
   if (isAutoSending.value) {
     isAutoSending.value = false;
     clearTimeout(timer);

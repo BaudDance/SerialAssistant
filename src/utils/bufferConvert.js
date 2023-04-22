@@ -99,7 +99,6 @@ export function isHexStr(str) {
 }
 
 export function strToHtml(str) {
-  console.log("strToHtml", str);
   return str
     .replaceAll(" ", "&nbsp;")
     .replaceAll("\r\n", "<br/>")
