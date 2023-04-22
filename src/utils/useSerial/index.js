@@ -56,7 +56,7 @@ export function useSerial(
         onReadFrame(buffer);
         buffer = new Uint8Array();
       },
-      20,
+      5,
       { immediate: false }
     );
     keepReading = true;
@@ -82,7 +82,6 @@ export function useSerial(
         reader.releaseLock();
       }
     }
-    console.log("串口读取循环已关闭");
   }
 
   async function openPort(options = { baudRate: 9600 }) {
@@ -98,16 +97,13 @@ export function useSerial(
 
   async function closePort() {
     keepReading = false;
-    console.log("keepReading = false");
     reader?.cancel();
     await readingClosed;
-    console.log("readingClosed");
     await port.value.close();
     connected.value = false;
   }
   async function sendHex(hexBuffer) {
     const writer = port.value.writable.getWriter();
-    console.log("发送数据", hexBuffer);
     await writer.write(hexBuffer);
 
     // 允许稍后关闭串口。
