@@ -7,7 +7,7 @@ import {
 } from "@/utils/bufferConvert";
 import { refThrottled, useScroll } from "@vueuse/core";
 import { format } from "date-fns";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 
 const { records, readingRecord, pinBottom } = useRecordStore();
 const rootEl = ref(null);
@@ -25,10 +25,11 @@ async function toggoleRecordDisplay(record) {
     record.display = "hex";
   }
 }
+const recordLength = computed(() => records.value.length);
 watch(
-  [records, refThrottled(readingRecord, 150)],
-  () => {
-    if (pinBottom.value) {
+  [recordLength, refThrottled(readingRecord, 150)],
+  (value, oldValue) => {
+    if (pinBottom.value & (value[0] != oldValue[0])) {
       setTimeout(() => scrollToBottom(), 0);
     }
   },
