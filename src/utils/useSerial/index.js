@@ -56,7 +56,7 @@ export function useSerial(
         onReadFrame(buffer);
         buffer = new Uint8Array();
       },
-      20,
+      5,
       { immediate: false }
     );
     keepReading = true;

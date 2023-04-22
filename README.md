@@ -8,6 +8,7 @@
 
 在线使用: [波特律动串口助手](https://serial.keysking.com/)
 ## TODO
+- 使用worker重构
 - SEO优化
 - 连续发送粘包问题
 - 修复RTS拉高部分板子boot0的问题

@@ -40,7 +40,7 @@ async function toggleAutoSend() {
   } else {
     if (autoSendTime.value <= 0) return;
     isAutoSending.value = true;
-    timeoutFunc();
+    emit("send");
     timer = setTimeout(timeoutFunc, autoSendTime.value);
   }
 }
