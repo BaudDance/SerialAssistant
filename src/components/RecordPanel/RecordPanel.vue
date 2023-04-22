@@ -15,6 +15,7 @@ const { x, y, isScrolling, arrivedState, directions } = useScroll(rootEl, {
   behavior: "smooth",
 });
 async function scrollToBottom() {
+  console.log(56);
   rootEl.value.scrollTop = rootEl.value.scrollHeight + 2000;
 }
 
@@ -28,6 +29,7 @@ async function toggoleRecordDisplay(record) {
 watch(
   [records, refThrottled(readingRecord, 150)],
   () => {
+    console.log(12);
     if (pinBottom.value) {
       setTimeout(() => scrollToBottom(), 0);
     }
@@ -42,11 +44,7 @@ watch(
     class="overflow-y-auto scroll-smooth p-2 relative record-panel pb-10"
   >
     <template v-for="record in records" :key="record.time">
-      <div
-        v-if="record.type == 'read'"
-        class="chat chat-start"
-        @click="scrollToBottom"
-      >
+      <div v-if="record.type == 'read'" class="chat chat-start">
         <div class="chat-header mx-2 flex">
           <!-- TODO 点击可以切换时间显示格式(是否显示日期) -->
           <div class="text-sm opacity-70">
