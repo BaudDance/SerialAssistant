@@ -7,7 +7,7 @@ import {
 } from "@/utils/bufferConvert";
 import { refThrottled, useScroll } from "@vueuse/core";
 import { format } from "date-fns";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 
 const { records, readingRecord, pinBottom } = useRecordStore();
 const rootEl = ref(null);
@@ -25,10 +25,11 @@ async function toggoleRecordDisplay(record) {
     record.display = "hex";
   }
 }
+const recordLength = computed(() => records.value.length);
 watch(
-  [records, refThrottled(readingRecord, 150)],
-  () => {
-    if (pinBottom.value) {
+  [recordLength, refThrottled(readingRecord, 150)],
+  (value, oldValue) => {
+    if (pinBottom.value & (value[0] != oldValue[0])) {
       setTimeout(() => scrollToBottom(), 0);
     }
   },
@@ -42,11 +43,7 @@ watch(
     class="overflow-y-auto scroll-smooth p-2 relative record-panel pb-10"
   >
     <template v-for="record in records" :key="record.time">
-      <div
-        v-if="record.type == 'read'"
-        class="chat chat-start"
-        @click="scrollToBottom"
-      >
+      <div v-if="record.type == 'read'" class="chat chat-start">
         <div class="chat-header mx-2 flex">
           <!-- TODO 点击可以切换时间显示格式(是否显示日期) -->
           <div class="text-sm opacity-70">

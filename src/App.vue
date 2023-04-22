@@ -1,12 +1,16 @@
 <script setup>
+import ControlPanel from "@/components/ControlPanel/ControlPanel.vue";
+import RecordPanel from "@/components/RecordPanel/RecordPanel.vue";
 import SendPanel from "@/components/SendPanel/SendPanel.vue";
 import SettingPanel from "@/components/SettingPanel/SettingPanel.vue";
+import DownloadDriverModal from "@/modals/DownloadDriverModal/DownloadDriverModal.vue";
+import SettingModal from "@/modals/SettingModal/SettingModal.vue";
 import { useRecordStore } from "@/store/useRecordStore";
 import { useSerialStore } from "@/store/useSerialStore";
 import { useSerial } from "@/utils/useSerial";
 import { provide } from "vue";
-import ControlPanel from "./components/ControlPanel/ControlPanel.vue";
-import RecordPanel from "./components/RecordPanel/RecordPanel.vue";
+import UserNumberFotter from "./components/UserNumberFooter/UserNumberFotter.vue";
+import ASCIIModel from "./modals/AsciiModel/ASCIIModel.vue";
 const { records, readingRecord, addRecord } = useRecordStore();
 const { readType } = useSerialStore();
 
@@ -63,8 +67,12 @@ provide("serial", serial);
       <div class="text-sm m-2 absolute -bottom-8 right-0">
         powered by 波特律动
       </div>
+      <UserNumberFotter class="absolute -bottom-8 left-0 m-2" />
     </div>
   </div>
+  <DownloadDriverModal />
+  <SettingModal />
+  <ASCIIModel />
 </template>
 
 <style scoped></style>

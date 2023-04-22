@@ -34070,15 +34070,19 @@
     "devices": {
       "5512": {
         "devid": "5512",
-        "devname": "CH341 in EPP/MEM/I2C mode, EPP/I2C adapter"
+        "devname": "CH341(EPP/MEM/I2C)"
       },
       "5523": {
         "devid": "5523",
-        "devname": "CH341 in serial mode, usb to serial port converter"
+        "devname": "CH341"
       },
       "5584": {
         "devid": "5584",
-        "devname": "CH341 in parallel mode, usb to printer port converter"
+        "devname": "CH341(parallel)"
+      },
+      "55d3": {
+        "devid": "55d3",
+        "devname": "CH343"
       },
       "7523": { "devid": "7523", "devname": "CH340 serial converter" },
       "7584": { "devid": "7584", "devname": "CH340S" },
