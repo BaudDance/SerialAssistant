@@ -5,7 +5,7 @@ import { computed, watch } from "vue";
 
 // const uuid = ref(uuidv4());
 const uuid = useLocalStorage("uuid", uuidv4());
-const backend = "ws://serial_backend.keysking.com/wss";
+const backend = "wss://serialbackend.keysking.com/wss";
 const { status, data, send } = useWebSocket(backend, {
   heartbeat: {
     message: JSON.stringify({ type: "beat", uuid: uuid.value }),
