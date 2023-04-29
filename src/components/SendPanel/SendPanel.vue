@@ -15,14 +15,23 @@ import { useFocus } from "@vueuse/core";
 import { inject, ref, watch } from "vue";
 import AutoSendButton from "./components/AutoSendButton.vue";
 
-const { sendHex } = inject("serial");
+const { sendHex: serialSendHex } = inject("serial");
+const { sendHex: bleSendHex } = inject("ble");
 const { records, addRecord } = useRecordStore();
-const { lineEnding } = useSettingStore();
+const { lineEnding, deviceType } = useSettingStore();
 const { sendType } = useSerialStore();
 
 const sendData = ref("");
 const inputRef = ref();
 const { focused } = useFocus(inputRef);
+
+async function sendHex(data) {
+  if (deviceType.value == "serial") {
+    await serialSendHex(data);
+  } else {
+    await bleSendHex(data);
+  }
+}
 
 async function send() {
   if (sendType.value == "hex") {
