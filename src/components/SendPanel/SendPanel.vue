@@ -2,17 +2,9 @@
 import { useRecordStore } from "@/store/useRecordStore";
 import { useSerialStore } from "@/store/useSerialStore";
 import { useSettingStore } from "@/store/useSettingStore";
-import {
-  hexFormatToHexStr,
-  hexFormatToStr,
-  hexStrToBuffer,
-  hexStrToHexFormat,
-  isHexStr,
-  strToBuffer,
-  strToHexFormat,
-} from "@/utils/bufferConvert";
-import { useFocus } from "@vueuse/core";
-import { inject, ref, watch } from "vue";
+
+import { useDataCode } from "@/utils/useDataCode/useDataCode";
+import { computed, inject, ref } from "vue";
 import AutoSendButton from "./components/AutoSendButton.vue";
 
 const { sendHex: serialSendHex } = inject("serial");
@@ -20,10 +12,23 @@ const { sendHex: bleSendHex } = inject("ble");
 const { records, addRecord } = useRecordStore();
 const { lineEnding, deviceType } = useSettingStore();
 const { sendType } = useSerialStore();
+const {
+  dataCode,
+  hexStringToHexFormat,
+  hexStringToBuffer,
+  stringToBuffer,
+  stringToHexFormat,
+} = useDataCode();
 
-const sendData = ref("");
-const inputRef = ref();
-const { focused } = useFocus(inputRef);
+const sendData = ref("1234AB2B");
+
+const sendDataHex = computed(() => {
+  if (sendType.value == "hex") {
+    return hexStringToHexFormat(sendData.value);
+  } else {
+    return stringToHexFormat(sendData.value + lineEnding.value);
+  }
+});
 
 async function sendHex(data) {
   if (deviceType.value == "serial") {
@@ -35,7 +40,7 @@ async function sendHex(data) {
 
 async function send() {
   if (sendType.value == "hex") {
-    const data = hexStrToBuffer(hexFormatToHexStr(sendData.value));
+    const data = hexStringToBuffer(sendData.value);
     await sendHex(data);
     addRecord({
       type: "write",
@@ -44,7 +49,7 @@ async function send() {
       display: sendType.value,
     });
   } else {
-    const data = strToBuffer(sendData.value + lineEnding.value);
+    const data = stringToBuffer(sendData.value + lineEnding.value);
     await sendHex(data);
     addRecord({
       type: "write",
@@ -57,37 +62,22 @@ async function send() {
 
 function onInput() {
   if (sendType.value == "hex") {
-    sendData.value = hexStrToHexFormat(sendData.value);
+    sendData.value = sendData.value.replace(/([^0-9a-fA-F])/, "").toUpperCase();
   }
 }
-
-watch(sendType, (value) => {
-  if (!sendData.value) return;
-  if (value == "hex") {
-    // 如果是纯hex字符,就直接转换为hex格式
-    if (isHexStr(sendData.value)) {
-      sendData.value = hexStrToHexFormat(sendData.value);
-    } else {
-      // 否则作为普通字符串,先取GBK编码,然后转换为hex格式
-      sendData.value = strToHexFormat(sendData.value);
-    }
-  } else {
-    sendData.value = hexFormatToStr(sendData.value);
-  }
-});
 </script>
 
 <template>
   <div class="relative">
     <textarea
       id="send-panel-input"
-      ref="inputRef"
       type="text-area"
       class="w-full h-full rounded-xl px-3 bg-transparent pb-10"
       autocomplete="send-panel-input"
       @input="onInput"
       v-model="sendData"
     ></textarea>
+    <!-- <div>{{ sendDataHex }}</div> -->
     <AutoSendButton class="absolute right-36 bottom-3" @send="send" />
     <button class="btn absolute right-3 bottom-3 px-10" @click="send">
       发 送
