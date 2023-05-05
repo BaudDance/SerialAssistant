@@ -1,14 +1,10 @@
 <script setup>
 import { useRecordStore } from "@/store/useRecordStore";
-import {
-  bufferToHexFormat,
-  bufferToStr,
-  strToHtml,
-} from "@/utils/bufferConvert";
+import { useDataCode } from "@/utils/useDataCode/useDataCode";
 import { refThrottled, useScroll } from "@vueuse/core";
 import { format } from "date-fns";
 import { computed, ref, watch } from "vue";
-
+const { bufferToHexFormat, bufferToString, stringToHtml } = useDataCode();
 const { records, readingRecord, pinBottom } = useRecordStore();
 const rootEl = ref(null);
 const { x, y, isScrolling, arrivedState, directions } = useScroll(rootEl, {
@@ -61,11 +57,11 @@ watch(
           <div v-if="record.display == 'hex'">
             {{ bufferToHexFormat(record.data) }}
           </div>
-          <div v-else v-html="strToHtml(bufferToStr(record.data))"></div>
+          <div v-else v-html="stringToHtml(bufferToString(record.data))"></div>
           <!-- {{
             record.display == "hex"
               ? bufferToHexFormat(record.data)
-              : strToHtml(bufferToStr(record.data))
+              : stringToHtml(bufferToStr(record.data))
           }} -->
         </div>
       </div>
@@ -87,7 +83,7 @@ watch(
           <div v-if="record.display == 'hex'">
             {{ bufferToHexFormat(record.data) }}
           </div>
-          <div v-else v-html="strToHtml(bufferToStr(record.data))"></div>
+          <div v-else v-html="stringToHtml(bufferToString(record.data))"></div>
         </div>
       </div>
     </template>
@@ -102,7 +98,10 @@ watch(
         <div v-if="readingRecord.display == 'hex'">
           {{ bufferToHexFormat(readingRecord.data) }}
         </div>
-        <div v-else v-html="strToHtml(bufferToStr(readingRecord.data))"></div>
+        <div
+          v-else
+          v-html="stringToHtml(bufferToString(readingRecord.data))"
+        ></div>
       </div>
     </div>
   </div>
