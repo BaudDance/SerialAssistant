@@ -70,8 +70,8 @@ function onInput() {
   }
 }
 
-function hexShowerUpdate(value) {
-  sendData.value = value;
+function clear() {
+  sendData.value = "";
 }
 </script>
 
@@ -79,22 +79,27 @@ function hexShowerUpdate(value) {
   <div class="relative">
     <HexShower
       v-if="sendHexInputMode == 'format' && sendType == 'hex'"
-      :value="sendData"
-      @update="hexShowerUpdate"
+      v-model="sendData"
       class="w-full h-full rounded-xl px-3 bg-transparent pb-10"
     />
     <textarea
       id="send-panel-input"
       type="text-area"
       v-else
-      class="w-full h-full rounded-xl px-3 bg-transparent pb-10"
+      class="w-full h-full rounded-xl px-3 bg-transparent pb-10 pr-40"
       autocomplete="send-panel-input"
       @input="onInput"
       v-model="sendData"
     ></textarea>
-    <AutoSendButton class="absolute right-36 bottom-3" @send="send" />
-    <button class="btn absolute right-3 bottom-3 px-10" @click="send">
-      发 送
+    <div class="absolute right-3 bottom-3 flex gap-x-3">
+      <AutoSendButton class="" @send="send" />
+      <button class="btn px-10" @click="send">发 送</button>
+    </div>
+    <button
+      class="absolute right-1 top-1 btn btn-ghost btn-circle btn-sm"
+      @click="clear"
+    >
+      <img class="w-5 h-5" src="/clear_context.svg" />
     </button>
   </div>
 </template>

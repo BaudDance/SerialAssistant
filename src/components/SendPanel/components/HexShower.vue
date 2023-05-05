@@ -1,17 +1,27 @@
 <script setup>
 import { nextTick, ref, watch } from "vue";
 
-const { value } = defineProps(["value"]);
-const emit = defineEmits(["update"]);
+const props = defineProps(["modelValue"]);
+const emit = defineEmits(["update:modelValue"]);
 
-const groups = ref(value.length == 0 ? [""] : value.match(/.{1,2}/g));
+const groups = ref(
+  props.modelValue.length == 0 ? [""] : props.modelValue.match(/.{1,2}/g)
+);
 const items = ref([]);
-
+watch(
+  props,
+  (p) => {
+    console.log(1);
+    groups.value =
+      p.modelValue.length == 0 ? [""] : p.modelValue.match(/.{1,2}/g);
+  },
+  { deep: true }
+);
 watch(
   groups,
   (n) => {
     const data = groups.value.join("");
-    emit("update", data);
+    emit("update:modelValue", data);
     if (n.length == 0) {
       groups.value = [""];
     }
@@ -67,7 +77,7 @@ async function onDeleteDown(index, e) {
         :ref="'hex' + i"
         :value="g"
         :key="i"
-        class="w-5 bg-transparent"
+        class="w-6 bg-transparent"
         autocomplete="off"
         @input="(e) => onInput(i, e)"
         @blur="(e) => onBlur(i, e)"
