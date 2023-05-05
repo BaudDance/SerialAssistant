@@ -32,11 +32,11 @@ const sendBuffer = computed(() => {
   if (sendType.value == "hex") {
     if (checkDigit.value) {
       return Uint8Array.from([
-        ...hexStringToBuffer(sendData.value),
+        ...hexStringToBuffer(sendData.value.replace(" ", "")),
         ...checkDigit.value,
       ]);
     }
-    return Uint8Array.from([...hexStringToBuffer(sendData.value)]);
+    return hexStringToBuffer(sendData.value.replaceAll(" ", ""));
   } else {
     return stringToBuffer(sendData.value + lineEnding.value);
   }
@@ -44,6 +44,7 @@ const sendBuffer = computed(() => {
 
 const checkDigit = computed(() => {
   if (!checkAlgorithm.value || sendType.value != "hex") return undefined;
+  if (sendData.value.length == 0) return [0x00];
   return checkAlgorithm.value.algorithm(hexStringToBuffer(sendData.value));
 });
 
@@ -81,7 +82,9 @@ watch(sendType, (value) => {
 
 function onInput() {
   if (sendType.value == "hex") {
-    sendData.value = sendData.value.replace(/([^0-9a-fA-F])/, "").toUpperCase();
+    sendData.value = sendData.value
+      .replace(/([^0-9a-fA-F ])/, "")
+      .toUpperCase();
   }
 }
 
@@ -132,7 +135,13 @@ function clear() {
         </ul>
       </div>
       <AutoSendButton class="" @send="send" />
-      <button class="btn px-10" @click="send">发 送</button>
+      <button
+        class="btn px-10"
+        :class="sendData.length == 0 ? 'btn-disabled' : ''"
+        @click="send"
+      >
+        发 送
+      </button>
     </div>
     <button
       class="absolute right-1 top-1 btn btn-ghost btn-circle btn-sm"
