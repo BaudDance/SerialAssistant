@@ -9,7 +9,13 @@ const gbkDecoder = new TextDecoder("gbk");
 const utf8Decoder = new TextDecoder();
 
 function hexStringToHexFormat(str) {
-  return "0x" + str.match(/.{1,2}/g).join(", 0x");
+  return (
+    "0x" +
+    str
+      .match(/.{1,2}/g)
+      .map((i) => i.toUpperCase())
+      .join(", 0x")
+  );
 }
 
 function hexStringToBuffer(str) {
@@ -18,17 +24,16 @@ function hexStringToBuffer(str) {
   );
 }
 
-function bufferToHexFormat(buffer) {
+function bufferToHexString(buffer) {
   return Array.from(buffer)
-    .map((i) => "0x" + i.toString(16).padStart(2, "0"))
-    .join(", ");
+    .map((i) => i.toString(16).padStart(2, "0").toUpperCase())
+    .join("");
 }
 
-function stringToBuffer(str) {
-  if (dataCode.value === "UTF-8") {
-    return new TextEncoder().encode(str);
-  }
-  return str2gbk(str);
+function bufferToHexFormat(buffer) {
+  return Array.from(buffer)
+    .map((i) => "0x" + i.toString(16).padStart(2, "0").toUpperCase())
+    .join(", ");
 }
 
 function bufferToString(buffer) {
@@ -39,9 +44,19 @@ function bufferToString(buffer) {
   console.log("GBK", buffer);
   return gbkDecoder.decode(buffer);
 }
+function stringToBuffer(str) {
+  if (dataCode.value === "UTF-8") {
+    return new TextEncoder().encode(str);
+  }
+  return str2gbk(str);
+}
 
 function stringToHexFormat(str) {
   return bufferToHexFormat(stringToBuffer(str));
+}
+
+function stringToHexString(str) {
+  return bufferToHexString(stringToBuffer(str));
 }
 
 function stringToHtml(str) {
@@ -51,16 +66,21 @@ function stringToHtml(str) {
     .replaceAll("\n", "<br/>")
     .replaceAll("\r", "<br/>");
 }
-
+export function isHexString(str) {
+  return true && str.match(/^[0-9a-fA-F]+$/);
+}
 export function useDataCode() {
   return {
     hexStringToHexFormat,
     hexStringToBuffer,
+    bufferToHexString,
     bufferToHexFormat,
-    stringToBuffer,
     bufferToString,
+    stringToBuffer,
     stringToHexFormat,
+    stringToHexString,
     stringToHtml,
+    isHexString,
     dataCode,
   };
 }

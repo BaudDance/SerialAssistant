@@ -2,7 +2,7 @@
 import { useSettingStore } from "@/store/useSettingStore";
 import { useDataCode } from "@/utils/useDataCode/useDataCode";
 const { dataCode } = useDataCode();
-const { lineEnding } = useSettingStore();
+const { lineEnding, sendHexInputMode } = useSettingStore();
 </script>
 <template>
   <input type="checkbox" id="setting-modal" class="modal-toggle" />
@@ -30,6 +30,17 @@ const { lineEnding } = useSettingStore();
         >
           <option :value="'UTF-8'">UTF-8</option>
           <option :value="'GBK'">GBK</option>
+        </select>
+      </div>
+      <div class="h-3"></div>
+      <div class="flex items-center gap-x-5">
+        <span class="text-white w-60">Hex输入模式:</span>
+        <select
+          v-model="sendHexInputMode"
+          class="select select-bordered w-full max-w-xs"
+        >
+          <option :value="'normal'">普通输入</option>
+          <option :value="'format'">格式化输入</option>
         </select>
       </div>
     </label>
