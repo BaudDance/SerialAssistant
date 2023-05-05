@@ -7,6 +7,7 @@ import DownloadDriverModal from "@/modals/DownloadDriverModal/DownloadDriverModa
 import SettingModal from "@/modals/SettingModal/SettingModal.vue";
 import { useRecordStore } from "@/store/useRecordStore";
 import { useSerialStore } from "@/store/useSerialStore";
+import { useBle } from "@/utils/useBle";
 import { useSerial } from "@/utils/useSerial";
 import { provide } from "vue";
 import UserNumberFotter from "./components/UserNumberFooter/UserNumberFotter.vue";
@@ -45,6 +46,9 @@ const serial = useSerial({
   onReadFrame,
 });
 provide("serial", serial);
+
+const ble = useBle({ onReadFrame });
+provide("ble", ble);
 </script>
 
 <template>

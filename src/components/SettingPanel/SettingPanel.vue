@@ -1,6 +1,6 @@
 <script setup>
 import BottomBar from "./components/BottomBar.vue";
-import SerialSetting from "./components/SerialSetting.vue";
+import SerialSetting from "./components/DeviceSetting/DeviceSetting.vue";
 </script>
 
 <template>

@@ -1,6 +1,8 @@
 <script setup>
 import { useSerialStore } from "@/store/useSerialStore";
+import { useSettingStore } from "@/store/useSettingStore";
 import { inject, watch } from "vue";
+import SwitchDeviceTypeBtn from "./components/SwitchDeviceTypeBtn.vue";
 const {
   port,
   closePort,
@@ -11,6 +13,8 @@ const {
   requestPort,
 } = inject("serial");
 const { baudRate, dataBits, stopBits, parity, flowControl } = useSerialStore();
+
+const { deviceType } = useSettingStore();
 
 function openSerialPort() {
   openPort({
@@ -38,18 +42,23 @@ async function selectPort() {
   }
 }
 </script>
+
 <template>
   <div class="flex flex-col">
-    <kbd class="kbd relative group cursor-pointer" @click="selectPort">
-      <div
-        class="inline-block w-2 h-2 rounded m-1"
-        :class="{
-          'bg-green-500': connected,
-          'bg-red-500': !connected,
-        }"
-      ></div>
-      {{ portName ?? "选择串口" }}
-    </kbd>
+    <div class="flex gap-x-2 items-center">
+      <kbd class="kbd relative group cursor-pointer w-full" @click="selectPort">
+        <div
+          class="inline-block w-2 h-2 rounded m-1"
+          :class="{
+            'bg-green-500': connected,
+            'bg-red-500': !connected,
+          }"
+        ></div>
+        {{ portName ?? "选择串口" }}
+      </kbd>
+      <SwitchDeviceTypeBtn v-if="!connected" />
+    </div>
+
     <div class="h-3"></div>
     <select class="select select-bordered w-full max-w-xs" v-model="baudRate">
       <option disabled>设置波特率</option>
@@ -83,6 +92,7 @@ async function selectPort() {
       <option selected value="1.5">停止位: 1.5</option>
       <option selected value="2">停止位: 2</option>
     </select>
+
     <div class="h-3"></div>
     <button class="btn btn-error" @click="closePort" v-if="connected">
       断 开
