@@ -5,6 +5,7 @@ import { useSettingStore } from "@/store/useSettingStore";
 
 import { useCheckDigit } from "@/utils/useCheckDigit/useCheckDigit";
 import { useDataCode } from "@/utils/useDataCode/useDataCode";
+import { useEventBus } from "@vueuse/core";
 import { computed, inject, ref, watch } from "vue";
 import AutoSendButton from "./components/AutoSendButton.vue";
 import HexShower from "./components/HexShower.vue";
@@ -85,11 +86,52 @@ function onInput() {
     sendData.value = sendData.value
       .replace(/([^0-9a-fA-F ])/, "")
       .toUpperCase();
+    reformatHex();
   }
 }
 
 function clear() {
   sendData.value = "";
+}
+
+function switchSendHexInputMode() {
+  if (sendHexInputMode.value == "format") {
+    sendHexInputMode.value = "normal";
+  } else {
+    sendHexInputMode.value = "format";
+  }
+}
+
+const reformatBus = useEventBus("reformat");
+
+function reformat() {
+  if (sendType.value == "hex") {
+    reformatBus.emit("reformat");
+    if (sendHexInputMode.value == "normal") {
+      reformatHex();
+    }
+  }
+}
+
+function reformatHex() {
+  let data = sendData.value;
+  // 首先使用空格分割 并去掉空字符串
+  data = data.split(" ").filter((item) => item);
+  // 在长度为奇数的字符串的最后一位前补0
+  data = data.map((item) => {
+    if (item.length % 2 == 1) {
+      // 最后一位前补0
+      return item.slice(0, item.length - 1) + "0" + item.slice(item.length - 1);
+    }
+    return item;
+  });
+  // 将数组转换为字符串
+  data = data.join("");
+  // 将字符串按照每两个字符分割
+  data = data.match(/.{1,2}/g);
+  // 将数组转换为字符串
+  data = data.join(" ");
+  sendData.value = data;
 }
 </script>
 
@@ -143,11 +185,25 @@ function clear() {
         发 送
       </button>
     </div>
-    <button
-      class="absolute right-1 top-1 btn btn-ghost btn-circle btn-sm"
-      @click="clear"
-    >
-      <img class="w-5 h-5" src="/clear_context.svg" />
-    </button>
+    <div class="absolute right-1 top-1 flex flex-col gap-y-2">
+      <button class="btn btn-ghost btn-circle btn-sm" @click="clear">
+        <img class="w-5 h-5" src="/clear_context.svg" />
+      </button>
+      <button
+        v-if="sendType == 'hex'"
+        class="btn btn-ghost btn-circle btn-sm lowercase"
+        @click="reformat"
+      >
+        <span class="text-xs">整理</span>
+      </button>
+      <button
+        v-if="sendType == 'hex'"
+        class="btn btn-outline btn-circle btn-sm lowercase"
+        :class="sendHexInputMode == 'format' ? 'btn-active' : ''"
+        @click="switchSendHexInputMode"
+      >
+        <span>0x</span>
+      </button>
+    </div>
   </div>
 </template>

@@ -1,26 +1,37 @@
 <script setup>
+import { useSettingStore } from "@/store/useSettingStore";
 import { nextTick, ref, watch } from "vue";
 
 const props = defineProps(["modelValue"]);
 const emit = defineEmits(["update:modelValue"]);
+const { sendHexInputMode } = useSettingStore();
 
 const groups = ref(
-  props.modelValue.length == 0 ? [""] : props.modelValue.match(/.{1,2}/g)
+  props.modelValue.length == 0
+    ? [""]
+    : props.modelValue.replaceAll(" ", "").match(/.{1,2}/g)
 );
 const items = ref([]);
 watch(
-  props,
-  (p) => {
-    console.log(1);
+  [sendHexInputMode],
+  () => {
+    if (sendHexInputMode.value == "format") return;
     groups.value =
-      p.modelValue.length == 0 ? [""] : p.modelValue.match(/.{1,2}/g);
+      props.modelValue.length == 0
+        ? [""]
+        : props.modelValue.replaceAll(" ", "").match(/.{1,2}/g);
   },
   { deep: true }
 );
 watch(
   groups,
   (n) => {
-    const data = groups.value.join("");
+    // 不足两位的前面补0
+    const data = groups.value
+      .map((v) => v.padStart(2, "0"))
+      .join("")
+      .replace(/(.{2})/g, "$1 ")
+      .trim();
     emit("update:modelValue", data);
     if (n.length == 0) {
       groups.value = [""];
