@@ -2,13 +2,12 @@
 import { useRecordStore } from "@/store/useRecordStore";
 import { useSerialStore } from "@/store/useSerialStore";
 import { useSettingStore } from "@/store/useSettingStore";
+import { useMagicKeys } from "@Vueuse/core";
 
 import { useCheckDigit } from "@/utils/useCheckDigit/useCheckDigit";
 import { useDataCode } from "@/utils/useDataCode/useDataCode";
-import { useEventBus } from "@vueuse/core";
 import { computed, inject, ref, watch } from "vue";
 import AutoSendButton from "./components/AutoSendButton.vue";
-import HexShower from "./components/HexShower.vue";
 
 const { sendHex: serialSendHex } = inject("serial");
 const { sendHex: bleSendHex } = inject("ble");
@@ -17,11 +16,8 @@ const { lineEnding, deviceType, sendHexInputMode } = useSettingStore();
 const { sendType } = useSerialStore();
 const { checkAlgorithm, checkAlgorithms } = useCheckDigit();
 const {
-  dataCode,
-  hexStringToHexFormat,
   hexStringToBuffer,
   stringToBuffer,
-  stringToHexFormat,
   stringToHexString,
   isHexString,
   bufferToHexFormat,
@@ -86,7 +82,6 @@ function onInput() {
     sendData.value = sendData.value
       .replace(/([^0-9a-fA-F ])/, "")
       .toUpperCase();
-    reformatHex();
   }
 }
 
@@ -94,26 +89,23 @@ function clear() {
   sendData.value = "";
 }
 
-function switchSendHexInputMode() {
-  if (sendHexInputMode.value == "format") {
-    sendHexInputMode.value = "normal";
-  } else {
-    sendHexInputMode.value = "format";
-  }
-}
-
-const reformatBus = useEventBus("reformat");
-
+const { ctrl_s } = useMagicKeys({
+  passive: false,
+  onEventFired(e) {
+    if (e.ctrlKey && e.key === "s" && e.type === "keydown") e.preventDefault();
+  },
+});
+watch(ctrl_s, (v) => {
+  if (v) reformat();
+});
 function reformat() {
   if (sendType.value == "hex") {
-    reformatBus.emit("reformat");
-    if (sendHexInputMode.value == "normal") {
-      reformatHex();
-    }
+    reformatHex();
   }
 }
 
 function reformatHex() {
+  if (sendData.value.length == 0) return;
   let data = sendData.value;
   // 首先使用空格分割 并去掉空字符串
   data = data.split(" ").filter((item) => item);
@@ -137,15 +129,9 @@ function reformatHex() {
 
 <template>
   <div class="relative">
-    <HexShower
-      v-if="sendHexInputMode == 'format' && sendType == 'hex'"
-      v-model="sendData"
-      class="w-full h-full rounded-xl px-3 bg-transparent pb-10"
-    />
     <textarea
       id="send-panel-input"
       type="text-area"
-      v-else
       class="w-full h-full rounded-xl px-3 bg-transparent pb-10 pr-40"
       autocomplete="send-panel-input"
       @input="onInput"
@@ -185,25 +171,21 @@ function reformatHex() {
         发 送
       </button>
     </div>
-    <div class="absolute right-1 top-1 flex flex-col gap-y-2">
-      <button class="btn btn-ghost btn-circle btn-sm" @click="clear">
-        <img class="w-5 h-5" src="/clear_context.svg" />
-      </button>
-      <button
-        v-if="sendType == 'hex'"
-        class="btn btn-ghost btn-circle btn-sm lowercase"
-        @click="reformat"
-      >
-        <span class="text-xs">整理</span>
-      </button>
-      <button
-        v-if="sendType == 'hex'"
-        class="btn btn-outline btn-circle btn-sm lowercase"
-        :class="sendHexInputMode == 'format' ? 'btn-active' : ''"
-        @click="switchSendHexInputMode"
-      >
-        <span>0x</span>
-      </button>
+    <div class="absolute right-3 top-2 flex flex-col gap-y-2">
+      <div class="tooltip" data-tip="清空输入框">
+        <button class="btn btn-ghost btn-circle btn-sm" @click="clear">
+          <img class="w-5 h-5" src="/clear_context.svg" />
+        </button>
+      </div>
+      <div class="tooltip" data-tip="ctrl+s">
+        <button
+          v-if="sendType == 'hex'"
+          class="btn btn-ghost btn-circle btn-sm lowercase"
+          @click="reformat"
+        >
+          <span class="text-xs">整理</span>
+        </button>
+      </div>
     </div>
   </div>
 </template>

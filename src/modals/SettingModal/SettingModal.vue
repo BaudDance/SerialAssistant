@@ -33,7 +33,7 @@ const { lineEnding, sendHexInputMode } = useSettingStore();
         </select>
       </div>
       <div class="h-3"></div>
-      <div class="flex items-center gap-x-5">
+      <!-- <div class="flex items-center gap-x-5">
         <span class="text-white w-60">Hex输入模式:</span>
         <select
           v-model="sendHexInputMode"
@@ -42,7 +42,7 @@ const { lineEnding, sendHexInputMode } = useSettingStore();
           <option :value="'normal'">普通输入</option>
           <option :value="'format'">格式化输入</option>
         </select>
-      </div>
+      </div> -->
     </label>
   </label>
 </template>
