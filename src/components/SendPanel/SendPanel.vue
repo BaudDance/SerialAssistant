@@ -2,7 +2,7 @@
 import { useRecordStore } from "@/store/useRecordStore";
 import { useSerialStore } from "@/store/useSerialStore";
 import { useSettingStore } from "@/store/useSettingStore";
-import { useMagicKeys } from "@Vueuse/core";
+import { useMagicKeys } from "@vueuse/core";
 
 import { useCheckDigit } from "@/utils/useCheckDigit/useCheckDigit";
 import { useDataCode } from "@/utils/useDataCode/useDataCode";
@@ -29,7 +29,7 @@ const sendBuffer = computed(() => {
   if (sendType.value == "hex") {
     if (checkDigit.value) {
       return Uint8Array.from([
-        ...hexStringToBuffer(sendData.value.replace(" ", "")),
+        ...hexStringToBuffer(sendData.value.replaceAll(" ", "")),
         ...checkDigit.value,
       ]);
     }
