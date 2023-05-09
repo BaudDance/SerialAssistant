@@ -42,7 +42,9 @@ const sendBuffer = computed(() => {
 const checkDigit = computed(() => {
   if (!checkAlgorithm.value || sendType.value != "hex") return undefined;
   if (sendData.value.length == 0) return [0x00];
-  return checkAlgorithm.value.algorithm(hexStringToBuffer(sendData.value));
+  return checkAlgorithm.value.algorithm(
+    hexStringToBuffer(sendData.value.replaceAll(" ", ""))
+  );
 });
 
 const checkDigitHexFormat = computed(() => {
