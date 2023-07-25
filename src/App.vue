@@ -53,7 +53,7 @@ provide("ble", ble);
 
 <template>
   <div class="flex justify-center items-center h-screen">
-    <div class="container aspect-video flex flex-nowrap relative">
+    <div class="container 2xl:mx-56 aspect-video flex flex-nowrap relative">
       <SettingPanel
         class="basis-1/4 border-solid border-2 border-gray-400 rounded-xl p-5"
       />
