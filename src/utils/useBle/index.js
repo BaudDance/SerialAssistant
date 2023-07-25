@@ -69,7 +69,7 @@ export function useBle(
         value.buffer,
         typeof value.buffer
       );
-      onReadFrame(value);
+      onReadFrame(new Uint8Array(value.buffer));
     });
 
     writeCharacteristic.value = await service.getCharacteristic(
