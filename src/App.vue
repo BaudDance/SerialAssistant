@@ -5,6 +5,7 @@ import SendPanel from "@/components/SendPanel/SendPanel.vue";
 import SettingPanel from "@/components/SettingPanel/SettingPanel.vue";
 import DownloadDriverModal from "@/modals/DownloadDriverModal/DownloadDriverModal.vue";
 import SettingModal from "@/modals/SettingModal/SettingModal.vue";
+import { listenNetworkStatus } from "@/network";
 import { useRecordStore } from "@/store/useRecordStore";
 import { useSerialStore } from "@/store/useSerialStore";
 import { useBle } from "@/utils/useBle";
@@ -14,6 +15,8 @@ import UserNumberFotter from "./components/UserNumberFooter/UserNumberFotter.vue
 import ASCIIModel from "./modals/AsciiModel/ASCIIModel.vue";
 const { records, readingRecord, addRecord } = useRecordStore();
 const { readType } = useSerialStore();
+
+listenNetworkStatus();
 
 function onReadData(data) {
   if (readingRecord.value) {
