@@ -1,10 +1,12 @@
+const cacheName = "v1"
+
 const addResourcesToCache = async (resources) => {
-  const cache = await caches.open("v1");
+  const cache = await caches.open(cacheName);
   await cache.addAll(resources);
 };
 
 const putInCache = async (request, response) => {
-  const cache = await caches.open("v1");
+  const cache = await caches.open(cacheName);
   const protocol = new URL(request.url).protocol
   // only cache http and https requests
   if (protocol == 'http:' || protocol == 'https:') {
