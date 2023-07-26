@@ -10,4 +10,9 @@ export function listenNetworkStatus() {
 		console.log("Network: Online")
 		document.title = document.title.replace(offlinePrefix, '')
 	}); 
+
+	// Initial title
+	if (!navigator.onLine) {
+		document.title = offlinePrefix + document.title
+	}
 }
