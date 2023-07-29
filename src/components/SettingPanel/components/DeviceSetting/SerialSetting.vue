@@ -12,7 +12,7 @@ const {
   reopenPort,
   requestPort,
 } = inject("serial");
-const { baudRate, dataBits, stopBits, parity, flowControl } = useSerialStore();
+const { baudRate, baudRateList, dataBits, stopBits, parity, flowControl } = useSerialStore();
 
 const { deviceType } = useSettingStore();
 
@@ -47,27 +47,27 @@ async function selectPort() {
   <div class="flex flex-col">
     <div class="flex gap-x-2 items-center">
       <kbd class="kbd relative group cursor-pointer w-full" @click="selectPort">
-        <div
-          class="inline-block w-2 h-2 rounded m-1"
-          :class="{
-            'bg-green-500': connected,
-            'bg-red-500': !connected,
-          }"
-        ></div>
+        <div class="inline-block w-2 h-2 rounded m-1" :class="{
+          'bg-green-500': connected,
+          'bg-red-500': !connected,
+        }"></div>
         {{ portName ?? "选择串口" }}
       </kbd>
       <SwitchDeviceTypeBtn v-if="!connected" />
     </div>
 
     <div class="h-3"></div>
-    <select class="select select-bordered w-full max-w-xs" v-model="baudRate">
-      <option disabled>设置波特率</option>
-      <option selected value="9600">波特率: 9600</option>
-      <option value="19200">波特率: 19200</option>
-      <option value="38400">波特率: 38400</option>
-      <option value="57600">波特率: 57600</option>
-      <option value="115200">波特率: 115200</option>
-    </select>
+    <div class="relative flex items-center group">
+      <select class="select select-bordered w-full max-w-xs" v-model="baudRate">
+        <option disabled>设置波特率</option>
+        <option v-for="item in baudRateList" :value="item" :key="item">波特率: {{ item }}</option>
+      </select>
+      <div class="tooltip absolute right-14 invisible group-hover:visible" data-tip="自定义">
+        <button class="btn btn-circle btn-xs badge-accent" onclick="serialrate_modal.showModal()">
+          <span class="text-xs">＋</span>
+        </button>
+      </div>
+    </div>
     <div class="h-3"></div>
     <select class="select select-bordered w-full max-w-xs" v-model="dataBits">
       <option disabled>设置数据位</option>
@@ -91,6 +91,7 @@ async function selectPort() {
       <option selected value="1">停止位: 1</option>
       <option selected value="1.5">停止位: 1.5</option>
       <option selected value="2">停止位: 2</option>
+      <option selected value="0">停止位: 0</option>
     </select>
 
     <div class="h-3"></div>
