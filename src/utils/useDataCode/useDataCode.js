@@ -59,6 +59,15 @@ function stringToHexString(str) {
   return bufferToHexString(stringToBuffer(str));
 }
 
+function decStringToBuffer(str){
+  // return Uint8Array.from(str.map((byte) => parseInt(byte)));
+  return hexStringToBuffer(parseInt(str).toString(16));
+}
+
+function bufferToDecFormat(buffer) {
+  return parseInt(bufferToHexString(buffer), 16).toString();
+}
+
 function stringToHtml(str) {
   return str
     .replaceAll(" ", "&nbsp;")
@@ -71,10 +80,12 @@ export function isHexString(str) {
 }
 export function useDataCode() {
   return {
+    decStringToBuffer,
     hexStringToHexFormat,
     hexStringToBuffer,
     bufferToHexString,
     bufferToHexFormat,
+    bufferToDecFormat,
     bufferToString,
     stringToBuffer,
     stringToHexFormat,

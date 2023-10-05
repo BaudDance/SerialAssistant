@@ -16,6 +16,7 @@ const { lineEnding, deviceType, sendHexInputMode } = useSettingStore();
 const { sendType } = useSerialStore();
 const { checkAlgorithm, checkAlgorithms } = useCheckDigit();
 const {
+  decStringToBuffer,
   hexStringToBuffer,
   stringToBuffer,
   stringToHexString,
@@ -34,8 +35,10 @@ const sendBuffer = computed(() => {
       ]);
     }
     return hexStringToBuffer(sendData.value.replaceAll(" ", ""));
-  } else {
+  } else if( sendType == "ascii" ) {
     return stringToBuffer(sendData.value + lineEnding.value);
+  } else {
+    return decStringToBuffer(sendData.value.replaceAll(" ", ""))
   }
 });
 
@@ -84,6 +87,10 @@ function onInput() {
     sendData.value = sendData.value
       .replace(/([^0-9a-fA-F ])/, "")
       .toUpperCase();
+  }
+  else if (sendType.value == "dec") {
+    sendData.value = sendData.value
+        .replace(/([^0-9])/, "")
   }
 }
 
