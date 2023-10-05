@@ -17,9 +17,9 @@ async function scrollToBottom() {
 async function toggoleRecordDisplay(record) {
   switch (record.display){
     case "hex":
-      record.display = "str";
+      record.display = "ascii";
       break
-    case "str":
+    case "ascii":
       record.display = "dec";
       break
     case "dec":
@@ -63,7 +63,7 @@ watch(
           <div v-if="record.display == 'hex'">
             {{ bufferToHexFormat(record.data) }}
           </div>
-          <div v-else-if="record.display == 'str'" v-html="stringToHtml(bufferToString(record.data))"></div>
+          <div v-else-if="record.display == 'ascii'" v-html="stringToHtml(bufferToString(record.data))"></div>
           <div v-else>
             {{ bufferToDecFormat(record.data) }}
           </div>
@@ -93,7 +93,7 @@ watch(
           <div v-if="record.display == 'hex'">
             {{ bufferToHexFormat(record.data) }}
           </div>
-          <div v-else-if="record.display == 'str'" v-html="stringToHtml(bufferToString(record.data))"></div>
+          <div v-else-if="record.display == 'ascii'" v-html="stringToHtml(bufferToString(record.data))"></div>
           <div v-else>
             {{ bufferToDecFormat(record.data) }}
           </div>
