@@ -60,11 +60,10 @@ function stringToHexString(str) {
 }
 
 function decStringToBuffer(str){
-  // return Uint8Array.from(str.map((byte) => parseInt(byte)));
   return hexStringToBuffer(parseInt(str).toString(16));
 }
 
-function bufferToDecFormat(buffer) {
+function bufferToDecString(buffer) {
   return parseInt(bufferToHexString(buffer), 16).toString();
 }
 
@@ -85,7 +84,7 @@ export function useDataCode() {
     hexStringToBuffer,
     bufferToHexString,
     bufferToHexFormat,
-    bufferToDecFormat,
+    bufferToDecFormat: bufferToDecString,
     bufferToString,
     stringToBuffer,
     stringToHexFormat,
