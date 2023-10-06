@@ -4,7 +4,7 @@ import { useDataCode } from "@/utils/useDataCode/useDataCode";
 import { refThrottled, useScroll } from "@vueuse/core";
 import { format } from "date-fns";
 import { computed, ref, watch } from "vue";
-const { bufferToHexFormat, bufferToString, stringToHtml } = useDataCode();
+const { bufferToDecFormat ,bufferToHexFormat, bufferToString, stringToHtml } = useDataCode();
 const { records, readingRecord, pinBottom } = useRecordStore();
 const rootEl = ref(null);
 const { x, y, isScrolling, arrivedState, directions } = useScroll(rootEl, {
@@ -15,10 +15,16 @@ async function scrollToBottom() {
 }
 
 async function toggoleRecordDisplay(record) {
-  if (record.display == "hex") {
-    record.display = "str";
-  } else {
-    record.display = "hex";
+  switch (record.display){
+    case "hex":
+      record.display = "ascii";
+      break
+    case "ascii":
+      record.display = "dec";
+      break
+    case "dec":
+      record.display = "hex";
+      break
   }
 }
 const recordLength = computed(() => records.value.length);
@@ -57,7 +63,11 @@ watch(
           <div v-if="record.display == 'hex'">
             {{ bufferToHexFormat(record.data) }}
           </div>
-          <div v-else v-html="stringToHtml(bufferToString(record.data))"></div>
+          <div v-else-if="record.display == 'ascii'" v-html="stringToHtml(bufferToString(record.data))"></div>
+          <div v-else>
+            {{ bufferToDecFormat(record.data) }}
+          </div>
+
           <!-- {{
             record.display == "hex"
               ? bufferToHexFormat(record.data)
@@ -83,7 +93,10 @@ watch(
           <div v-if="record.display == 'hex'">
             {{ bufferToHexFormat(record.data) }}
           </div>
-          <div v-else v-html="stringToHtml(bufferToString(record.data))"></div>
+          <div v-else-if="record.display == 'ascii'" v-html="stringToHtml(bufferToString(record.data))"></div>
+          <div v-else>
+            {{ bufferToDecFormat(record.data) }}
+          </div>
         </div>
       </div>
     </template>

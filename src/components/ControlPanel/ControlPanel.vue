@@ -6,11 +6,31 @@ const { pinBottom, clearRecords, readingRecord, rxCount, txCount } =
   useRecordStore();
 
 function toggleReadType() {
-  readType.value = readType.value == "hex" ? "ascii" : "hex";
+  switch (readType.value) {
+    case "hex":
+      readType.value = "ascii";
+      break
+    case "ascii":
+      readType.value = "dec";
+      break
+    case "dec":
+      readType.value = 'hex';
+      break
+  }
 }
 
 function toggleSendType() {
-  sendType.value = sendType.value == "hex" ? "ascii" : "hex";
+  switch (sendType.value) {
+    case "hex":
+      sendType.value = "ascii";
+      break
+    case "ascii":
+      sendType.value = "dec";
+      break
+    case "dec":
+      sendType.value = 'hex';
+      break
+  }
 }
 function togglePinBottom() {
   pinBottom.value = !pinBottom.value;
@@ -20,27 +40,22 @@ function togglePinBottom() {
   <div class="flex items-center mx-3">
     <div class="tooltip" data-tip="点击切换接收格式">
       <label
-        class="swap badge badge-info badge-outline text-white text-center"
-        :class="
-          readType == 'hex' ? ['swap-active', ' badge-info'] : ['badge-warning']
-        "
+        class=" badge badge-outline text-white text-center"
+        :class="readType === 'ascii' ? 'badge-warning': ( readType==='hex'? 'badge-info' : 'badge-error') "
+
         @click="toggleReadType"
       >
-        <div class="swap-on fill-current w-15 m-2">接收:HEX</div>
-        <div class="swap-off fill-current w-15 m-2">接收:ASCII</div>
+        <div class="fill-current w-15 m-2">接收:{{ readType.toUpperCase() }}</div>
       </label>
     </div>
     <div class="w-3"></div>
     <div class="tooltip" data-tip="点击切换发送格式">
       <label
-        class="swap badge badge-outline text-white text-center"
-        :class="
-          sendType == 'hex' ? ['swap-active', ' badge-info'] : ['badge-warning']
-        "
+        class="badge badge-outline text-white text-center"
+        :class="sendType === 'ascii' ? 'badge-warning': ( sendType==='hex'? 'badge-info' : 'badge-error') "
         @click="toggleSendType"
       >
-        <div class="swap-on m-2">发送:HEX</div>
-        <div class="swap-off m-2">发送:ASCII</div>
+        <div class="swap-on m-2">发送: {{ sendType.toUpperCase() }}</div>
       </label>
     </div>
     <div class="w-3"></div>
