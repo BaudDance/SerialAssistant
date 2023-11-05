@@ -12,11 +12,11 @@ function addNewBaudRate() {
 }
 
 function canDelete(rate) {
-    if (!canDelete(rate)) return;
     return !defaultBaudRateList.includes(rate);
 }
 
 function deleteRate(rate) {
+    if (!canDelete(rate)) return;
     baudRateList.value.splice(baudRateList.value.indexOf(rate), 1);
 }
 

@@ -1,7 +1,4 @@
 <script setup>
-import { useLocalStorage, useWebSocket } from "@vueuse/core";
-import { v4 as uuidv4 } from "uuid";
-import { computed, watch } from "vue";
 import useOnline from './useOnline';
 
 const { online } = useOnline();

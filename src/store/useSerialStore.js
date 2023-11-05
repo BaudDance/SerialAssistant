@@ -1,5 +1,5 @@
-import { useLocalStorage } from '@vueuse/core';
-import { ref } from 'vue';
+import { useLocalStorage, createGlobalState } from '@vueuse/core';
+import { ref, computed } from 'vue';
 
 const baudRate = useLocalStorage('baudRate', 9600, { listenToStorageChanges: false });
 const defaultBaudRateList = [9600, 19200, 38400, 57600, 115200];
@@ -12,7 +12,25 @@ const flowControl = ref('none', { listenToStorageChanges: false });
 const readType = useLocalStorage('readType', 'hex', { listenToStorageChanges: false });
 const sendType = useLocalStorage('sendType', 'hex', { listenToStorageChanges: false });
 
-export function useSerialStore () {
+const hasDecTyps = useLocalStorage('hasDecTyps', false);
+
+const recordTypes = computed(() => {
+  const types = ['hex', 'ascii'];
+  if (hasDecTyps.value) {
+    types.push('dec');
+  }
+  return types;
+})
+
+function nextReadType() {
+  const index = recordTypes.value.indexOf(readType.value);
+  readType.value = recordTypes.value[(index + 1) % recordTypes.value.length];
+}
+function nextSendType() {
+  const index = recordTypes.value.indexOf(sendType.value);
+  sendType.value = recordTypes.value[(index + 1) % recordTypes.value.length];
+}
+export const useSerialStore = createGlobalState(() => {
   return {
     baudRate,
     defaultBaudRateList,
@@ -22,6 +40,10 @@ export function useSerialStore () {
     parity,
     flowControl,
     readType,
-    sendType
+    sendType,
+    recordTypes,
+    nextReadType,
+    nextSendType,
+    hasDecTyps,
   };
-}
+});
