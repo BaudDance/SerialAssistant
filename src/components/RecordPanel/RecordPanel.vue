@@ -4,8 +4,10 @@ import { useDataCode } from "@/utils/useDataCode/useDataCode";
 import { refThrottled, useScroll } from "@vueuse/core";
 import { format } from "date-fns";
 import { computed, ref, watch } from "vue";
-const { bufferToDecFormat ,bufferToHexFormat, bufferToString, stringToHtml } = useDataCode();
+import { useSerialStore } from "@/store/useSerialStore";
+const { bufferToDecFormat, bufferToHexFormat, bufferToString, stringToHtml } = useDataCode();
 const { records, readingRecord, pinBottom } = useRecordStore();
+const { recordTypes } = useSerialStore();
 const rootEl = ref(null);
 const { x, y, isScrolling, arrivedState, directions } = useScroll(rootEl, {
   behavior: "smooth",
@@ -15,17 +17,8 @@ async function scrollToBottom() {
 }
 
 async function toggoleRecordDisplay(record) {
-  switch (record.display){
-    case "hex":
-      record.display = "ascii";
-      break
-    case "ascii":
-      record.display = "dec";
-      break
-    case "dec":
-      record.display = "hex";
-      break
-  }
+  const index = recordTypes.value.indexOf(record.display);
+  record.display = recordTypes.value[(index + 1) % recordTypes.value.length];
 }
 const recordLength = computed(() => records.value.length);
 watch(
@@ -40,10 +33,7 @@ watch(
 </script>
 
 <template>
-  <div
-    ref="rootEl"
-    class="overflow-y-auto scroll-smooth p-2 relative record-panel pb-10"
-  >
+  <div ref="rootEl" class="overflow-y-auto scroll-smooth p-2 relative record-panel pb-10">
     <template v-for="record in records" :key="record.time">
       <div v-if="record.type == 'read'" class="chat chat-start">
         <div class="chat-header mx-2 flex">
@@ -52,10 +42,7 @@ watch(
             {{ format(record.time, "HH:mm:ss:SSS") }}
           </div>
           <div class="w-4"></div>
-          <div
-            class="cursor-pointer"
-            @click="() => toggoleRecordDisplay(record)"
-          >
+          <div class="cursor-pointer" @click="() => toggoleRecordDisplay(record)">
             {{ record.display }}
           </div>
         </div>
@@ -82,10 +69,7 @@ watch(
             {{ format(record.time, "HH:mm:ss:SSS") }}
           </div>
           <div class="w-4"></div>
-          <div
-            class="cursor-pointer"
-            @click="() => toggoleRecordDisplay(record)"
-          >
+          <div class="cursor-pointer" @click="() => toggoleRecordDisplay(record)">
             {{ record.display }}
           </div>
         </div>
@@ -111,10 +95,7 @@ watch(
         <div v-if="readingRecord.display == 'hex'">
           {{ bufferToHexFormat(readingRecord.data) }}
         </div>
-        <div
-          v-else
-          v-html="stringToHtml(bufferToString(readingRecord.data))"
-        ></div>
+        <div v-else v-html="stringToHtml(bufferToString(readingRecord.data))"></div>
       </div>
     </div>
   </div>
@@ -126,14 +107,17 @@ watch(
   width: 4px;
   height: 8px;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #ccc;
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-track {
   border-radius: 4px;
   margin: 15px;
 }
+
 ::-webkit-scrollbar-button {
   width: 0;
   height: 0;

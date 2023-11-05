@@ -27,6 +27,10 @@ function clearRecords() {
   rxCount.value = 0;
   txCount.value = 0;
 }
+
+
+
+
 export function useRecordStore() {
   return {
     records,

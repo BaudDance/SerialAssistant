@@ -1,8 +1,10 @@
 <script setup>
 import { useSettingStore } from "@/store/useSettingStore";
 import { useDataCode } from "@/utils/useDataCode/useDataCode";
+import { useSerialStore } from "@/store/useSerialStore";
 const { dataCode } = useDataCode();
 const { lineSelfEnding, lineEndingMode } = useSettingStore();
+const { hasDecTyps } = useSerialStore()
 </script>
 <template>
   <input type="checkbox" id="setting-modal" class="modal-toggle" />
@@ -31,6 +33,13 @@ const { lineSelfEnding, lineEndingMode } = useSettingStore();
           <option :value="'UTF-8'">UTF-8</option>
           <option :value="'GBK'">GBK</option>
         </select>
+      </div>
+      <div class="h-3"></div>
+      <div class="flex items-center gap-x-5">
+        <span class="text-white w-60">十进制格式:</span>
+        <div class=" w-full max-w-xs">
+          <input type="checkbox" :checked="hasDecTyps" class="checkbox" @click="() => hasDecTyps = !hasDecTyps" />
+        </div>
       </div>
       <div class="h-3"></div>
 

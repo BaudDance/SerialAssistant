@@ -35,9 +35,11 @@ const sendBuffer = computed(() => {
       ]);
     }
     return hexStringToBuffer(sendData.value.replaceAll(" ", ""));
-  } else if( sendType == "ascii" ) {
+  } else if (sendType.value == "ascii") {
+    console.log("ascii", stringToBuffer(sendData.value + lineEnding.value));
     return stringToBuffer(sendData.value + lineEnding.value);
   } else {
+    console.log("dec", decStringToBuffer(sendData.value.replaceAll(" ", "")));
     return decStringToBuffer(sendData.value.replaceAll(" ", ""))
   }
 });
@@ -90,7 +92,7 @@ function onInput() {
   }
   else if (sendType.value == "dec") {
     sendData.value = sendData.value
-        .replace(/([^0-9])/, "")
+      .replace(/([^0-9])/, "")
   }
 }
 
@@ -138,31 +140,18 @@ function reformatHex() {
 
 <template>
   <div class="relative">
-    <textarea
-      id="send-panel-input"
-      type="text-area"
-      class="w-full h-full rounded-xl px-3 bg-transparent pb-10 pr-40"
-      autocomplete="send-panel-input"
-      @input="onInput"
-      v-model="sendData"
-    ></textarea>
+    <textarea id="send-panel-input" type="text-area" class="w-full h-full rounded-xl px-3 bg-transparent pb-10 pr-40"
+      autocomplete="send-panel-input" @input="onInput" v-model="sendData"></textarea>
     <div class="absolute right-3 bottom-3 flex gap-x-3">
       <div class="dropdown dropdown-top" v-if="sendType == 'hex'">
-        <label
-          tabindex="0"
-          class="btn"
-          :class="checkAlgorithm ? 'btn-success btn-outline' : 'btn-ghost'"
-        >
+        <label tabindex="0" class="btn" :class="checkAlgorithm ? 'btn-success btn-outline' : 'btn-ghost'">
           {{
             checkAlgorithm
-              ? `${checkAlgorithm.name}(${checkDigitHexFormat})`
-              : "校验位"
+            ? `${checkAlgorithm.name}(${checkDigitHexFormat})`
+            : "校验位"
           }}
         </label>
-        <ul
-          tabindex="0"
-          class="dropdown-content menu p-2 shadow bg-base-200 rounded-box w-28"
-        >
+        <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box w-28">
           <li v-for="item in checkAlgorithms">
             <a @click="checkAlgorithm = item">{{ item.name }}</a>
           </li>
@@ -172,11 +161,7 @@ function reformatHex() {
         </ul>
       </div>
       <AutoSendButton class="" @send="send" />
-      <button
-        class="btn px-10"
-        :class="sendData.length == 0 ? 'btn-disabled' : ''"
-        @click="send"
-      >
+      <button class="btn px-10" :class="sendData.length == 0 ? 'btn-disabled' : ''" @click="send">
         发 送
       </button>
     </div>
@@ -187,11 +172,7 @@ function reformatHex() {
         </button>
       </div>
       <div class="tooltip" data-tip="ctrl+s">
-        <button
-          v-if="sendType == 'hex'"
-          class="btn btn-ghost btn-circle btn-sm lowercase"
-          @click="reformat"
-        >
+        <button v-if="sendType == 'hex'" class="btn btn-ghost btn-circle btn-sm lowercase" @click="reformat">
           <span class="text-xs">整理</span>
         </button>
       </div>

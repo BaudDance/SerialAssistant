@@ -38,10 +38,8 @@ function bufferToHexFormat(buffer) {
 
 function bufferToString(buffer) {
   if (dataCode.value === "UTF-8") {
-    console.log("UTF-8", buffer);
     return utf8Decoder.decode(buffer);
   }
-  console.log("GBK", buffer);
   return gbkDecoder.decode(buffer);
 }
 function stringToBuffer(str) {
@@ -59,7 +57,7 @@ function stringToHexString(str) {
   return bufferToHexString(stringToBuffer(str));
 }
 
-function decStringToBuffer(str){
+function decStringToBuffer(str) {
   return hexStringToBuffer(parseInt(str).toString(16));
 }
 
