@@ -1,4 +1,4 @@
-const cacheName = "v1"
+const cacheName = "v20250314"
 
 const addResourcesToCache = async (resources) => {
   const cache = await caches.open(cacheName);
