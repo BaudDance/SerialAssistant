@@ -23,7 +23,7 @@ const registerServiceWorker = async () => {
   }
 };
 
-registerServiceWorker();
+// registerServiceWorker();
 
 // mount the main app
 
