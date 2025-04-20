@@ -23,6 +23,22 @@ const registerServiceWorker = async () => {
   }
 };
 
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((registration) => {
+      registration.unregister(); // 注销所有旧的 Service Worker
+    });
+  });
+
+  // navigator.serviceWorker.register("/sw.js", { scope: "/" }).then((registration) => {
+  //   if (registration.waiting) {
+  //     registration.waiting.postMessage({ type: "SKIP_WAITING" }); // 跳过等待状态
+  //   } else if (registration.installing) {
+  //     registration.installing.postMessage({ type: "SKIP_WAITING" });
+  //   }
+  // });
+}
+console.log("你好，我是keysking");
 // registerServiceWorker();
 
 // mount the main app
