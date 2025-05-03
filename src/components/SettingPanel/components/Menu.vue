@@ -22,6 +22,11 @@
           <label for="ascii-modal">ASCII码表</label>
         </li>
       </a>
+      <a href="https://led.baud-dance.com/" target="_blank">
+        <li tabindex="0">
+          <label>LED字模生成器</label>
+        </li>
+      </a>
       <li class="menu-title">
         <span>设置</span>
       </li>
