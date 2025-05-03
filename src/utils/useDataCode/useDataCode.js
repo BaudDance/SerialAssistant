@@ -67,11 +67,15 @@ function bufferToDecString(buffer) {
 
 function stringToHtml(str) {
   return str
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
     .replaceAll(" ", "&nbsp;")
     .replaceAll("\r\n", "<br/>")
     .replaceAll("\n", "<br/>")
     .replaceAll("\r", "<br/>");
 }
+
 export function isHexString(str) {
   return true && str.match(/^[0-9a-fA-F]+$/);
 }
