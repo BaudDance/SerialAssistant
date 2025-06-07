@@ -13,7 +13,7 @@ import { useSerial } from "@/utils/useSerial";
 import { provide } from "vue";
 import UserNumberFotter from "./components/UserNumberFooter/UserNumberFotter.vue";
 import ASCIIModel from "./modals/AsciiModel/ASCIIModel.vue";
-import BottomBar from "@/components/Bar/BottomBar.vue";
+import BottomBar from "@/components/Bar/Bar.vue";
 import DeviceSetting from "@/components/SettingPanel/DeviceSetting.vue";
 const { records, readingRecord, addRecord } = useRecordStore();
 const { readType } = useSerialStore();
