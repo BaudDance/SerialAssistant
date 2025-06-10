@@ -13,7 +13,7 @@ import { useSerial } from "@/utils/useSerial";
 import { provide } from "vue";
 import UserNumberFotter from "./components/UserNumberFooter/UserNumberFotter.vue";
 import ASCIIModel from "./modals/AsciiModel/ASCIIModel.vue";
-import BottomBar from "@/components/Bar/Bar.vue";
+import BottomBar from "@/components/SettingPanel/components/DeviceSetting/Bar.vue";
 import DeviceSetting from "@/components/SettingPanel/DeviceSetting.vue";
 const { records, readingRecord, addRecord } = useRecordStore();
 const { readType } = useSerialStore();
@@ -57,11 +57,8 @@ provide("ble", ble);
 </script>
 
 <template>
-  <div class="absolute inset-0">
-    <BottomBar/>
-  </div>
   <div class="flex justify-center items-center">
-    <div class="container 2xl:mx-56 aspect-video h-screen py-[100px] flex flex-col space-y-5 lg:space-y-0 lg:flex-row relative">
+    <div class="container 2xl:mx-56 aspect-video h-screen py-[40px] lg:py-[100px] flex flex-col-reverse space-y-5 lg:space-y-0 lg:flex-row relative">
       <DeviceSetting class="lg:basis-1/4 border-solid border-2 border-gray-400 rounded-xl p-5" />
       <div class="w-7"></div>
       <div class="flex flex-col flex-1 lg:basis-3/4 space-y-2">
@@ -70,10 +67,10 @@ provide("ble", ble);
         <SendPanel class="lg:basis-1/4 border-solid border-2 border-gray-400 rounded-xl" />
       </div>
 
-      <div class="text-sm m-2 absolute -bottom-8 right-0">
+      <div class="text-sm m-2 absolute bottom-2 right-0">
         powered by 波特律动
       </div>
-      <UserNumberFotter class="absolute -bottom-8 left-0 m-2" />
+      <UserNumberFotter class="absolute bottom-2 left-0 m-2" />
     </div>
   </div>
   <DownloadDriverModal />
