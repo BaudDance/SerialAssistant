@@ -2,7 +2,6 @@
 import ControlPanel from "@/components/ControlPanel/ControlPanel.vue";
 import RecordPanel from "@/components/RecordPanel/RecordPanel.vue";
 import SendPanel from "@/components/SendPanel/SendPanel.vue";
-import SettingPanel from "@/components/SettingPanel/SettingPanel.vue";
 import DownloadDriverModal from "@/modals/DownloadDriverModal/DownloadDriverModal.vue";
 import SettingModal from "@/modals/SettingModal/SettingModal.vue";
 import SerialRateModal from "@/modals/SerialRateModal/SerialRateModal.vue";
@@ -14,6 +13,8 @@ import { useSerial } from "@/utils/useSerial";
 import { provide } from "vue";
 import UserNumberFotter from "./components/UserNumberFooter/UserNumberFotter.vue";
 import ASCIIModel from "./modals/AsciiModel/ASCIIModel.vue";
+import BottomBar from "@/components/SettingPanel/components/DeviceSetting/Bar.vue";
+import DeviceSetting from "@/components/SettingPanel/DeviceSetting.vue";
 const { records, readingRecord, addRecord } = useRecordStore();
 const { readType } = useSerialStore();
 
@@ -56,20 +57,20 @@ provide("ble", ble);
 </script>
 
 <template>
-  <div class="flex justify-center items-center h-screen">
-    <div class="container 2xl:mx-56 aspect-video flex flex-nowrap relative">
-      <SettingPanel class="basis-1/4 border-solid border-2 border-gray-400 rounded-xl p-5" />
+  <div class="flex justify-center items-center">
+    <div class="container 2xl:mx-56 aspect-video h-screen py-[40px] lg:py-[100px] flex flex-col-reverse space-y-5 lg:space-y-0 lg:flex-row relative">
+      <DeviceSetting class="lg:basis-1/4 border-solid border-2 border-gray-400 rounded-xl p-5" />
       <div class="w-7"></div>
-      <div class="flex flex-col flex-grow basis-3/4">
-        <RecordPanel class="basis-3/4 border-solid border-2 border-gray-400 rounded-xl" />
-        <ControlPanel class="h-10" />
-        <SendPanel class="basis-1/4 border-solid border-2 border-gray-400 rounded-xl" />
+      <div class="flex flex-col flex-1 lg:basis-3/4 space-y-2">
+        <RecordPanel class="flex-1 lg:basis-3/4 border-solid border-2 border-gray-400 rounded-xl" />
+        <ControlPanel/>
+        <SendPanel class="lg:basis-1/4 border-solid border-2 border-gray-400 rounded-xl" />
       </div>
 
-      <div class="text-sm m-2 absolute -bottom-8 right-0">
+      <div class="text-sm m-2 absolute bottom-2 right-0">
         powered by 波特律动
       </div>
-      <UserNumberFotter class="absolute -bottom-8 left-0 m-2" />
+      <UserNumberFotter class="absolute bottom-2 left-0 m-2" />
     </div>
   </div>
   <DownloadDriverModal />

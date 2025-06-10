@@ -1,6 +1,6 @@
 <script setup>
-import { useSerialStore } from "@/store/useSerialStore";
-import { useSettingStore } from "@/store/useSettingStore";
+import { useSerialStore } from "@/store/useSerialStore.js";
+import { useSettingStore } from "@/store/useSettingStore.js";
 import { inject, watch } from "vue";
 import SwitchDeviceTypeBtn from "./components/SwitchDeviceTypeBtn.vue";
 const {
@@ -41,6 +41,10 @@ async function selectPort() {
     openSerialPort();
   }
 }
+
+function showdailog(){
+  document.getElementById('serialrate_modal').showModal()
+}
 </script>
 
 <template>
@@ -55,19 +59,23 @@ async function selectPort() {
       </kbd>
       <SwitchDeviceTypeBtn v-if="!connected" />
     </div>
-
     <div class="h-3"></div>
-    <div class="relative flex items-center group">
-      <select class="select select-bordered w-full max-w-xs" v-model="baudRate">
-        <option disabled>设置波特率</option>
-        <option v-for="item in baudRateList" :value="item" :key="item">波特率: {{ item }}</option>
-      </select>
-      <div class="tooltip absolute right-14 invisible group-hover:visible" data-tip="自定义">
-        <button class="btn btn-circle btn-xs badge-accent" onclick="serialrate_modal.showModal()">
-          <span class="text-xs">＋</span>
-        </button>
-      </div>
-    </div>
+
+    <div class="flex flex-row lg:flex-col">
+
+  <select class="select select-bordered w-full max-w-xs" @change.prevent="(event)=>{
+    if (event.target.value === '自定义'){
+      event.target.value = baudRate
+      showdailog()
+    } else {
+      baudRate = event.target.value
+    }
+  }">
+    <option disabled>设置波特率</option>
+    <option v-for="item in baudRateList" :value="item" :key="item">波特率: {{ item }}</option>
+    <option>自定义</option>
+  </select>
+
     <div class="h-3"></div>
     <select class="select select-bordered w-full max-w-xs" v-model="dataBits">
       <option disabled>设置数据位</option>
@@ -93,6 +101,7 @@ async function selectPort() {
       <option selected value="2">停止位: 2</option>
       <option selected value="0">停止位: 0</option>
     </select>
+    </div>
 
     <div class="h-3"></div>
     <button class="btn btn-error" @click="closePort" v-if="connected">
@@ -102,4 +111,5 @@ async function selectPort() {
       重 连
     </button>
   </div>
+
 </template>
