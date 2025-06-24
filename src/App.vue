@@ -67,10 +67,10 @@ provide("ble", ble);
         <SendPanel class="lg:basis-1/4 border-solid border-2 border-gray-400 rounded-xl" />
       </div>
 
-      <div class="text-sm m-2 absolute bottom-2 right-0">
+      <div class="text-sm m-2 absolute bottom-[15px] lg:bottom-[75px] right-0">
         powered by 波特律动
       </div>
-      <UserNumberFotter class="absolute bottom-2 left-0 m-2" />
+      <UserNumberFotter class="absolute  bottom-[15px] lg:bottom-[75px] left-0 m-2" />
     </div>
   </div>
   <DownloadDriverModal />
