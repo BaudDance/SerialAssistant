@@ -8,7 +8,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "analyze": "vite build --mode=analyze"
+    "analyze": "vite build --mode=analyze",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prepare": "npx simple-git-hooks"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.11",
@@ -29,9 +32,17 @@
     "autoprefixer": "^10.4.14",
     "eslint": "^9.23.0",
     "eslint-plugin-format": "^1.0.1",
+    "lint-staged": "^15.5.0",
     "postcss": "^8.4.27",
     "rollup-plugin-visualizer": "^5.14.0",
+    "simple-git-hooks": "^2.13.0",
     "vite": "^6.3.5",
     "vite-plugin-vue-devtools": "^7.7.7"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged"
+  },
+  "lint-staged": {
+    "*": "eslint --fix"
   }
 }
