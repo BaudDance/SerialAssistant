@@ -7,27 +7,30 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "analyze": "vite build --mode=analyze"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.1.11",
     "@vueuse/core": "^10.2.1",
     "axios": "^1.6.0",
     "daisyui": "^3.5.0",
     "date-fns": "^2.30.0",
     "str2gbk": "^0.0.5",
+    "tailwindcss": "^4.1.11",
     "uuid": "^9.0.0",
     "vue": "^3.3.4"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.11.0",
     "@antfu/ni": "^24.3.0",
+    "@types/node": "^22.15.3",
     "@vitejs/plugin-vue": "^5.2.4",
     "autoprefixer": "^10.4.14",
     "eslint": "^9.23.0",
     "eslint-plugin-format": "^1.0.1",
     "postcss": "^8.4.27",
     "rollup-plugin-visualizer": "^5.14.0",
-    "tailwindcss": "^3.3.3",
     "vite": "^6.3.5",
     "vite-plugin-vue-devtools": "^7.7.7"
   }
