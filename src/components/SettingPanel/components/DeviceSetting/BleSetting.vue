@@ -43,7 +43,7 @@ async function connect() {
     <div class="h-3"></div>
     <select class="select select-bordered w-full max-w-xs" v-model="bleType">
       <option disabled>设置蓝牙模块类型</option>
-      <option v-for="t in bleTypes" :value="t">
+      <option v-for="t in bleTypes" :value="t" :key="t">
         <div class="tooltip" :data-tip="t.description">
           {{ t.name }}({{ t.description }})
         </div>
