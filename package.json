@@ -1,8 +1,9 @@
 {
   "name": "serial",
-  "private": true,
-  "version": "0.0.0",
   "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.8.1+sha512.c50088ba998c67b8ca8c99df8a5e02fd2ae2e2b29aaf238feaa9e124248d3f48f9fb6db2424949ff901cffbb5e0f0cc1ad6aedb602cd29450751d11c35023677",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -18,18 +19,16 @@
     "vue": "^3.3.4"
   },
   "devDependencies": {
+    "@antfu/eslint-config": "^4.11.0",
+    "@antfu/ni": "^24.3.0",
     "@vitejs/plugin-vue": "^5.2.4",
     "autoprefixer": "^10.4.14",
-    "eslint": "^8.46.0",
-    "eslint-config-semistandard": "^17.0.0",
-    "eslint-config-standard": "^17.1.0",
-    "eslint-plugin-import": "^2.28.0",
-    "eslint-plugin-n": "^16.0.1",
-    "eslint-plugin-promise": "^6.1.1",
+    "eslint": "^9.23.0",
+    "eslint-plugin-format": "^1.0.1",
     "postcss": "^8.4.27",
+    "rollup-plugin-visualizer": "^5.14.0",
     "tailwindcss": "^3.3.3",
     "vite": "^6.3.5",
     "vite-plugin-vue-devtools": "^7.7.7"
-  },
-  "packageManager": "pnpm@10.8.1+sha512.c50088ba998c67b8ca8c99df8a5e02fd2ae2e2b29aaf238feaa9e124248d3f48f9fb6db2424949ff901cffbb5e0f0cc1ad6aedb602cd29450751d11c35023677"
+  }
 }
