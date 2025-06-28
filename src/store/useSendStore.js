@@ -1,11 +1,11 @@
 import { createGlobalState, useMagicKeys } from '@vueuse/core'
 import { computed, inject, ref, watch } from 'vue'
+import { useCheckDigit } from '@/composables/useCheckDigit/useCheckDigit'
+import { useDataCode } from '@/composables/useDataCode/useDataCode'
+
 import { useRecordStore } from '@/store/useRecordStore'
 import { useSerialStore } from '@/store/useSerialStore'
-
 import { useSettingStore } from '@/store/useSettingStore'
-import { useCheckDigit } from '@/utils/useCheckDigit/useCheckDigit'
-import { useDataCode } from '@/utils/useDataCode/useDataCode'
 
 export const useSendStore = createGlobalState(() => {
   const { sendHex: serialSendHex } = inject('serial')

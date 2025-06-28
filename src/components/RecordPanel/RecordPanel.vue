@@ -2,9 +2,9 @@
 import { refThrottled, useScroll } from '@vueuse/core'
 import { format } from 'date-fns'
 import { computed, ref, watch } from 'vue'
+import { useDataCode } from '@/composables/useDataCode/useDataCode'
 import { useRecordStore } from '@/store/useRecordStore'
 import { useSerialStore } from '@/store/useSerialStore'
-import { useDataCode } from '@/utils/useDataCode/useDataCode'
 
 const { bufferToDecFormat, bufferToHexFormat, bufferToString, stringToHtml } = useDataCode()
 const { records, readingRecord, pinBottom } = useRecordStore()
