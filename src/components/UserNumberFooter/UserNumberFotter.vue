@@ -1,7 +1,7 @@
 <script setup>
-import useOnline from './useOnline';
+import useOnline from './useOnline'
 
-const { online } = useOnline();
+const { online } = useOnline()
 </script>
 
 <template>

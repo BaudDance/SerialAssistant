@@ -1,33 +1,48 @@
-import { ref } from "vue";
 import {
   createGlobalState,
   useIntervalFn,
   useLocalStorage,
-} from "@vueuse/core";
-import { v4 as uuidv4 } from "uuid";
-import axios from "axios";
+} from '@vueuse/core'
 
-const baseURL = 'https://led.baud-dance.com/api';
+import { ref } from 'vue'
+
+/**
+ * 生成一个随机的 v4 uuid
+ * @returns uuid
+ */
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0
+    const v = c === 'x' ? r : (r & 0x3 | 0x8)
+    return v.toString(16)
+  })
+}
+
+const baseURL = 'https://led.baud-dance.com/api'
 
 async function getOnline(userId) {
-    return await axios.get(`${baseURL}/online/serial/${userId}`, {
-      params: {},
-    });
-  }
+  const res = await fetch(`${baseURL}/online/serial/${userId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+  return await res.json()
+}
 
 export default createGlobalState(() => {
-  const uuid = useLocalStorage("uuid", uuidv4());
-  const online = ref({ led: "n" });
+  const uuid = useLocalStorage('uuid', generateUUID())
+  const online = ref({ led: 'n' })
   useIntervalFn(
     async () => {
-      console.log("uuid:", uuid.value);
-      const res = await getOnline(uuid.value);
-      console.log("res:", res);
-      online.value = res.data.data;
+      console.log('uuid:', uuid.value)
+      const res = await getOnline(uuid.value)
+      console.log('res:', res)
+      online.value = res.data
     },
     1000 * 60,
-    { immediate: true, immediateCallback: true }
-  );
+    { immediate: true, immediateCallback: true },
+  )
 
-  return { online };
-});
+  return { online }
+})
