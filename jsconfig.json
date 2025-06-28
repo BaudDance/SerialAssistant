@@ -7,7 +7,7 @@
     "allowSyntheticDefaultImports": true,
     "allowJs": true,
     "paths": {
-      "@/*": ["src/*"],
+      "@/*": ["src/*"]
     },
     "skipDefaultLibCheck": false,
     "jsx": "preserve",
@@ -24,5 +24,3 @@
     "dist"
   ]
 }
-
-
