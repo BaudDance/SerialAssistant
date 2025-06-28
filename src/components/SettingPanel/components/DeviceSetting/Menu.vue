@@ -3,7 +3,7 @@
 <template>
   <div class="dropdown dropdown-top z-10">
     <label tabindex="0" class="btn btn-square btn-ghost">
-      <img src="/menu.svg" class="w-7 h-7" />
+      <img src="/menu.svg" class="w-7 h-7">
     </label>
     <ul
       tabindex="0"
