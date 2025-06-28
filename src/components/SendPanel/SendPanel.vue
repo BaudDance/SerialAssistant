@@ -2,7 +2,7 @@
 import { useSendStore } from '@/store/useSendStore'
 import AutoSendButton from './components/AutoSendButton.vue'
 
-const { sendData, clear, onInput, send, sendType, checkAlgorithm, checkAlgorithms, checkDigitHexFormat, reformat } = useSendStore()
+const { sendData, clear, onInput, send, sendType, checkAlgorithm, checkAlgorithms, checkDigitHexFormat, reformat, isAutoSending } = useSendStore()
 </script>
 
 <template>
@@ -56,7 +56,7 @@ const { sendData, clear, onInput, send, sendType, checkAlgorithm, checkAlgorithm
 
       <AutoSendButton />
 
-      <Button>
+      <Button :disabled="sendData.length === 0 || isAutoSending" :class="[sendData.length === 0 ? '' : 'cursor-pointer']" @click="send">
         发送
       </Button>
     </div>
