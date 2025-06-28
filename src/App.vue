@@ -1,21 +1,27 @@
 <script setup>
-import { provide } from 'vue'
-import { SiderBar } from '@/components'
+import { defineAsyncComponent, provide } from 'vue'
+import { ActivityBar, StatusBar } from '@/components'
 import ControlPanel from '@/components/ControlPanel/ControlPanel.vue'
-// import ASCIIModel from './modals/AsciiModel/ASCIIModel.vue'
-import { DownLoadDriverDialog } from '@/components/Dialog'
+// import { AsciiDialog, DownLoadDriverDialog, SettingDialog } from '@/components/Dialog'
 import RecordPanel from '@/components/RecordPanel/RecordPanel.vue'
 import SendPanel from '@/components/SendPanel/SendPanel.vue'
 import DeviceSetting from '@/components/SettingPanel/DeviceSetting.vue'
-// import DownloadDriverModal from '@/modals/DownloadDriverModal/DownloadDriverModal.vue'
-// import SerialRateModal from '@/modals/SerialRateModal/SerialRateModal.vue'
-// import SettingModal from '@/modals/SettingModal/SettingModal.vue'
+
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '@/components/ui/resizable'
+
 import { listenNetworkStatus } from '@/network'
 import { useRecordStore } from '@/store/useRecordStore'
 import { useSerialStore } from '@/store/useSerialStore'
 import { useBle } from '@/utils/useBle'
 import { useSerial } from '@/utils/useSerial'
-import UserNumberFotter from './components/UserNumberFooter/UserNumberFotter.vue'
+
+const AsciiDialog = defineAsyncComponent(() => import('@/components/Dialog/Ascii.vue'))
+const DownLoadDriverDialog = defineAsyncComponent(() => import('@/components/Dialog/DownLoadDriver.vue'))
+const SettingDialog = defineAsyncComponent(() => import('@/components/Dialog/Setting.vue'))
 
 const { readingRecord, addRecord } = useRecordStore()
 const { readType } = useSerialStore()
@@ -61,8 +67,35 @@ provide('ble', ble)
 
 <template>
   <div class="flex justify-center items-center">
-    <div class="container 2xl:mx-56 aspect-video h-screen py-[40px] lg:py-[100px] flex flex-col-reverse space-y-5 lg:space-y-0 lg:flex-row relative">
-      <SiderBar />
+    <div class="container 2xl:mx-56 aspect-video h-screen py-[40px] lg:py-[100px] flex flex-col-reverse  lg:flex-row relative">
+      <ActivityBar class="rounded-l-lg border-t border-l border-b" />
+      <ResizablePanelGroup
+        direction="horizontal"
+        class="rounded-r-lg border-t border-r border-b"
+      >
+        <ResizablePanel :default-size="20">
+          <div class=" h-full bg-card ">
+            <DeviceSetting />
+          </div>
+        </ResizablePanel>
+        <ResizableHandle with-handle />
+        <ResizablePanel :default-size="80">
+          <ResizablePanelGroup direction="vertical">
+            <ResizablePanel :default-size="70">
+              <RecordPanel class="bg-card w-full h-full" />
+            </ResizablePanel>
+            <ResizableHandle with-handle />
+            <ResizablePanel :default-size="30">
+              <div class="flex flex-col bg-card h-full">
+                <ControlPanel class="" />
+                <SendPanel class="flex-1" />
+                <StatusBar class="bg-input" />
+              </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </ResizablePanel>
+      </ResizablePanelGroup>
+      <!-- <SiderBar />
       <DeviceSetting class="lg:basis-1/4 border-solid border-2 border-gray-400  p-5" />
       <div class="w-7" />
       <div class="flex flex-col flex-1 lg:basis-3/4 space-y-2">
@@ -74,12 +107,14 @@ provide('ble', ble)
       <div class="text-sm m-2 absolute bottom-[15px] lg:bottom-[75px] right-0">
         powered by 波特律动
       </div>
-      <UserNumberFotter class="absolute  bottom-[15px] lg:bottom-[75px] left-0 m-2" />
+      <UserNumberFotter class="absolute  bottom-[15px] lg:bottom-[75px] left-0 m-2" /> -->
     </div>
   </div>
   <!-- <DownloadDriverModal />
   <SettingModal />
   <ASCIIModel />
   <SerialRateModal /> -->
+  <AsciiDialog />
   <DownLoadDriverDialog />
+  <SettingDialog />
 </template>
