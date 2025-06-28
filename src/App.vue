@@ -2,7 +2,6 @@
 import { defineAsyncComponent, provide } from 'vue'
 import { ActivityBar, StatusBar } from '@/components'
 import ControlPanel from '@/components/ControlPanel/ControlPanel.vue'
-// import { AsciiDialog, DownLoadDriverDialog, SettingDialog } from '@/components/Dialog'
 import RecordPanel from '@/components/RecordPanel/RecordPanel.vue'
 import SendPanel from '@/components/SendPanel/SendPanel.vue'
 import DeviceSetting from '@/components/SettingPanel/DeviceSetting.vue'
@@ -13,11 +12,11 @@ import {
   ResizablePanelGroup,
 } from '@/components/ui/resizable'
 
+import { useBle } from '@/composables/useBle'
+import { useSerial } from '@/composables/useSerial'
 import { listenNetworkStatus } from '@/network'
 import { useRecordStore } from '@/store/useRecordStore'
 import { useSerialStore } from '@/store/useSerialStore'
-import { useBle } from '@/utils/useBle'
-import { useSerial } from '@/utils/useSerial'
 
 const AsciiDialog = defineAsyncComponent(() => import('@/components/Dialog/Ascii.vue'))
 const DownLoadDriverDialog = defineAsyncComponent(() => import('@/components/Dialog/DownLoadDriver.vue'))
