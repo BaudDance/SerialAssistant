@@ -74,15 +74,9 @@ export const useSendStore = createGlobalState(() => {
   }
 
   async function send() {
-    // await sendHex(sendBuffer.value)
+    await sendHex(sendBuffer.value)
     addRecord({
       type: 'write',
-      data: sendBuffer.value,
-      time: new Date(),
-      display: sendType.value,
-    })
-    addRecord({
-      type: 'read',
       data: sendBuffer.value,
       time: new Date(),
       display: sendType.value,
