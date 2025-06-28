@@ -1,103 +1,104 @@
 <script setup>
-import { computed, ref } from "vue";
+import { computed, ref } from 'vue'
+
 const drivers = [
   {
-    url: "/drivers/CH340_CH341_Windows_x64_x86.EXE",
-    platform: ["windows"],
-    chips: ["CH340", "CH341"],
+    url: '/drivers/CH340_CH341_Windows_x64_x86.EXE',
+    platform: ['windows'],
+    chips: ['CH340', 'CH341'],
   },
   {
-    url: "/drivers/CH340_CH341_MacOS.dmg",
-    platform: ["mac"],
+    url: '/drivers/CH340_CH341_MacOS.dmg',
+    platform: ['mac'],
     chips: [
-      "CH340",
-      "CH341",
-      "CH342",
-      "CH343",
-      "CH344",
-      "CH347",
-      "CH9101",
-      "CH9102",
-      "CH9103",
-      "CH9104",
-      "CH9143",
+      'CH340',
+      'CH341',
+      'CH342',
+      'CH343',
+      'CH344',
+      'CH347',
+      'CH9101',
+      'CH9102',
+      'CH9103',
+      'CH9104',
+      'CH9143',
     ],
   },
   {
-    url: "/drivers/CH340_CH341_LINUX.ZIP",
-    platform: ["linux"],
+    url: '/drivers/CH340_CH341_LINUX.ZIP',
+    platform: ['linux'],
     chips: [
-      "CH340",
-      "CH341",
-      "CH342",
-      "CH343",
-      "CH344",
-      "CH347",
-      "CH9101",
-      "CH9102",
-      "CH9103",
-      "CH9104",
-      "CH9143",
+      'CH340',
+      'CH341',
+      'CH342',
+      'CH343',
+      'CH344',
+      'CH347',
+      'CH9101',
+      'CH9102',
+      'CH9103',
+      'CH9104',
+      'CH9143',
     ],
   },
   {
-    url: "/drivers/CH343SER_Windows_x64_x86.EXE",
-    platform: ["windows"],
+    url: '/drivers/CH343SER_Windows_x64_x86.EXE',
+    platform: ['windows'],
     chips: [
-      "CH342",
-      "CH343",
-      "CH344",
-      "CH347",
-      "CH9101",
-      "CH9102",
-      "CH9103",
-      "CH9143",
+      'CH342',
+      'CH343',
+      'CH344',
+      'CH347',
+      'CH9101',
+      'CH9102',
+      'CH9103',
+      'CH9143',
     ],
   },
   {
-    url: "/drivers/CP210x_Windows_Drivers_x64_x86.zip",
-    platform: ["windows"],
-    chips: ["CP210x"],
+    url: '/drivers/CP210x_Windows_Drivers_x64_x86.zip',
+    platform: ['windows'],
+    chips: ['CP210x'],
   },
   {
-    url: "/drivers/CP210x_MAC_OSX_Driver.zip",
-    platform: ["mac"],
-    chips: ["CP210x"],
+    url: '/drivers/CP210x_MAC_OSX_Driver.zip',
+    platform: ['mac'],
+    chips: ['CP210x'],
   },
   {
-    url: "/drivers/FT232_Windows_x64_x86.exe",
-    platform: ["windows"],
-    chips: ["FT系列"],
+    url: '/drivers/FT232_Windows_x64_x86.exe',
+    platform: ['windows'],
+    chips: ['FT系列'],
   },
   {
-    url: "/drivers/FT232_MacOS_10_15.zip",
-    platform: ["mac"],
-    chips: ["FT系列"],
+    url: '/drivers/FT232_MacOS_10_15.zip',
+    platform: ['mac'],
+    chips: ['FT系列'],
   },
   {
-    url: "/drivers/ftdi_sio.tar.gz",
-    platform: ["linux"],
-    chips: ["FT系列"],
+    url: '/drivers/ftdi_sio.tar.gz',
+    platform: ['linux'],
+    chips: ['FT系列'],
   },
-];
+]
 
-const platforms = [...new Set(drivers.flatMap((driver) => driver.platform))];
-const chips = [...new Set(drivers.flatMap((driver) => driver.chips))].sort();
+const platforms = [...new Set(drivers.flatMap(driver => driver.platform))]
+const chips = [...new Set(drivers.flatMap(driver => driver.chips))].sort()
 
-const platform = ref(undefined);
-const chip = ref(undefined);
+const platform = ref(undefined)
+const chip = ref(undefined)
 
 const downloadUrl = computed(() => {
   return drivers.find(
-    (driver) =>
-      driver.platform.includes(platform.value) &&
-      driver.chips.includes(chip.value)
-  )?.url;
-});
+    driver =>
+      driver.platform.includes(platform.value)
+      && driver.chips.includes(chip.value),
+  )?.url
+})
 </script>
 
 <template>
-  <input type="checkbox" id="download-driver-modal" class="modal-toggle" />
+  <input id="download-driver-modal" type="checkbox" class="modal-toggle">
   <label for="download-driver-modal" class="modal cursor-pointer">
     <label class="modal-box relative" for="">
       <h3 class="text-lg font-bold mb-8">常见串口驱动下载</h3>
@@ -127,8 +128,8 @@ const downloadUrl = computed(() => {
             downloadUrl
               ? "下载"
               : platform && chip
-              ? "抱歉，未收录此驱动，请到芯片官网寻找"
-              : "请 选 择"
+                ? "抱歉，未收录此驱动，请到芯片官网寻找"
+                : "请 选 择"
           }}
         </a>
       </div>
