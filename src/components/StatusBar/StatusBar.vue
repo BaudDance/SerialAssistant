@@ -74,11 +74,11 @@ const { isAutoSending } = useSendStore()
         </div>
       </div>
       <Separator orientation="vertical" />
-      <div class="text-sm">
+      <div>
         Tx: {{ txCount }} Bytes
       </div>
       <Separator orientation="vertical" />
-      <div class="text-sm">
+      <div>
         Rx: {{ rxCount + (readingRecord?.data.length || 0) }} Bytes
       </div>
     </div>
