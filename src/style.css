@@ -144,13 +144,16 @@
   width: fit-content;
   padding: 0.5rem 1rem;
   max-width: 90%;
-  border-radius: var(--rounded-box, 1rem);
+  border-radius: calc(var(--radius) - 2px);
   min-height: 2.75rem;
   min-width: 2.75rem;
   --tw-bg-opacity: 1;
   background-color: var(--input);
   --tw-text-opacity: 1;
-  /* color: hsl(var(--nc) / var(--tw-text-opacity)) */
+  color: hsl(var(--nc) / var(--tw-text-opacity));
+  /* 文字垂直居中 */
+  display: flex;
+  align-items: center;
 }
 
 .chat-bubble:before {

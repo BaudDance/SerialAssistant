@@ -47,7 +47,7 @@ watch(
             {{ record.display }}
           </div>
         </div>
-        <div class="chat-bubble break-words text-md">
+        <div class="chat-bubble break-words text-sm">
           <div v-if="record.display == 'hex'">
             {{ bufferToHexFormat(record.data) }}
           </div>
@@ -74,7 +74,7 @@ watch(
             {{ record.display }}
           </div>
         </div>
-        <div class="chat-bubble break-words text-md">
+        <div class="chat-bubble break-words text-sm">
           <div v-if="record.display == 'hex'">
             {{ bufferToHexFormat(record.data) }}
           </div>
@@ -92,7 +92,7 @@ watch(
           {{ format(readingRecord.time, "HH:mm:ss:SSS") }}
         </div>
       </div>
-      <div class="chat-bubble break-all text-md">
+      <div class="chat-bubble break-all text-sm">
         <div v-if="readingRecord.display == 'hex'">
           {{ bufferToHexFormat(readingRecord.data) }}
         </div>
