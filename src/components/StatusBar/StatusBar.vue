@@ -35,7 +35,11 @@ const {
     <div class="flex h-full items-center space-x-2">
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger class="bg-green-600  h-full flex items-center px-3">
+          <TooltipTrigger
+            class="h-full flex items-center px-3" :class="[
+              isConnected ? 'bg-green-700' : 'bg-blue-800',
+            ]"
+          >
             <div v-if="isConnected">
               设备已连接
             </div>
