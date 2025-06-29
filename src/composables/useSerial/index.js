@@ -40,12 +40,20 @@ export function useSerial(
   }
 
   async function requestPort() {
-    const p = await serial.requestPort(options)
-    if (p) {
-      port.value = p
-      updatePorts()
+    try {
+      const p = await serial.requestPort(options)
+      console.debug('requestPort', p)
+      if (p) {
+        port.value = p
+        updatePorts()
+        return p
+      }
+      return null
     }
-    return p
+    catch (error) {
+      console.error(error)
+      return null
+    }
   }
 
   function setPort(p) {
