@@ -19,6 +19,14 @@ const ble = inject('ble')
 
 const isConnected = computed(() => serial.connected.value || ble.connected.value)
 const { isAutoSending } = useSendStore()
+
+const {
+  portName,
+} = inject('serial')
+
+const {
+  deviceName,
+} = inject('ble')
 </script>
 
 <template>
@@ -27,17 +35,17 @@ const { isAutoSending } = useSendStore()
     <div class="flex h-full items-center space-x-2">
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger>
-            <div v-if="isConnected" class="bg-green-600  h-full flex items-center px-3">
-              已连接
+          <TooltipTrigger class="bg-green-600  h-full flex items-center px-3">
+            <div v-if="isConnected">
+              设备已连接
             </div>
-            <div v-else class=" h-full flex items-center px-3">
+            <div v-else>
               等待连接
             </div>
           </TooltipTrigger>
           <TooltipContent>
             <p v-if="isConnected">
-              设备已连接
+              {{ portName || deviceName }} 已连接
             </p>
             <p v-else>
               设备未连接，点击左侧连接按钮连接设备
