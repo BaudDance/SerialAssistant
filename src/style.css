@@ -121,6 +121,15 @@
   }
 }
 
+#nprogress .bar {
+  background: var(--primary) !important;
+}
+
+#nprogress .spinner-icon {
+  border-top-color: var(--primary) !important;
+  border-left-color: var(--primary) !important;
+}
+
 .disable-spin-button::-webkit-inner-spin-button,
 .disable-spin-button::-webkit-outer-spin-button {
   -webkit-appearance: none;
