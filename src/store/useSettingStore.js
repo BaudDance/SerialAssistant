@@ -4,7 +4,7 @@ const deviceType = useLocalStorage('deviceType', 'serial', {
   listenToStorageChanges: false,
 }) // serial, ble
 
-const lineEndingMode = useLocalStorage('lineEndingMode', '', {
+const lineEndingMode = useLocalStorage('lineEndingMode', ' ', {
   listenToStorageChanges: false,
 })
 const lineSelfEnding = useLocalStorage('lineSelfEnding', '', {
