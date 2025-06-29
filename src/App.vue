@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/resizable'
 
 import { useBle } from '@/composables/useBle'
+import { useFullScreen } from '@/composables/useFullScreen'
 import { useSerial } from '@/composables/useSerial'
 import { listenNetworkStatus } from '@/network'
 import { useRecordStore } from '@/store/useRecordStore'
@@ -28,6 +29,7 @@ const SerialRateDialog = defineAsyncComponent(() => import('@/components/Dialog/
 
 const { readingRecord, addRecord } = useRecordStore()
 const { readType } = useSerialStore()
+const { isFullScreen } = useFullScreen()
 
 listenNetworkStatus()
 
@@ -74,14 +76,17 @@ provide('ble', ble)
 
 <template>
   <div class="flex justify-center items-center">
-    <div class="container 2xl:mx-56 aspect-video h-screen py-[40px] lg:py-[100px] flex flex-col lg:flex-row relative">
+    <div
+      class="h-screen aspect-video flex flex-col lg:flex-row relative"
+      :class="[isFullScreen ? 'w-full' : 'container 2xl:mx-56 py-[40px] lg:py-[100px]']"
+    >
       <ActivityBar
-        class="rounded-t-lg rounded-b-none border-r border-l border-b lg:rounded-l-lg lg:rounded-r-none lg:border-t lg:border-l lg:border-b"
+        :class="{ 'rounded-t-lg rounded-b-none border-r border-l border-b lg:rounded-l-lg lg:rounded-r-none lg:border-t lg:border-l lg:border-b': !isFullScreen }"
       />
       <ResizablePanelGroup
         v-if="lgAndLarger"
         direction="horizontal"
-        class="rounded-r-lg border-t border-r border-b"
+        :class="{ 'rounded-r-lg border-t border-r border-b': !isFullScreen }"
       >
         <ResizablePanel :default-size="20">
           <div class=" h-full bg-card ">
@@ -106,7 +111,11 @@ provide('ble', ble)
         </ResizablePanel>
       </ResizablePanelGroup>
 
-      <ResizablePanelGroup v-else direction="vertical" class="rounded-b-lg border-l border-r border-b">
+      <ResizablePanelGroup
+        v-else
+        direction="vertical"
+        :class="{ 'rounded-b-lg border-l border-r border-b': !isFullScreen }"
+      >
         <ResizablePanel :default-size="70">
           <ResizablePanelGroup
             direction="horizontal"
