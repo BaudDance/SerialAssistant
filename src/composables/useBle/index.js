@@ -1,5 +1,6 @@
 import { useSupported } from '@vueuse/core'
 import { computed, ref } from 'vue'
+import { useNprogress } from '@/composables/useNprogress'
 
 export function useBle(
   options = {
@@ -13,7 +14,7 @@ export function useBle(
       && 'bluetooth' in navigator
       && (await navigator.bluetooth.getAvailability()),
   )
-
+  const nprogress = useNprogress()
   const bluetooth = navigator.bluetooth
   const device = ref(undefined)
   const deviceName = computed(() => device.value?.name)
@@ -24,6 +25,7 @@ export function useBle(
 
   async function requestDevice(type) {
     try {
+      nprogress.start()
       const d = await bluetooth.requestDevice({
         filters: [{ services: [type.service] }],
       })
@@ -37,6 +39,9 @@ export function useBle(
     catch (e) {
       console.error(e)
       return null
+    }
+    finally {
+      nprogress.done()
     }
   }
 
