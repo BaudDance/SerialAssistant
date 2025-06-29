@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 const bleTypes = ref([
   {
@@ -17,7 +17,12 @@ const bleTypes = ref([
   },
 ])
 
-const bleType = ref(bleTypes.value[0])
+const bleSelected = ref(bleTypes.value[0].name)
+
+const bleType = computed(() => {
+  return bleTypes.value.find(t => t.name === bleSelected.value) || bleTypes.value[0]
+})
+
 export function useBleStore() {
-  return { bleTypes, bleType }
+  return { bleTypes, bleSelected, bleType }
 }
