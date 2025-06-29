@@ -1,8 +1,18 @@
 <script setup>
-import { useSerialStore } from "@/store/useSerialStore.js";
-import { useSettingStore } from "@/store/useSettingStore.js";
-import { inject, watch } from "vue";
-import SwitchDeviceTypeBtn from "./components/SwitchDeviceTypeBtn.vue";
+import { inject, watch } from 'vue'
+import { useDialog } from '@/components/Dialog'
+import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { useSerialStore } from '@/store/useSerialStore.js'
+
 const {
   port,
   closePort,
@@ -11,105 +21,144 @@ const {
   openPort,
   reopenPort,
   requestPort,
-} = inject("serial");
-const { baudRate, baudRateList, dataBits, stopBits, parity, flowControl } = useSerialStore();
-
-const { deviceType } = useSettingStore();
-
+} = inject('serial')
+const { baudRate, baudRateList, dataBits, stopBits, parity, flowControl, serialRate, defaultBaudRateList } = useSerialStore()
+const { open } = useDialog()
 function openSerialPort() {
   openPort({
-    baudRate: parseInt(baudRate.value),
-    dataBits: parseInt(dataBits.value),
-    stopBits: parseFloat(stopBits.value),
+    baudRate: Number.parseInt(baudRate.value),
+    dataBits: Number.parseInt(dataBits.value),
+    stopBits: Number.parseFloat(stopBits.value),
     parity: parity.value,
     flowControl: flowControl.value,
-  });
+  })
 }
-watch([baudRate, dataBits, stopBits, parity, flowControl], (newPort) => {
-  if (!port.value || !connected) return;
+watch([baudRate, dataBits, stopBits, parity, flowControl], (_newPort) => {
+  if (!port.value || !connected)
+    return
   reopenPort({
-    baudRate: parseInt(baudRate.value),
-    dataBits: parseInt(dataBits.value),
-    stopBits: parseFloat(stopBits.value),
+    baudRate: Number.parseInt(baudRate.value),
+    dataBits: Number.parseInt(dataBits.value),
+    stopBits: Number.parseFloat(stopBits.value),
     parity: parity.value,
     flowControl: flowControl.value,
-  });
-});
+  })
+})
 
 async function selectPort() {
   if (await requestPort()) {
-    openSerialPort();
+    openSerialPort()
   }
 }
 
-function showdailog(){
-  document.getElementById('serialrate_modal').showModal()
+// 数据位列表
+const dataBitsList = [
+  8,
+  7,
+  6,
+  5,
+]
+
+// 校验位列表
+const parityList = {
+  none: 'None',
+  even: 'Even',
+  odd: 'Odd',
+  mark: 'Mark',
+  space: 'Space',
 }
+
+// 停止位列表
+const stopBitsList = [
+  1,
+  1.5,
+  2,
+  0,
+]
 </script>
 
 <template>
-  <div class="flex flex-col">
-    <div class="flex gap-x-2 items-center">
-      <kbd class="kbd relative group cursor-pointer w-full" @click="selectPort">
-        <div class="inline-block w-2 h-2 rounded m-1" :class="{
-          'bg-green-500': connected,
-          'bg-red-500': !connected,
-        }"></div>
-        {{ portName ?? "选择串口" }}
-      </kbd>
-      <SwitchDeviceTypeBtn v-if="!connected" />
-    </div>
-    <div class="h-3"></div>
-
-    <div class="flex flex-row lg:flex-col">
-
-  <select class="select select-bordered w-full max-w-xs" @change.prevent="(event)=>{
-    if (event.target.value === '自定义'){
-      event.target.value = baudRate
-      showdailog()
-    } else {
-      baudRate = event.target.value
-    }
-  }">
-    <option disabled>设置波特率</option>
-    <option v-for="item in baudRateList" :value="item" :key="item">波特率: {{ item }}</option>
-    <option>自定义</option>
-  </select>
-
-    <div class="h-3"></div>
-    <select class="select select-bordered w-full max-w-xs" v-model="dataBits">
-      <option disabled>设置数据位</option>
-      <option selected value="8">数据位: 8</option>
-      <option value="7">数据位: 7</option>
-      <option value="6">数据位: 6</option>
-      <option value="5">数据位: 5</option>
-    </select>
-    <div class="h-3"></div>
-    <select class="select select-bordered w-full max-w-xs" v-model="parity">
-      <option disabled>设置校验位</option>
-      <option selected value="none">校验位: None</option>
-      <option value="even">校验位: Even</option>
-      <option value="odd">校验位: Odd</option>
-      <option value="mark">校验位: Mark</option>
-      <option value="space">校验位: Space</option>
-    </select>
-    <div class="h-3"></div>
-    <select class="select select-bordered w-full max-w-xs" v-model="stopBits">
-      <option disabled>设置停止位</option>
-      <option selected value="1">停止位: 1</option>
-      <option selected value="1.5">停止位: 1.5</option>
-      <option selected value="2">停止位: 2</option>
-      <option selected value="0">停止位: 0</option>
-    </select>
+  <div class="flex flex-col p-4">
+    <div class="flex flex-col gap-y-1.5 pb-4">
+      <h3 class="font-semibold leading-none tracking-tight">
+        {{ portName ?? "串口设置" }}
+      </h3>
+      <p class="text-xs text-muted-foreground">
+        请选择串口连接相关参数
+      </p>
     </div>
 
-    <div class="h-3"></div>
-    <button class="btn btn-error" @click="closePort" v-if="connected">
+    <div class="flex flex-col space-y-3 pb-4">
+      <label for="baudRate" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">波特率</label>
+      <Select v-model="baudRate">
+        <SelectTrigger class="w-full">
+          <SelectValue placeholder="请选择波特率" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem v-for="item in baudRateList" :key="item" :value="item">
+              {{ item }}
+            </SelectItem>
+          </SelectGroup>
+          <SelectGroup>
+            <SelectLabel>
+              <Button variant="ghost" class="cursor-pointer" @click.stop="open('serialRate')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Material Symbols by Google - https://github.com/google/material-design-icons/blob/master/LICENSE --><path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z" /></svg>
+                添加自定义
+              </Button>
+            </SelectLabel>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+      <label for="dataBits" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">数据位</label>
+      <Select v-model="dataBits">
+        <SelectTrigger class="w-full">
+          <SelectValue placeholder="请选择数据位" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem v-for="item in dataBitsList" :key="item" :value="item">
+              {{ item }}
+            </SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+      <label for="parity" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">校验位</label>
+      <Select v-model="parity">
+        <SelectTrigger class="w-full">
+          <SelectValue placeholder="请选择校验位" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem v-for="item in Object.keys(parityList)" :key="item" :value="item">
+              {{ parityList[item] }}
+            </SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+      <label for="stopBits" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">停止位</label>
+      <Select v-model="stopBits">
+        <SelectTrigger class="w-full">
+          <SelectValue placeholder="请选择停止位" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem v-for="item in stopBitsList" :key="item" :value="item">
+              {{ item }}
+            </SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    </div>
+
+    <Button v-if="!connected" class="cursor-pointer mb-3" @click="selectPort">
+      {{ portName ? "重新选择" : "选择串口设备" }}
+    </Button>
+    <Button v-if="connected" class="cursor-pointer mb-3" variant="destructive" @click="closePort">
       断 开
-    </button>
-    <button class="btn" @click="openSerialPort" v-if="!connected && port">
+    </Button>
+    <Button v-if="!connected && port" class="cursor-pointer mb-3" variant="secondary" @click="openSerialPort">
       重 连
-    </button>
+    </Button>
   </div>
-
 </template>

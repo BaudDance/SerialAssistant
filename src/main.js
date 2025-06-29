@@ -1,34 +1,37 @@
 import { createApp } from 'vue'
-import './style.css'
 import App from './App.vue'
+import './style.css'
 
 // register service worker
 
-const registerServiceWorker = async () => {
-  if ("serviceWorker" in navigator) {
-    try {
-      const registration = await navigator.serviceWorker.register("/sw.js", {
-        scope: "/",
-      });
-      if (registration.installing) {
-        console.log("Service worker installing");
-      } else if (registration.waiting) {
-        console.log("Service worker installed");
-      } else if (registration.active) {
-        console.log("Service worker active");
-      }
-    } catch (error) {
-      console.error(`Registration failed with ${error}`);
-    }
-  }
-};
+// async function registerServiceWorker() {
+//   if ('serviceWorker' in navigator) {
+//     try {
+//       const registration = await navigator.serviceWorker.register('/sw.js', {
+//         scope: '/',
+//       })
+//       if (registration.installing) {
+//         console.log('Service worker installing')
+//       }
+//       else if (registration.waiting) {
+//         console.log('Service worker installed')
+//       }
+//       else if (registration.active) {
+//         console.log('Service worker active')
+//       }
+//     }
+//     catch (error) {
+//       console.error(`Registration failed with ${error}`)
+//     }
+//   }
+// }
 
-if ("serviceWorker" in navigator) {
+if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then((registrations) => {
     registrations.forEach((registration) => {
-      registration.unregister(); // 注销所有旧的 Service Worker
-    });
-  });
+      registration.unregister() // 注销所有旧的 Service Worker
+    })
+  })
 
   // navigator.serviceWorker.register("/sw.js", { scope: "/" }).then((registration) => {
   //   if (registration.waiting) {
@@ -38,7 +41,7 @@ if ("serviceWorker" in navigator) {
   //   }
   // });
 }
-console.log("你好，我是keysking");
+// console.log('你好，我是keysking')
 // registerServiceWorker();
 
 // mount the main app

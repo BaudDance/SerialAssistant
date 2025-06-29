@@ -1,76 +1,79 @@
 <script setup>
-import { useElementHover } from "@vueuse/core";
-import { computed, ref } from "vue";
-const el = ref();
-const isHovered = useElementHover(el);
+import { onBeforeUnmount, ref, watch } from 'vue'
+import { useSendStore } from '@/store/useSendStore'
 
-const emit = defineEmits(["send"]);
+const { isAutoSending, send } = useSendStore()
 
-const autoSendTime = ref(1000);
-const isAutoSending = ref(false);
+const autoSendTime = ref(1000)
 
-let timer = undefined;
-
-const content = computed(() => {
-  if (isAutoSending.value) {
-    if (isHovered.value) {
-      return "取消自动发送";
-    }
-    return "自动发送中";
-  } else {
-    if (isHovered.value && autoSendTime.value) {
-      return "开始自动发送";
-    }
-    return "自动发送";
-  }
-});
+let timer = null
 
 async function timeoutFunc() {
   if (isAutoSending.value) {
-    emit("send");
-    if (autoSendTime.value <= 0) return;
-    timer = setTimeout(timeoutFunc, autoSendTime.value);
+    send()
+    if (autoSendTime.value <= 0)
+      return
+    timer = setTimeout(timeoutFunc, autoSendTime.value)
   }
 }
 
-async function toggleAutoSend() {
-  if (isAutoSending.value) {
-    isAutoSending.value = false;
-    clearTimeout(timer);
-  } else {
-    if (autoSendTime.value <= 0) return;
-    isAutoSending.value = true;
-    emit("send");
-    timer = setTimeout(timeoutFunc, autoSendTime.value);
+watch(isAutoSending, (enabled) => {
+  if (enabled) {
+    console.log('auto send enabled')
+    if (autoSendTime.value <= 0)
+      return
+    send()
+    timer = setTimeout(timeoutFunc, autoSendTime.value)
   }
-}
+  else {
+    console.log('auto send disabled')
+    clearTimeout(timer)
+  }
+})
+
+// 销毁定时器防止内存泄漏
+onBeforeUnmount(() => {
+  clearTimeout(timer)
+  isAutoSending.value = false
+  timer = null
+})
 </script>
 
 <template>
-  <div class="dropdown dropdown-top dropdown-end dropdown-hover" ref="el">
-    <button
-      tabindex="0"
-      class="btn px-7"
-      :class="isAutoSending ? 'btn-success hover:btn-error' : 'btn-ghost'"
-      @click="toggleAutoSend"
-    >
-      {{ content }}
-    </button>
-    <ul
-      tabindex="0"
-      class="dropdown-content p-3 shadow bg-base-200 rounded-box w-50"
-    >
-      <!-- 填写自动发送时间 与开始按钮 -->
-      <div class="flex items-center">
-        <input
-          type="number"
-          placeholder="输入间隔时长"
-          class="input input-bordered input-sm w-28 flex-auto"
-          v-model="autoSendTime"
-        />
-        <div class="w-5"></div>
-        <div class="text-sm flex-none">ms/次</div>
+  <Popover>
+    <PopoverTrigger as-child class="cursor-pointer">
+      <Button variant="ghost">
+        自动发送
+      </Button>
+    </PopoverTrigger>
+    <PopoverContent side="top">
+      <div class="grid gap-4">
+        <div class="space-y-2">
+          <h4 class="font-medium leading-none flex items-center justify-between">
+            <div class="flex items-center">
+              <span class="mr-2">
+                自动发送设置
+              </span>
+            </div>
+            <Switch id="autoSendSwitch" v-model="isAutoSending" class="cursor-pointer" :disabled="!autoSendTime || autoSendTime <= 0" />
+          </h4>
+          <p class="text-sm text-muted-foreground">
+            {{ autoSendTime ? `启用后自动每 ${autoSendTime} 毫秒发送一次数据` : '请输入自动发送间隔时间' }}
+          </p>
+        </div>
+        <div class="grid gap-2">
+          <div class="grid grid-cols-3 items-center gap-4">
+            <NumberField id="autoSendNumberField" v-model="autoSendTime" :min="0" class="col-span-2">
+              <NumberFieldContent>
+                <NumberFieldDecrement />
+                <NumberFieldInput />
+                <NumberFieldIncrement />
+              </NumberFieldContent>
+            </NumberField>
+            <Label for="autoSendNumberField"> ms / 次</Label>
+          </div>
+        </div>
       </div>
-    </ul>
-  </div>
+    </PopoverContent>
+  </Popover>
 </template>
