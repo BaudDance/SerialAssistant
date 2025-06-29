@@ -32,8 +32,8 @@ async function getOnline(userId) {
 
 export default createGlobalState(() => {
   const uuid = useLocalStorage('uuid', generateUUID())
-  const online = ref({ led: 'n' })
-  useIntervalFn(
+  const online = ref({ led: 'none' })
+  const { pause, resume } = useIntervalFn(
     async () => {
       console.log('uuid:', uuid.value)
       const res = await getOnline(uuid.value)
@@ -44,5 +44,5 @@ export default createGlobalState(() => {
     { immediate: true, immediateCallback: true },
   )
 
-  return { online }
+  return { online, pause, resume }
 })
