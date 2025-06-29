@@ -23,18 +23,21 @@ export function useBle(
   const connected = ref(false)
 
   async function requestDevice(type) {
-    // const ops = options || {
-    //   acceptAllDevices: true,
-    //   optionalServices: [0xffe0],
-    // };
-    const d = await bluetooth.requestDevice({
-      filters: [{ services: [type.service] }],
-    })
-    if (d) {
-      device.value = d
+    try {
+      const d = await bluetooth.requestDevice({
+        filters: [{ services: [type.service] }],
+      })
+      if (d) {
+        device.value = d
+        return d
+      }
+      console.log('requestDevice', d)
+      return null
     }
-    console.log('requestDevice', d)
-    return d
+    catch (e) {
+      console.error(e)
+      return null
+    }
   }
 
   async function connectDevice(type) {
