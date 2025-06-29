@@ -11,6 +11,8 @@
     "analyze": "vite build --mode=analyze",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "test": "vitest",
+    "test:run": "vitest --run",
     "prepare": "npx simple-git-hooks"
   },
   "dependencies": {
@@ -40,6 +42,7 @@
     "autoprefixer": "^10.4.14",
     "eslint": "^9.23.0",
     "eslint-plugin-format": "^1.0.1",
+    "jsdom": "^26.1.0",
     "lint-staged": "^15.5.0",
     "postcss": "^8.4.27",
     "rollup-plugin-visualizer": "^5.14.0",
@@ -47,7 +50,8 @@
     "unplugin-auto-import": "^19.3.0",
     "unplugin-vue-components": "^28.7.0",
     "vite": "npm:rolldown-vite@latest",
-    "vite-plugin-vue-devtools": "^7.7.7"
+    "vite-plugin-vue-devtools": "^7.7.7",
+    "vitest": "^3.2.4"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged"
