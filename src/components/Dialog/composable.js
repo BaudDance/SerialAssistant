@@ -5,6 +5,7 @@ export const dialogKeys = {
   downLoadDriver: 'downLoadDriver',
   ascii: 'ascii',
   setting: 'setting',
+  serialRate: 'serialRate',
 }
 
 export const useDialog = createGlobalState(() => {
