@@ -1,5 +1,5 @@
 <script setup>
-import { computed, inject } from 'vue'
+import { computed, inject, onBeforeUnmount } from 'vue'
 import { Separator } from '@/components/ui/separator'
 import {
   Tooltip,
@@ -12,7 +12,11 @@ import { useRecordStore } from '@/store/useRecordStore'
 import { useSendStore } from '@/store/useSendStore'
 
 const { readingRecord, txCount, rxCount } = useRecordStore()
-const { online } = useOnline()
+const { online, pause } = useOnline()
+onBeforeUnmount(() => {
+  // 销毁定时器防止内存泄露
+  pause()
+})
 
 const serial = inject('serial')
 const ble = inject('ble')
