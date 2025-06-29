@@ -91,7 +91,7 @@ const stopBitsList = {
   <div class="flex flex-col p-4">
     <div class="flex flex-col gap-y-1.5 pb-4">
       <h3 class="font-semibold leading-none tracking-tight">
-        串口设置
+        {{ portName ?? "串口设置" }}
       </h3>
       <p class="text-xs text-muted-foreground">
         请选择串口连接相关参数
@@ -159,7 +159,7 @@ const stopBitsList = {
     </div>
 
     <Button v-if="!connected" class="cursor-pointer mb-3" @click="selectPort">
-      {{ portName ?? "选择串口设备" }}
+      {{ portName ? "重新选择" : "选择串口设备" }}
     </Button>
     <Button v-if="connected" class="cursor-pointer mb-3" variant="destructive" @click="closePort">
       断 开
