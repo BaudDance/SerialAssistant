@@ -40,8 +40,8 @@ const {
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger
-            class="h-full flex items-center px-3" :class="[
-              isConnected ? 'bg-green-700' : 'bg-blue-800',
+            class="h-full flex items-center px-3 text-white" :class="[
+              isConnected ? 'bg-green-600' : 'bg-blue-600',
             ]"
           >
             <div v-if="isConnected">
