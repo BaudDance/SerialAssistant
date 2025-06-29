@@ -6,7 +6,6 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
@@ -42,14 +41,14 @@ async function connect() {
         请选择蓝牙连接相关参数
       </p>
     </div>
-    <div class="flex flex-row lg:flex-col lg:space-y-3 pb-4">
+    <div class="flex flex-col space-y-3 pb-4">
+      <label for="parity" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">模块类型</label>
       <Select v-model="bleSelected">
         <SelectTrigger class="w-full">
           <SelectValue placeholder="请选择蓝牙模块类型" />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectLabel>设置蓝牙模块类型</SelectLabel>
             <SelectItem v-for="t in bleTypes" :key="t.name" :value="t.name">
               {{ t.name }}
             </SelectItem>

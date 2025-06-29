@@ -1,5 +1,6 @@
 <script setup>
-import { inject, watch, watchEffect } from 'vue'
+import { inject, watch } from 'vue'
+import { useDialog } from '@/components/Dialog'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -21,8 +22,8 @@ const {
   reopenPort,
   requestPort,
 } = inject('serial')
-const { baudRate, baudRateList, dataBits, stopBits, parity, flowControl } = useSerialStore()
-
+const { baudRate, baudRateList, dataBits, stopBits, parity, flowControl, serialRate, defaultBaudRateList } = useSerialStore()
+const { open } = useDialog()
 function openSerialPort() {
   openPort({
     baudRate: Number.parseInt(baudRate.value),
@@ -50,24 +51,13 @@ async function selectPort() {
   }
 }
 
-function showdailog() {
-  document.getElementById('serialrate_modal').showModal()
-}
-
-watchEffect(() => {
-  if (baudRate.value === 'custom') {
-    baudRate.value = 9600
-    showdailog()
-  }
-})
-
 // 数据位列表
-const dataBitsList = {
-  8: '8',
-  7: '7',
-  6: '6',
-  5: '5',
-}
+const dataBitsList = [
+  8,
+  7,
+  6,
+  5,
+]
 
 // 校验位列表
 const parityList = {
@@ -79,12 +69,12 @@ const parityList = {
 }
 
 // 停止位列表
-const stopBitsList = {
-  1: '1',
-  1.5: '1.5',
-  2: '2',
-  0: '0',
-}
+const stopBitsList = [
+  1,
+  1.5,
+  2,
+  0,
+]
 </script>
 
 <template>
@@ -98,60 +88,63 @@ const stopBitsList = {
       </p>
     </div>
 
-    <div class="flex flex-row lg:flex-col lg:space-y-3 pb-4">
+    <div class="flex flex-col space-y-3 pb-4">
+      <label for="baudRate" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">波特率</label>
       <Select v-model="baudRate">
         <SelectTrigger class="w-full">
           <SelectValue placeholder="请选择波特率" />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectLabel>设置波特率</SelectLabel>
             <SelectItem v-for="item in baudRateList" :key="item" :value="item">
-              波特率: {{ item }}
+              {{ item }}
             </SelectItem>
-            <SelectItem value="custom">
-              自定义
-            </SelectItem>
+          </SelectGroup>
+          <SelectGroup>
+            <SelectLabel>
+              <Button variant="ghost" class="cursor-pointer" @click.stop="open('serialRate')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Material Symbols by Google - https://github.com/google/material-design-icons/blob/master/LICENSE --><path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z" /></svg>
+                添加自定义
+              </Button>
+            </SelectLabel>
           </SelectGroup>
         </SelectContent>
       </Select>
+      <label for="dataBits" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">数据位</label>
       <Select v-model="dataBits">
         <SelectTrigger class="w-full">
           <SelectValue placeholder="请选择数据位" />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectLabel>设置数据位</SelectLabel>
-            <SelectItem v-for="item in Object.keys(dataBitsList)" :key="item" :value="item">
-              数据位: {{ dataBitsList[item] }}
+            <SelectItem v-for="item in dataBitsList" :key="item" :value="item">
+              {{ item }}
             </SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>
-
+      <label for="parity" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">校验位</label>
       <Select v-model="parity">
         <SelectTrigger class="w-full">
           <SelectValue placeholder="请选择校验位" />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectLabel>设置校验位</SelectLabel>
             <SelectItem v-for="item in Object.keys(parityList)" :key="item" :value="item">
-              校验位: {{ parityList[item] }}
+              {{ parityList[item] }}
             </SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>
-
+      <label for="stopBits" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">停止位</label>
       <Select v-model="stopBits">
         <SelectTrigger class="w-full">
           <SelectValue placeholder="请选择停止位" />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectLabel>设置停止位</SelectLabel>
-            <SelectItem v-for="item in Object.keys(stopBitsList)" :key="item" :value="item">
-              停止位: {{ stopBitsList[item] }}
+            <SelectItem v-for="item in stopBitsList" :key="item" :value="item">
+              {{ item }}
             </SelectItem>
           </SelectGroup>
         </SelectContent>
