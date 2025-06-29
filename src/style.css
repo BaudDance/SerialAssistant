@@ -121,6 +121,12 @@
   }
 }
 
+.disable-spin-button::-webkit-inner-spin-button,
+.disable-spin-button::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 .chat {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
