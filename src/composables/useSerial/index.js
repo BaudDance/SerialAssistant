@@ -1,6 +1,7 @@
 import { useSupported, useTimeoutFn } from '@vueuse/core'
 import { computed, ref } from 'vue'
 import USBJson from '@/assets/usb-device.json'
+import { useNprogress } from '@/composables/useNprogress'
 /**
  *  Get device name from USBJson
  * @param {SerialPort} port
@@ -27,6 +28,7 @@ export function useSerial(
   },
 ) {
   const { onReadData, onReadFrame } = options
+  const nprogress = useNprogress()
   const isSupported = useSupported(() => navigator && 'serial' in navigator)
   const serial = navigator.serial
   const port = ref(undefined)
@@ -41,6 +43,7 @@ export function useSerial(
 
   async function requestPort() {
     try {
+      nprogress.start()
       const p = await serial.requestPort(options)
       console.debug('requestPort', p)
       if (p) {
@@ -53,6 +56,9 @@ export function useSerial(
     catch (error) {
       console.error(error)
       return null
+    }
+    finally {
+      nprogress.done()
     }
   }
 
