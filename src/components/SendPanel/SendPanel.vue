@@ -12,6 +12,7 @@ const { sendData, clear, onInput, send, sendType, checkAlgorithm, checkAlgorithm
       v-model="sendData"
       type="text-area"
       class="flex-1 w-full bg-transparent focus:outline-none focus-visible:outline-none text-sm pt-1 px-3 pb-3"
+      style="resize: none"
       autocomplete="send-panel-input"
       @input="onInput"
     />
