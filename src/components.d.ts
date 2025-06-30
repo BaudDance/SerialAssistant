@@ -24,7 +24,6 @@ declare module 'vue' {
     CardTitle: typeof import('./components/ui/card/CardTitle.vue')['default']
     Checkbox: typeof import('./components/ui/checkbox/Checkbox.vue')['default']
     ControlPanel: typeof import('./components/ControlPanel/ControlPanel.vue')['default']
-    copy: typeof import('./components/Dialog/Setting copy.vue')['default']
     DeviceSetting: typeof import('./components/SettingPanel/DeviceSetting.vue')['default']
     Dialog: typeof import('./components/ui/dialog/Dialog.vue')['default']
     DialogClose: typeof import('./components/ui/dialog/DialogClose.vue')['default']
@@ -133,10 +132,14 @@ declare module 'vue' {
     TagsInputItemDelete: typeof import('./components/ui/tags-input/TagsInputItemDelete.vue')['default']
     TagsInputItemText: typeof import('./components/ui/tags-input/TagsInputItemText.vue')['default']
     Textarea: typeof import('./components/ui/textarea/Textarea.vue')['default']
+    Toggle: typeof import('./components/ui/toggle/Toggle.vue')['default']
+    ToggleGroup: typeof import('./components/ui/toggle-group/ToggleGroup.vue')['default']
+    ToggleGroupItem: typeof import('./components/ui/toggle-group/ToggleGroupItem.vue')['default']
     Tooltip: typeof import('./components/ui/tooltip/Tooltip.vue')['default']
     TooltipContent: typeof import('./components/ui/tooltip/TooltipContent.vue')['default']
     TooltipProvider: typeof import('./components/ui/tooltip/TooltipProvider.vue')['default']
     TooltipTrigger: typeof import('./components/ui/tooltip/TooltipTrigger.vue')['default']
+    TopBar: typeof import('./components/TopBar/TopBar.vue')['default']
     UserNumberFotter: typeof import('./components/UserNumberFooter/UserNumberFotter.vue')['default']
   }
 }
