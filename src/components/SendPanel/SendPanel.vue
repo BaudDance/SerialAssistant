@@ -18,7 +18,7 @@ const { sendData, clear, onInput, send, sendType, checkAlgorithm, checkAlgorithm
     />
 
     <div class="p-3  flex justify-end space-x-2">
-      <TooltipProvider>
+      <TooltipProvider v-if="sendType === 'hex'">
         <Tooltip>
           <TooltipTrigger>
             <Button as-child variant="ghost" class="w-9 h-9 cursor-pointer p-1.5" @click="reformat">
@@ -31,7 +31,7 @@ const { sendData, clear, onInput, send, sendType, checkAlgorithm, checkAlgorithm
         </Tooltip>
       </TooltipProvider>
 
-      <DropdownMenu>
+      <DropdownMenu v-if="sendType === 'hex'">
         <DropdownMenuTrigger as-child class="cursor-pointer">
           <Button variant="ghost">
             {{
