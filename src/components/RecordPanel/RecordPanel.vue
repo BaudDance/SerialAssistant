@@ -1,6 +1,6 @@
 <script setup>
 import { refThrottled, useScroll } from '@vueuse/core'
-import { format } from 'date-fns'
+import dayjs from 'dayjs'
 import { computed, ref, watch } from 'vue'
 import { useDataCode } from '@/composables/useDataCode/useDataCode'
 import { useRecordStore } from '@/store/useRecordStore'
@@ -40,7 +40,7 @@ watch(
         <div class="chat-header mx-2 flex">
           <!-- TODO 点击可以切换时间显示格式(是否显示日期) -->
           <div class="text-sm opacity-70">
-            {{ format(record.time, "HH:mm:ss:SSS") }}
+            {{ dayjs(record.time).format("HH:mm:ss:SSS") }}
           </div>
           <div class="w-4" />
           <div class="cursor-pointer" @click="() => toggoleRecordDisplay(record)">
@@ -67,7 +67,7 @@ watch(
         <div class="chat-header mx-2 flex">
           <!-- TODO 点击可以切换时间显示格式(是否显示日期) -->
           <div class="text-sm opacity-70">
-            {{ format(record.time, "HH:mm:ss:SSS") }}
+            {{ dayjs(record.time).format("HH:mm:ss:SSS") }}
           </div>
           <div class="w-4" />
           <div class="cursor-pointer" @click="() => toggoleRecordDisplay(record)">
@@ -89,7 +89,7 @@ watch(
       <div class="chat-header mx-2">
         <!-- TODO 点击可以切换时间显示格式(是否显示日期) -->
         <div class="text-sm opacity-70">
-          {{ format(readingRecord.time, "HH:mm:ss:SSS") }}
+          {{ dayjs(readingRecord.time).format("HH:mm:ss:SSS") }}
         </div>
       </div>
       <div class="chat-bubble break-all text-sm">
