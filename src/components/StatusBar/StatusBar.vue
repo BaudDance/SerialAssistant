@@ -8,11 +8,13 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import useOnline from '@/components/UserNumberFooter/useOnline'
+import { useLayout } from '@/composables/useLayout'
 import { useRecordStore } from '@/store/useRecordStore'
 import { useSendStore } from '@/store/useSendStore'
 
 const { readingRecord, txCount, rxCount } = useRecordStore()
 const { online, pause } = useOnline()
+const { smallerThanLg } = useLayout()
 onBeforeUnmount(() => {
   // 销毁定时器防止内存泄露
   pause()
@@ -68,7 +70,7 @@ const {
     </div>
     <!-- right -->
     <div class="flex h-4 items-center space-x-2">
-      <TooltipProvider>
+      <TooltipProvider v-if="!smallerThanLg">
         <Tooltip>
           <TooltipTrigger>
             <div>Enter 发送 / Ctrl + S 整理</div>
