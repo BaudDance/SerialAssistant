@@ -14,6 +14,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       vue(),
+
       // https://github.com/antfu/unplugin-auto-import
       AutoImport({
         include: [/\.[jt]sx?$/, /\.vue$/, /\.vue\?vue/, /\.md$/],
@@ -28,6 +29,7 @@ export default defineConfig(({ mode }) => {
         ],
         vueTemplate: true,
       }),
+
       // https://github.com/antfu/unplugin-vue-components
       Components({
         // allow auto load markdown components under `./src/components/`
@@ -36,8 +38,14 @@ export default defineConfig(({ mode }) => {
         include: [/\.vue$/, /\.vue\?vue/, /\.md$/],
         dts: 'src/components.d.ts',
       }),
+
+      // https://github.com/tailwindlabs/tailwindcss
       tailwindcss(),
+
+      // https://devtools.vuejs.org/
       vueDevTools(),
+
+      // https://github.com/btd/rollup-plugin-visualizer
       mode === 'analyze' ? visualizer({ open: true, brotliSize: true }) : null,
     ],
     resolve: {
