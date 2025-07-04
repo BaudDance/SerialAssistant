@@ -83,7 +83,7 @@ const stopBitsList = [
       <h3 class="font-semibold leading-none tracking-tight">
         {{ portName ?? "串口设置" }}
       </h3>
-      <p class="text-xs text-muted-foreground">
+      <p class="text-muted-foreground">
         请选择串口连接相关参数
       </p>
     </div>
