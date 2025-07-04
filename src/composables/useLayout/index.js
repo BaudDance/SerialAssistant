@@ -19,7 +19,7 @@ export const useLayout = createGlobalState(() => {
   const smallerThanLg = breakpoints.smaller('lg') // 小于 lg(1024px)
 
   // 全屏状态 小于2xl的屏幕默认全屏
-  const showFullScreen = useStorage('layout:showFullScreen', breakpoints.smaller('xl'))
+  const showFullScreen = useStorage('layout:showFullScreen', breakpoints.smaller('2xl'))
   const toggleFullScreen = () => {
     showFullScreen.value = !showFullScreen.value
   }
