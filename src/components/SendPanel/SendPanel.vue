@@ -32,7 +32,7 @@ const { sendData, clear, onInput, send, sendType, checkAlgorithm, checkAlgorithm
       </TooltipProvider>
 
       <DropdownMenu v-if="sendType === 'hex'">
-        <DropdownMenuTrigger as-child class="cursor-pointer">
+        <DropdownMenuTrigger as-child class="cursor-pointer text-md">
           <Button variant="ghost">
             {{
               checkAlgorithm

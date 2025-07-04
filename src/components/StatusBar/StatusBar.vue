@@ -36,7 +36,7 @@ const {
 </script>
 
 <template>
-  <div class="bg-input flex justify-between items-center text-xs h-6 pr-3">
+  <div class="bg-input flex justify-between items-center h-6 pr-3">
     <!-- left -->
     <div class="flex h-full items-center space-x-2">
       <TooltipProvider>

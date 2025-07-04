@@ -41,7 +41,7 @@ onBeforeUnmount(() => {
 
 <template>
   <Popover>
-    <PopoverTrigger as-child class="cursor-pointer">
+    <PopoverTrigger as-child class="cursor-pointer text-md">
       <Button variant="ghost">
         自动发送
       </Button>

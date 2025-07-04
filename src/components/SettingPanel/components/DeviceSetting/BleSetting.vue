@@ -37,7 +37,7 @@ async function connect() {
       <h3 class="font-semibold leading-none tracking-tight">
         {{ deviceName ?? "蓝牙设置" }}
       </h3>
-      <p class="text-xs text-muted-foreground">
+      <p class="text-muted-foreground">
         请选择蓝牙连接相关参数
       </p>
     </div>
@@ -55,7 +55,7 @@ async function connect() {
           </SelectGroup>
         </SelectContent>
       </Select>
-      <div class="text-xs text-muted-foreground">
+      <div class="text-muted-foreground">
         {{ bleType.description }}
       </div>
     </div>

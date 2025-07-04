@@ -108,7 +108,7 @@ const disabledAddButton = computed(() => {
               添加
             </Button>
           </div>
-          <p role="alert" class="h-4 pt-2 text-xs font-medium text-destructive opacity-70">
+          <p role="alert" class="h-4 pt-2 font-medium text-destructive opacity-70">
             {{ disabledAddButton }}
           </p>
         </div>
