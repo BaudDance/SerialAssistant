@@ -2,7 +2,7 @@ import { breakpointsTailwind, createGlobalState, useBreakpoints, useStorage } fr
 import { ref } from 'vue'
 
 export const DEFAULT_LAYOUT_CONFIG = Object.freeze({
-  showFullScreen: false,
+  showFullScreen: true,
   showSettingPanel: true,
   showTopBar: true,
   showActivityBar: true,
@@ -18,8 +18,8 @@ export const useLayout = createGlobalState(() => {
   const breakpoints = useBreakpoints(breakpointsTailwind)
   const smallerThanLg = breakpoints.smaller('lg') // 小于 lg(1024px)
 
-  // 全屏状态
-  const showFullScreen = useStorage('layout:showFullScreen', ref(DEFAULT_LAYOUT_CONFIG.showFullScreen))
+  // 全屏状态 小于2xl的屏幕默认全屏
+  const showFullScreen = useStorage('layout:showFullScreen', breakpoints.smaller('xl'))
   const toggleFullScreen = () => {
     showFullScreen.value = !showFullScreen.value
   }
@@ -84,6 +84,7 @@ export const useLayout = createGlobalState(() => {
   })
 
   return {
+    breakpoints,
     // 响应式断点
     smallerThanLg,
 
