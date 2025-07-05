@@ -28,19 +28,19 @@ const { hasDecTyps } = useSerialStore()
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectItem value=" ">
+              <SelectItem value="无">
                 无
               </SelectItem>
-              <SelectItem value="\n">
+              <SelectItem value="LF">
                 LF
               </SelectItem>
-              <SelectItem value="\r">
+              <SelectItem value="CR">
                 CR
               </SelectItem>
-              <SelectItem value="\r\n">
+              <SelectItem value="CRLF">
                 CRLF
               </SelectItem>
-              <SelectItem value="undefined">
+              <SelectItem value="自定义">
                 自定义
               </SelectItem>
             </SelectGroup>
