@@ -1,14 +1,9 @@
 <script setup>
-import { useDataCode } from '@/composables/useDataCode/useDataCode'
 import { useSerialStore } from '@/store/useSerialStore'
-import { useSettingStore } from '@/store/useSettingStore'
 import { dialogKeys, useDialog } from './composable'
 
 const { visible } = useDialog()
-const { dataCode } = useDataCode()
-const { lineEndingMode } = useSettingStore()
-
-const { serialRate, defaultBaudRateList, baudRateList } = useSerialStore()
+const { defaultBaudRateList, baudRateList } = useSerialStore()
 
 const defaultMinBaudRate = 300
 const defaultMaxBaudRate = 10000000
