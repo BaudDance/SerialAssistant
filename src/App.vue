@@ -29,7 +29,7 @@ const SerialRateDialog = defineAsyncComponent(() => import('@/components/Dialog/
 
 const { readingRecord, addRecord } = useRecordStore()
 const { readType } = useSerialStore()
-const { showFullScreen, smallerThanLg, showSettingPanel, showSendPanel } = useLayout()
+const { showFullScreen, fullScreenBreakpoint, showSettingPanel, showSendPanel } = useLayout()
 const settingPanelRef = ref()
 const sendPanelRef = ref()
 watchEffect(() => {
@@ -54,7 +54,7 @@ listenNetworkStatus()
 const userFullScreenPreference = ref(showFullScreen.value)
 
 watchEffect(() => {
-  if (smallerThanLg.value) {
+  if (fullScreenBreakpoint.value) {
     // 小于lg时，保存当前状态并强制全屏
     if (!showFullScreen.value) {
       userFullScreenPreference.value = false
@@ -69,7 +69,7 @@ watchEffect(() => {
 
 // 监听用户主动切换全屏状态（仅在大屏幕时更新偏好）
 watchEffect(() => {
-  if (!smallerThanLg.value) {
+  if (!fullScreenBreakpoint.value) {
     userFullScreenPreference.value = showFullScreen.value
   }
 })
