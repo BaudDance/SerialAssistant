@@ -1,27 +1,29 @@
 <script setup>
 import { provide, ref, watchEffect } from 'vue'
-
 import ActivityBar from '@/components/ActivityBar/ActivityBar.vue'
 import ControlPanel from '@/components/ControlPanel/ControlPanel.vue'
+
 import { DialogProvider } from '@/components/Dialog'
 import RecordPanel from '@/components/RecordPanel/RecordPanel.vue'
 import SendPanel from '@/components/SendPanel/SendPanel.vue'
 import DeviceSetting from '@/components/SettingPanel/DeviceSetting.vue'
 import StatusBar from '@/components/StatusBar/StatusBar.vue'
 import TopBar from '@/components/TopBar/TopBar.vue'
-
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from '@/components/ui/resizable'
+import { Toaster } from '@/components/ui/sonner'
 
 import { useBle } from '@/composables/useBle'
+
 import { useLayout } from '@/composables/useLayout'
 import { useSerial } from '@/composables/useSerial'
 import { listenNetworkStatus } from '@/network'
 import { useRecordStore } from '@/store/useRecordStore'
 import { useSerialStore } from '@/store/useSerialStore'
+import 'vue-sonner/style.css'
 
 const { readingRecord, addRecord } = useRecordStore()
 const { readType } = useSerialStore()
@@ -152,5 +154,6 @@ provide('ble', ble)
     </div>
   </div>
 
+  <Toaster />
   <DialogProvider />
 </template>
