@@ -1,7 +1,7 @@
 <script  setup>
 import { useLayout } from '@/composables/useLayout'
 
-const { showFullScreen, showSettingPanel, settingPanelPosition, showSendPanel, smallerThanLg } = useLayout()
+const { showFullScreen, showSettingPanel, settingPanelPosition, showSendPanel, fullScreenBreakpoint } = useLayout()
 </script>
 
 <template>
@@ -42,7 +42,7 @@ const { showFullScreen, showSettingPanel, settingPanelPosition, showSendPanel, s
         </Tooltip>
       </TooltipProvider>
 
-      <TooltipProvider v-if="!smallerThanLg">
+      <TooltipProvider v-if="!fullScreenBreakpoint">
         <Tooltip>
           <TooltipTrigger>
             <Toggle v-model="showFullScreen" class="min-w-0 w-6 h-6 p-0 cursor-pointer">

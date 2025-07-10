@@ -14,12 +14,14 @@ export const DEFAULT_LAYOUT_CONFIG = Object.freeze({
  * 提供全局布局状态管理和持久化存储
  */
 export const useLayout = createGlobalState(() => {
-  // 响应式断点
+  // tailwindcss响应式断点
   const breakpoints = useBreakpoints(breakpointsTailwind)
-  const smallerThanLg = breakpoints.smaller('lg') // 小于 lg(1024px)
 
-  // 全屏状态 小于2xl的屏幕默认全屏
-  const showFullScreen = useStorage('layout:showFullScreen', breakpoints.smaller('2xl'))
+  // 自动全屏模式断点
+  const fullScreenBreakpoint = breakpoints.smaller('2xl') // 小于2xl（1536px）的屏幕默认全屏
+
+  // 全屏状态
+  const showFullScreen = useStorage('layout:showFullScreen', ref(DEFAULT_LAYOUT_CONFIG.showFullScreen))
   const toggleFullScreen = () => {
     showFullScreen.value = !showFullScreen.value
   }
@@ -84,9 +86,8 @@ export const useLayout = createGlobalState(() => {
   })
 
   return {
-    breakpoints,
     // 响应式断点
-    smallerThanLg,
+    fullScreenBreakpoint,
 
     // 状态
     showFullScreen,
