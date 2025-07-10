@@ -14,7 +14,7 @@ import { useSendStore } from '@/store/useSendStore'
 
 const { readingRecord, txCount, rxCount } = useRecordStore()
 const { online, pause } = useOnline()
-const { smallerThanLg } = useLayout()
+const { fullScreenBreakpoint } = useLayout()
 onBeforeUnmount(() => {
   // 销毁定时器防止内存泄露
   pause()
@@ -70,7 +70,7 @@ const {
     </div>
     <!-- right -->
     <div class="flex h-4 items-center space-x-2">
-      <TooltipProvider v-if="!smallerThanLg">
+      <TooltipProvider v-if="!fullScreenBreakpoint">
         <Tooltip>
           <TooltipTrigger>
             <div>Enter 发送 / Ctrl + S 整理</div>

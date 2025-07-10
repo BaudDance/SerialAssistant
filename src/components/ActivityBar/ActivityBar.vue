@@ -18,10 +18,10 @@ const { open } = useDialog()
 
 const isDark = useDark()
 const toggleDark = useToggle(isDark)
-const { smallerThanLg } = useLayout()
+const { fullScreenBreakpoint } = useLayout()
 
 const buttonClass = computed(() => {
-  if (smallerThanLg.value) {
+  if (fullScreenBreakpoint.value) {
     return 'w-6 h-6 p-0.75'
   }
   return 'w-12 h-12 p-3'
