@@ -113,6 +113,7 @@ declare module 'vue' {
     SheetTitle: typeof import('./components/ui/sheet/SheetTitle.vue')['default']
     SheetTrigger: typeof import('./components/ui/sheet/SheetTrigger.vue')['default']
     Slider: typeof import('./components/ui/slider/Slider.vue')['default']
+    Sonner: typeof import('./components/ui/sonner/Sonner.vue')['default']
     StatusBar: typeof import('./components/StatusBar/StatusBar.vue')['default']
     Switch: typeof import('./components/ui/switch/Switch.vue')['default']
     SwitchDeviceTypeBtn: typeof import('./components/SettingPanel/components/DeviceSetting/components/SwitchDeviceTypeBtn.vue')['default']

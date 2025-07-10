@@ -32,6 +32,7 @@
     "tw-animate-css": "^1.3.4",
     "vee-validate": "^4.15.1",
     "vue": "^3.3.4",
+    "vue-sonner": "^2.0.1",
     "zod": "^3.25.67"
   },
   "devDependencies": {
