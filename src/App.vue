@@ -1,8 +1,9 @@
 <script setup>
-import { defineAsyncComponent, provide, ref, watchEffect } from 'vue'
+import { provide, ref, watchEffect } from 'vue'
 
 import ActivityBar from '@/components/ActivityBar/ActivityBar.vue'
 import ControlPanel from '@/components/ControlPanel/ControlPanel.vue'
+import { DialogProvider } from '@/components/Dialog'
 import RecordPanel from '@/components/RecordPanel/RecordPanel.vue'
 import SendPanel from '@/components/SendPanel/SendPanel.vue'
 import DeviceSetting from '@/components/SettingPanel/DeviceSetting.vue'
@@ -21,11 +22,6 @@ import { useSerial } from '@/composables/useSerial'
 import { listenNetworkStatus } from '@/network'
 import { useRecordStore } from '@/store/useRecordStore'
 import { useSerialStore } from '@/store/useSerialStore'
-
-const AsciiDialog = defineAsyncComponent(() => import('@/components/Dialog/Ascii.vue'))
-const DownLoadDriverDialog = defineAsyncComponent(() => import('@/components/Dialog/DownLoadDriver.vue'))
-const SettingDialog = defineAsyncComponent(() => import('@/components/Dialog/Setting.vue'))
-const SerialRateDialog = defineAsyncComponent(() => import('@/components/Dialog/SerialRate.vue'))
 
 const { readingRecord, addRecord } = useRecordStore()
 const { readType } = useSerialStore()
@@ -156,8 +152,5 @@ provide('ble', ble)
     </div>
   </div>
 
-  <AsciiDialog />
-  <DownLoadDriverDialog />
-  <SettingDialog />
-  <SerialRateDialog />
+  <DialogProvider />
 </template>
