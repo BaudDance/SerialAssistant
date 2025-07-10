@@ -11,7 +11,7 @@ import { useSendStore } from '@/store/useSendStore'
 import { useSerialStore } from '@/store/useSerialStore'
 
 const { readType, sendType, nextReadType, nextSendType } = useSerialStore()
-const { pinBottom, clearRecords, readingRecord, rxCount, txCount } = useRecordStore()
+const { pinBottom, clearRecords, readingRecord, rxCount, txCount, exportRecords } = useRecordStore()
 const { clear } = useSendStore()
 
 function toggleReadType() {
@@ -71,6 +71,28 @@ const typeCssMap = {
         </TooltipTrigger>
         <TooltipContent>
           <p>点击切换接收窗口是否自动滚动</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <Badge class="cursor-pointer" @click="exportRecords">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path d="M4 12a8 8 0 1 0 16 0" /><path stroke-linejoin="round" d="M12 14V4m0 0l3 3m-3-3L9 7" /></g></svg>
+            导出
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>导出的JSON文件包含以下字段:</p>
+          <ul>
+            <li>type: 消息类型，read 或 write</li>
+            <li>data: 消息数据，根据显示格式不同，可能是十六进制字符串、ASCII 字符串或十进制字符串</li>
+            <li>timestamp: 消息时间戳，毫秒级时间戳</li>
+            <li>time: 消息时间，格式化后的时间字符串</li>
+            <li>display: 消息显示格式，hex、ascii 或 dec</li>
+          </ul>
+          <p>推荐使用 <a class="text-blue-500" href="https://json.fans/cn" target="_blank" rel="noopener noreferrer">JSON.fans</a> 在线工具进行 JSON 预览</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
