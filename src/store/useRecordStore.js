@@ -70,6 +70,28 @@ export function useRecordStore() {
     a.remove()
   }
 
+  async function copyRecordContent(record) {
+    let content = ''
+    if (record.display === 'hex') {
+      content = bufferToHexFormat(record.data)
+    }
+    else if (record.display === 'ascii') {
+      content = bufferToString(record.data)
+    }
+    else {
+      content = bufferToDecFormat(record.data)
+    }
+
+    try {
+      await navigator.clipboard.writeText(content)
+      toast.success('复制消息内容成功')
+    }
+    catch (err) {
+      console.error('复制失败:', err)
+      toast.error('复制消息内容失败')
+    }
+  }
+
   return {
     records,
     readingRecord,
@@ -79,5 +101,6 @@ export function useRecordStore() {
     addRecord,
     clearRecords,
     exportRecords,
+    copyRecordContent,
   }
 }

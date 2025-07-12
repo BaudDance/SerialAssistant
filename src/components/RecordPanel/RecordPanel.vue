@@ -7,9 +7,10 @@ import { useRecordStore } from '@/store/useRecordStore'
 import { useSerialStore } from '@/store/useSerialStore'
 
 const { bufferToDecFormat, bufferToHexFormat, bufferToString, stringToHtml } = useDataCode()
-const { records, readingRecord, pinBottom } = useRecordStore()
+const { records, readingRecord, pinBottom, copyRecordContent } = useRecordStore()
 const { recordTypes } = useSerialStore()
 const rootEl = ref(null)
+const showFullDate = ref(false)
 const { x, y, isScrolling, arrivedState, directions } = useScroll(rootEl, {
   behavior: 'smooth',
 })
@@ -21,6 +22,17 @@ async function toggoleRecordDisplay(record) {
   const index = recordTypes.value.indexOf(record.display)
   record.display = recordTypes.value[(index + 1) % recordTypes.value.length]
 }
+
+function toggleTimeFormat() {
+  showFullDate.value = !showFullDate.value
+}
+
+function formatTime(time) {
+  return showFullDate.value
+    ? dayjs(time).format('YYYY-MM-DD HH:mm:ss:SSS')
+    : dayjs(time).format('HH:mm:ss:SSS')
+}
+
 const recordLength = computed(() => records.value.length)
 watch(
   [recordLength, refThrottled(readingRecord, 150)],
@@ -38,9 +50,8 @@ watch(
     <template v-for="record in records" :key="record.time">
       <div v-if="record.type == 'read'" class="chat chat-start">
         <div class="chat-header mx-2 flex">
-          <!-- TODO 点击可以切换时间显示格式(是否显示日期) -->
-          <div class="text-sm opacity-70">
-            {{ dayjs(record.time).format("HH:mm:ss:SSS") }}
+          <div class="text-sm opacity-70 cursor-pointer hover:opacity-100 transition-opacity" @click="toggleTimeFormat">
+            {{ formatTime(record.time) }}
           </div>
           <div class="w-4" />
           <div class="cursor-pointer" @click="() => toggoleRecordDisplay(record)">
@@ -62,12 +73,25 @@ watch(
               : stringToHtml(bufferToStr(record.data))
           }} -->
         </div>
+        <div class="chat-footer mt-1">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <Button variant="ghost" size="icon" class="w-6 h-6 p-0.75 cursor-pointer" @click="() => copyRecordContent(record)">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Material Symbols by Google - https://github.com/google/material-design-icons/blob/master/LICENSE --><path fill="currentColor" d="M9 18q-.825 0-1.412-.587T7 16V4q0-.825.588-1.412T9 2h9q.825 0 1.413.588T20 4v12q0 .825-.587 1.413T18 18zm0-2h9V4H9zm-4 6q-.825 0-1.412-.587T3 20V6h2v14h11v2zm4-6V4z" /></svg>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                复制
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       </div>
       <div v-if="record.type == 'write'" class="chat chat-end">
         <div class="chat-header mx-2 flex">
-          <!-- TODO 点击可以切换时间显示格式(是否显示日期) -->
-          <div class="text-sm opacity-70">
-            {{ dayjs(record.time).format("HH:mm:ss:SSS") }}
+          <div class="text-sm opacity-70 cursor-pointer hover:opacity-100 transition-opacity" @click="toggleTimeFormat">
+            {{ formatTime(record.time) }}
           </div>
           <div class="w-4" />
           <div class="cursor-pointer" @click="() => toggoleRecordDisplay(record)">
@@ -83,13 +107,26 @@ watch(
             {{ bufferToDecFormat(record.data) }}
           </div>
         </div>
+        <div class="chat-footer mt-1">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <Button variant="ghost" size="icon" class="w-6 h-6 p-0.75 cursor-pointer" @click="() => copyRecordContent(record)">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Material Symbols by Google - https://github.com/google/material-design-icons/blob/master/LICENSE --><path fill="currentColor" d="M9 18q-.825 0-1.412-.587T7 16V4q0-.825.588-1.412T9 2h9q.825 0 1.413.588T20 4v12q0 .825-.587 1.413T18 18zm0-2h9V4H9zm-4 6q-.825 0-1.412-.587T3 20V6h2v14h11v2zm4-6V4z" /></svg>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                复制
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       </div>
     </template>
     <div v-if="readingRecord" class="chat chat-start">
       <div class="chat-header mx-2">
-        <!-- TODO 点击可以切换时间显示格式(是否显示日期) -->
-        <div class="text-sm opacity-70">
-          {{ dayjs(readingRecord.time).format("HH:mm:ss:SSS") }}
+        <div class="text-sm opacity-70 cursor-pointer hover:opacity-100 transition-opacity" @click="toggleTimeFormat">
+          {{ formatTime(readingRecord.time) }}
         </div>
       </div>
       <div class="chat-bubble break-all text-sm">
