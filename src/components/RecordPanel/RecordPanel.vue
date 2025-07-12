@@ -48,7 +48,7 @@ watch(
 <template>
   <div ref="rootEl" class="overflow-y-auto scroll-smooth p-2 relative record-panel pb-10">
     <template v-for="record in records" :key="record.time">
-      <div v-if="record.type == 'read'" class="chat chat-start">
+      <div v-if="record.type == 'read'" class="chat chat-start group">
         <div class="chat-header mx-2 flex">
           <div class="text-sm opacity-70 cursor-pointer hover:opacity-100 transition-opacity" @click="toggleTimeFormat">
             {{ formatTime(record.time) }}
@@ -74,21 +74,23 @@ watch(
           }} -->
         </div>
         <div class="chat-footer mt-1">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <Button variant="ghost" size="icon" class="w-6 h-6 p-0.75 cursor-pointer" @click="() => copyRecordContent(record)">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Material Symbols by Google - https://github.com/google/material-design-icons/blob/master/LICENSE --><path fill="currentColor" d="M9 18q-.825 0-1.412-.587T7 16V4q0-.825.588-1.412T9 2h9q.825 0 1.413.588T20 4v12q0 .825-.587 1.413T18 18zm0-2h9V4H9zm-4 6q-.825 0-1.412-.587T3 20V6h2v14h11v2zm4-6V4z" /></svg>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                复制
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button variant="ghost" size="icon" class="w-6 h-6 p-0.75 cursor-pointer" @click="() => copyRecordContent(record)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><!-- Icon from Material Symbols by Google - https://github.com/google/material-design-icons/blob/master/LICENSE --><path fill="currentColor" d="M9 18q-.825 0-1.412-.587T7 16V4q0-.825.588-1.412T9 2h9q.825 0 1.413.588T20 4v12q0 .825-.587 1.413T18 18zm0-2h9V4H9zm-4 6q-.825 0-1.412-.587T3 20V6h2v14h11v2zm4-6V4z" /></svg>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  复制
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </div>
       </div>
-      <div v-if="record.type == 'write'" class="chat chat-end">
+      <div v-if="record.type == 'write'" class="chat chat-end group">
         <div class="chat-header mx-2 flex">
           <div class="text-sm opacity-70 cursor-pointer hover:opacity-100 transition-opacity" @click="toggleTimeFormat">
             {{ formatTime(record.time) }}
@@ -108,18 +110,20 @@ watch(
           </div>
         </div>
         <div class="chat-footer mt-1">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <Button variant="ghost" size="icon" class="w-6 h-6 p-0.75 cursor-pointer" @click="() => copyRecordContent(record)">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Material Symbols by Google - https://github.com/google/material-design-icons/blob/master/LICENSE --><path fill="currentColor" d="M9 18q-.825 0-1.412-.587T7 16V4q0-.825.588-1.412T9 2h9q.825 0 1.413.588T20 4v12q0 .825-.587 1.413T18 18zm0-2h9V4H9zm-4 6q-.825 0-1.412-.587T3 20V6h2v14h11v2zm4-6V4z" /></svg>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                复制
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button variant="ghost" size="icon" class="w-6 h-6 p-0.75 cursor-pointer" @click="() => copyRecordContent(record)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><!-- Icon from Material Symbols by Google - https://github.com/google/material-design-icons/blob/master/LICENSE --><path fill="currentColor" d="M9 18q-.825 0-1.412-.587T7 16V4q0-.825.588-1.412T9 2h9q.825 0 1.413.588T20 4v12q0 .825-.587 1.413T18 18zm0-2h9V4H9zm-4 6q-.825 0-1.412-.587T3 20V6h2v14h11v2zm4-6V4z" /></svg>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  复制
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </div>
       </div>
     </template>
