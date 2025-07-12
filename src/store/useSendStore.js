@@ -109,7 +109,13 @@ export const useSendStore = createGlobalState(() => {
     sendData.value = ''
   }
 
-  const keys = useMagicKeys()
+  const keys = useMagicKeys({
+    passive: false,
+    onEventFired(e) {
+      if (e.ctrlKey && e.key === 's' && e.type === 'keydown')
+        e.preventDefault()
+    },
+  })
   const enter = keys.Enter
   const ctrlS = keys['Ctrl+S']
 
