@@ -13,7 +13,8 @@
     "lint:fix": "eslint . --fix",
     "test": "vitest",
     "test:run": "vitest --run",
-    "prepare": "npx simple-git-hooks"
+    "prepare": "npx simple-git-hooks",
+    "deploy:netlify": "ntl deploy"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.11",
@@ -45,6 +46,7 @@
     "eslint-plugin-format": "^1.0.1",
     "jsdom": "^26.1.0",
     "lint-staged": "^15.5.0",
+    "netlify-cli": "^22.2.2",
     "postcss": "^8.4.27",
     "rollup-plugin-visualizer": "^5.14.0",
     "simple-git-hooks": "^2.13.0",
