@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  serial-assistant:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '8080:80'
+    restart: unless-stopped
+    # 如果需要环境变量，可以在这里添加
+    # environment:
+    #   - NODE_ENV=production
