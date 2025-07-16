@@ -74,6 +74,27 @@ pnpm dev
 pnpm build
 ```
 
+### Docker 部署 / Docker Deployment
+
+项目提供了Docker支持，可以使用Docker快速部署应用。
+
+```bash
+# 使用Docker构建镜像
+docker build -t serial-assistant .
+
+# 运行容器
+docker run -d -p 8080:80 --name serial-assistant serial-assistant
+```
+
+或者使用docker-compose：
+
+```bash
+# 使用docker-compose启动服务
+docker-compose up -d
+```
+
+构建完成后，访问 http://localhost:8080 即可使用应用。
+
 ### 可用脚本 / Available Scripts
 
 ```bash
