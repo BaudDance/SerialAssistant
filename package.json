@@ -14,6 +14,7 @@
     "test": "vitest",
     "test:run": "vitest --run",
     "prepare": "npx simple-git-hooks",
+    "deploy:docker": "docker build -t serial-assistant .",
     "deploy:netlify": "ntl deploy"
   },
   "dependencies": {
