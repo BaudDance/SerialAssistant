@@ -17,7 +17,7 @@
 <p align="center">
   <img src="./src/assets/app-screenshot.png" alt="screenshot">
 </p>
-
+<br>
 <p align="center">
   <a href="https://github.com/BaudDance/SerialAssistant">
     <img src="https://img.shields.io/github/stars/BaudDance/SerialAssistant?style=social" alt="GitHub Stars">
@@ -74,6 +74,8 @@ pnpm dev
 pnpm build
 ```
 
+## 🚀 部署指南 / Deployment Guide
+
 ### Docker 部署 / Docker Deployment
 
 项目提供了Docker支持，可以使用Docker快速部署应用。
@@ -95,17 +97,61 @@ docker-compose up -d
 
 构建完成后，访问 http://localhost:8080 即可使用应用。
 
+### Netlify 部署 / Netlify Deployment
+
+项目支持一键部署到 Netlify，提供了完整的配置文件。
+
+#### 方式一：使用 Netlify CLI
+
+1. 安装 Netlify CLI
+
+```bash
+npm install -g netlify-cli
+```
+
+2. 登录 Netlify
+
+```bash
+netlify login
+```
+
+3. 初始化并部署项目
+
+```bash
+# 构建项目
+pnpm build
+
+# 部署到 Netlify
+pnpm deploy:netlify
+```
+
+#### 方式二：通过 Netlify 网站部署
+
+1. 在 [Netlify](https://www.netlify.com) 注册并登录账号
+2. 点击 "New site from Git"
+3. 选择 GitHub 并授权仓库访问权限
+4. 选择要部署的仓库
+5. 配置构建设置：
+   - Build command: `pnpm build`
+   - Publish directory: `dist`
+   - Node version: `22`
+6. 点击 "Deploy site"
+
+部署完成后，Netlify 会自动分配一个域名。你也可以在站点设置中配置自定义域名。
+
 ### 可用脚本 / Available Scripts
 
 ```bash
-pnpm dev          # 启动开发服务器
-pnpm build        # 构建生产版本
-pnpm preview      # 预览构建结果
-pnpm analyze      # 分析构建包大小
-pnpm lint         # 代码检查
-pnpm lint:fix     # 自动修复代码问题
-pnpm test         # 运行单元测试
-pnpm test:run     # 运行单元测试（单次）
+pnpm dev                # 启动开发服务器
+pnpm build              # 构建生产版本
+pnpm preview            # 预览构建结果
+pnpm analyze            # 分析构建包大小
+pnpm lint               # 代码检查
+pnpm lint:fix           # 自动修复代码问题
+pnpm test               # 运行单元测试
+pnpm test:run           # 运行单元测试（单次）
+pnpm deploy:docker      # 部署到Docker
+pnpm deploy:netlify     # 部署到Netlify
 ```
 
 ## 🏗️ 技术栈 / Tech Stack
@@ -188,6 +234,18 @@ src/
 - [ ] 关键词彩色高亮
 - [ ] 添加随机小贴士
 - [ ] 添加缓存限制防止数据过多导致卡顿
+
+## 📈 项目趋势 / Star History
+
+<p align="center">
+  <a href="https://star-history.com/#BaudDance/SerialAssistant">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=BaudDance/SerialAssistant&type=Date&theme=dark" />
+      <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=BaudDance/SerialAssistant&type=Date" />
+      <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=BaudDance/SerialAssistant&type=Date" />
+  </picture>
+  </a>
+</p>
 
 ## 🤝 贡献 / Contributing
 
