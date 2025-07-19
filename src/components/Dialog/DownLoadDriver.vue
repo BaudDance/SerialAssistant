@@ -119,6 +119,13 @@ const downloadUrl = computed(() => {
   )?.url
 })
 
+// 从 downloadUrl 提取文件名
+const downloadFileName = computed(() => {
+  if (!downloadUrl.value)
+    return null
+  return downloadUrl.value.split('/').pop()
+})
+
 watchEffect(() => {
   if (!visible[dialogKeys.downLoadDriver]) {
     platform.value = undefined
@@ -163,7 +170,7 @@ watchEffect(() => {
         </SelectContent>
       </Select>
       <DialogFooter>
-        <a :href="downloadUrl" class="w-full" :download="!!downloadUrl" :class="[downloadUrl ? 'cursor-pointer' : 'cursor-not-allowed']">
+        <a :href="downloadUrl" class="w-full" :download="downloadFileName" :class="[downloadUrl ? 'cursor-pointer' : 'cursor-not-allowed']">
           <Button
             class="w-full "
             :class="[downloadUrl ? 'cursor-pointer' : 'cursor-not-allowed']"
