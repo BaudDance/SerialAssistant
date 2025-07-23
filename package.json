@@ -1,7 +1,7 @@
 {
-  "name": "serial",
+  "name": "serial-assistant",
   "type": "module",
-  "version": "0.0.1",
+  "version": "2.1.0",
   "private": true,
   "packageManager": "pnpm@10.12.3",
   "scripts": {
