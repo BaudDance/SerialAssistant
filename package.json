@@ -35,6 +35,7 @@
     "vee-validate": "^4.15.1",
     "vue": "^3.3.4",
     "vue-sonner": "^2.0.1",
+    "vuedraggable": "^4.1.0",
     "zod": "^3.25.67"
   },
   "devDependencies": {
