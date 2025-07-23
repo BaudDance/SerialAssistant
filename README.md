@@ -139,6 +139,68 @@ pnpm deploy:netlify
 
 部署完成后，Netlify 会自动分配一个域名。你也可以在站点设置中配置自定义域名。
 
+### Vercel 部署 / Vercel Deployment
+
+项目支持一键部署到 Vercel，提供了完整的配置文件。
+
+#### 配置文件说明
+
+**vercel.json** - 主要的 Vercel 配置文件，包含以下配置：
+
+- **构建命令**: `pnpm run build`
+- **输出目录**: `dist`
+- **框架**: Vite
+- **路由重写**: 支持 SPA 路由
+- **缓存策略**: 静态资源长期缓存
+- **Node.js 版本**: 22
+
+**.vercelignore** - 指定部署时需要忽略的文件和目录，减少部署包大小。
+
+#### 方式一：使用 Vercel CLI
+
+1. 安装 Vercel CLI
+
+```bash
+npm i -g vercel
+```
+
+2. 登录 Vercel
+
+```bash
+vercel login
+```
+
+3. 部署项目
+
+```bash
+# 部署
+pnpm deploy:vercel
+# 或者
+vercel --prod
+```
+
+#### 方式二：通过 Vercel Dashboard 部署
+
+1. 访问 [Vercel Dashboard](https://vercel.com/dashboard)
+2. 点击 "New Project"
+3. 导入你的 Git 仓库
+4. Vercel 会自动检测到这是一个 Vite 项目并使用相应配置
+5. 点击 "Deploy" 开始部署
+
+#### 方式三：通过 Git 集成自动部署
+
+连接 Git 仓库后，每次推送到主分支都会自动触发部署。
+
+#### 环境变量配置
+
+如果项目需要环境变量，可以在 Vercel Dashboard 的项目设置中添加，或者通过 CLI 添加：
+
+```bash
+vercel env add VITE_API_URL
+```
+
+部署完成后，Vercel 会自动分配一个域名。你也可以在站点设置中配置自定义域名。
+
 ### 可用脚本 / Available Scripts
 
 ```bash
@@ -152,6 +214,7 @@ pnpm test               # 运行单元测试
 pnpm test:run           # 运行单元测试（单次）
 pnpm deploy:docker      # 部署到Docker
 pnpm deploy:netlify     # 部署到Netlify
+pnpm deploy:vercel      # 部署到Vercel（生产环境）
 ```
 
 ## 🏗️ 技术栈 / Tech Stack

@@ -15,7 +15,8 @@
     "test:run": "vitest --run",
     "prepare": "npx simple-git-hooks",
     "deploy:docker": "docker build -t serial-assistant .",
-    "deploy:netlify": "ntl deploy"
+    "deploy:netlify": "ntl deploy",
+    "deploy:vercel": "vercel --prod"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.11",
