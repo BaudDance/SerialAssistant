@@ -1,7 +1,7 @@
 <script  setup>
 import { useLayout } from '@/composables/useLayout'
 
-const { showFullScreen, showSettingPanel, settingPanelPosition, showSendPanel, fullScreenBreakpoint } = useLayout()
+const { showFullScreen, showSettingPanel, showQuickInputPanel, showSendPanel, fullScreenBreakpoint } = useLayout()
 </script>
 
 <template>
@@ -11,19 +11,12 @@ const { showFullScreen, showSettingPanel, settingPanelPosition, showSendPanel, f
         <Tooltip>
           <TooltipTrigger>
             <Toggle v-model="showSettingPanel" class="min-w-0 w-6 h-6 p-0 cursor-pointer">
-              <template v-if="settingPanelPosition === 'left'">
-                <svg v-if="showSettingPanel" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M6 21a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3zM18 5h-8v14h8a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1" /></svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm5-2v16" /></svg>
-              </template>
-
-              <template v-else>
-                <svg v-if="showSettingPanel" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M6 21a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3zm8-16H6a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8z" /></svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm11-2v16" /></svg>
-              </template>
+              <svg v-if="showSettingPanel" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M6 21a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3zM18 5h-8v14h8a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1" /></svg>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm5-2v16" /></svg>
             </Toggle>
           </TooltipTrigger>
           <TooltipContent>
-            <p>点击{{ showSettingPanel ? '折叠' : '展开' }}设备设置栏</p>
+            <p>点击{{ showSettingPanel ? '折叠' : '展开' }}设备设置面板</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -38,6 +31,20 @@ const { showFullScreen, showSettingPanel, settingPanelPosition, showSendPanel, f
           </TooltipTrigger>
           <TooltipContent>
             <p>点击{{ showSendPanel ? '折叠' : '展开' }}输入面板</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger>
+            <Toggle v-model="showQuickInputPanel" class="min-w-0 w-6 h-6 p-0 cursor-pointer">
+              <svg v-if="showQuickInputPanel" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M6 21a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3zm8-16H6a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8z" /></svg>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm11-2v16" /></svg>
+            </Toggle>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>点击{{ showQuickInputPanel ? '折叠' : '展开' }}快捷输入面板</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
