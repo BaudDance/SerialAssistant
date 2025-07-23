@@ -27,19 +27,20 @@ const DialogProvider = defineAsyncComponent(() => import('@/components/Dialog/Pr
 
 const { readingRecord, addRecord } = useRecordStore()
 const { readType } = useSerialStore()
-const { showFullScreen, fullScreenBreakpoint, showSettingPanel, showSendPanel } = useLayout()
+const { showFullScreen, fullScreenBreakpoint, showSettingPanel, showQuickInputPanel, showSendPanel } = useLayout()
 const settingPanelRef = ref()
 const sendPanelRef = ref()
-watchEffect(() => {
-  if (showSettingPanel.value) {
+
+watch(showSettingPanel, (newVal) => {
+  if (newVal) {
     settingPanelRef.value?.expand()
   }
   else {
     settingPanelRef.value?.collapse()
   }
 })
-watchEffect(() => {
-  if (showSendPanel.value) {
+watch(showSendPanel, (newVal) => {
+  if (newVal) {
     sendPanelRef.value?.expand()
   }
   else {
@@ -118,8 +119,10 @@ provide('ble', ble)
       <ActivityBar
         class="rounded-l-lg rounded-r-none border bg-sidebar"
       />
+
       <div class="w-full h-full flex flex-col">
-        <TopBar class="bg-sidebar rounded-tr-lg border-t border-r" />
+        <TopBar class="bg-sidebar  border-t border-r" />
+
         <ResizablePanelGroup
           direction="horizontal"
           class="flex-1"
@@ -130,7 +133,9 @@ provide('ble', ble)
               <DeviceSetting />
             </div>
           </ResizablePanel>
+
           <ResizableHandle with-handle />
+
           <ResizablePanel :default-size="80">
             <ResizablePanelGroup direction="vertical">
               <ResizablePanel :default-size="70">
@@ -146,7 +151,15 @@ provide('ble', ble)
             </ResizablePanelGroup>
           </ResizablePanel>
         </ResizablePanelGroup>
-        <StatusBar class="bg-sidebar rounded-br-lg border-r border-b" />
+
+        <StatusBar class="bg-sidebar  border-r border-b" />
+      </div>
+      <div
+        v-if="showQuickInputPanel"
+        class="h-full bg-sidebar max-w-150 w-full"
+        :class="[showFullScreen ? 'rounded-r-lg' : '']"
+      >
+        <QuickInputPanel />
       </div>
       <!-- <div class="text-sm m-2 absolute bottom-[15px] lg:bottom-[75px] right-0">
         powered by 波特律动
