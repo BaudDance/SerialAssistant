@@ -9,6 +9,15 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     ActivityBar: typeof import('./components/ActivityBar/ActivityBar.vue')['default']
+    AlertDialog: typeof import('./components/ui/alert-dialog/AlertDialog.vue')['default']
+    AlertDialogAction: typeof import('./components/ui/alert-dialog/AlertDialogAction.vue')['default']
+    AlertDialogCancel: typeof import('./components/ui/alert-dialog/AlertDialogCancel.vue')['default']
+    AlertDialogContent: typeof import('./components/ui/alert-dialog/AlertDialogContent.vue')['default']
+    AlertDialogDescription: typeof import('./components/ui/alert-dialog/AlertDialogDescription.vue')['default']
+    AlertDialogFooter: typeof import('./components/ui/alert-dialog/AlertDialogFooter.vue')['default']
+    AlertDialogHeader: typeof import('./components/ui/alert-dialog/AlertDialogHeader.vue')['default']
+    AlertDialogTitle: typeof import('./components/ui/alert-dialog/AlertDialogTitle.vue')['default']
+    AlertDialogTrigger: typeof import('./components/ui/alert-dialog/AlertDialogTrigger.vue')['default']
     Ascii: typeof import('./components/Dialog/Ascii.vue')['default']
     AutoSendButton: typeof import('./components/SendPanel/components/AutoSendButton.vue')['default']
     Badge: typeof import('./components/ui/badge/Badge.vue')['default']
