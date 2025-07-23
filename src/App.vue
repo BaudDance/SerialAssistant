@@ -1,9 +1,7 @@
 <script setup>
-import { provide, ref, watchEffect } from 'vue'
+import { defineAsyncComponent, provide, ref, watchEffect } from 'vue'
 import ActivityBar from '@/components/ActivityBar/ActivityBar.vue'
 import ControlPanel from '@/components/ControlPanel/ControlPanel.vue'
-
-import { DialogProvider } from '@/components/Dialog'
 import RecordPanel from '@/components/RecordPanel/RecordPanel.vue'
 import SendPanel from '@/components/SendPanel/SendPanel.vue'
 import DeviceSetting from '@/components/SettingPanel/DeviceSetting.vue'
@@ -24,6 +22,8 @@ import { listenNetworkStatus } from '@/network'
 import { useRecordStore } from '@/store/useRecordStore'
 import { useSerialStore } from '@/store/useSerialStore'
 import 'vue-sonner/style.css'
+
+const DialogProvider = defineAsyncComponent(() => import('@/components/Dialog/Provider.vue'))
 
 const { readingRecord, addRecord } = useRecordStore()
 const { readType } = useSerialStore()
