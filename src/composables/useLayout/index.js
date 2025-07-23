@@ -4,6 +4,7 @@ import { ref } from 'vue'
 export const DEFAULT_LAYOUT_CONFIG = Object.freeze({
   showFullScreen: true,
   showSettingPanel: true,
+  showQuickInputPanel: true,
   showTopBar: true,
   showActivityBar: true,
   showSendPanel: true,
@@ -32,6 +33,12 @@ export const useLayout = createGlobalState(() => {
     showSettingPanel.value = !showSettingPanel.value
   }
 
+  // 快捷输入面板
+  const showQuickInputPanel = useStorage('layout:showQuickInputPanel', ref(DEFAULT_LAYOUT_CONFIG.showQuickInputPanel))
+  const toggleQuickInputPanel = () => {
+    showQuickInputPanel.value = !showQuickInputPanel.value
+  }
+
   // 顶部栏 - 原则上不建议隐藏，但提供接口供用户自定义
   const showTopBar = useStorage('layout:showTopBar', ref(DEFAULT_LAYOUT_CONFIG.showTopBar))
   const toggleTopBar = () => {
@@ -56,6 +63,7 @@ export const useLayout = createGlobalState(() => {
     const updaters = {
       showFullScreen: value => showFullScreen.value = value,
       showSettingPanel: value => showSettingPanel.value = value,
+      showQuickInputPanel: value => showQuickInputPanel.value = value,
       showTopBar: value => showTopBar.value = value,
       showActivityBar: value => showActivityBar.value = value,
       showSendPanel: value => showSendPanel.value = value,
@@ -80,6 +88,7 @@ export const useLayout = createGlobalState(() => {
   const getCurrentConfig = () => ({
     showFullScreen: showFullScreen.value,
     showSettingPanel: showSettingPanel.value,
+    showQuickInputPanel: showQuickInputPanel.value,
     showTopBar: showTopBar.value,
     showActivityBar: showActivityBar.value,
     showSendPanel: showSendPanel.value,
@@ -92,6 +101,7 @@ export const useLayout = createGlobalState(() => {
     // 状态
     showFullScreen,
     showSettingPanel,
+    showQuickInputPanel,
     showTopBar,
     showActivityBar,
     showSendPanel,
@@ -101,6 +111,9 @@ export const useLayout = createGlobalState(() => {
 
     // 设置面板控制
     toggleSettingPanel,
+
+    // 快捷输入面板控制
+    toggleQuickInputPanel,
 
     // 顶部栏控制
     toggleTopBar,
