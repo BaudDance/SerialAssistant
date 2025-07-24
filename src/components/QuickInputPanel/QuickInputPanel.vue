@@ -297,14 +297,14 @@ onUnmounted(() => {
   <div class="p-2 h-full flex flex-col">
     <div class="flex flex-col space-y-3 mb-3">
       <div class="flex justify-between items-center border-b pb-2">
-        <h3 class="text-lg font-medium">
+        <h3 class="font-semibold leading-none tracking-tight">
           快捷输入面板
         </h3>
         <div class="flex items-center gap-2">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger as-child>
-                <Button variant="ghost" size="icon" class="h-8 w-8" @click="addRow">
+                <Button variant="ghost" size="icon" class="h-8 w-8 cursor-pointer" @click="addRow">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus">
                     <line x1="12" x2="12" y1="5" y2="19" />
                     <line x1="5" x2="19" y1="12" y2="12" />
@@ -320,7 +320,7 @@ onUnmounted(() => {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger as-child>
-                <Button variant="ghost" size="icon" class="h-8 w-8 text-red-500 hover:text-red-600" @click="clearAll">
+                <Button variant="ghost" size="icon" class="h-8 w-8 cursor-pointer text-red-500 hover:text-red-600" @click="clearAll">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2">
                     <path d="M3 6h18" />
                     <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
@@ -339,7 +339,7 @@ onUnmounted(() => {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger as-child>
-                <Button variant="ghost" size="icon" class="h-8 w-8" @click="enableAll">
+                <Button variant="ghost" size="icon" class="h-8 w-8 cursor-pointer" @click="enableAll">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-square">
                     <polyline points="9 11 12 14 22 4" />
                     <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
@@ -355,7 +355,7 @@ onUnmounted(() => {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger as-child>
-                <Button variant="ghost" size="icon" class="h-8 w-8" @click="disableAll">
+                <Button variant="ghost" size="icon" class="h-8 w-8 cursor-pointer" @click="disableAll">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square">
                     <rect width="18" height="18" x="3" y="3" rx="2" />
                   </svg>
@@ -372,7 +372,7 @@ onUnmounted(() => {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger as-child>
-                <Button variant="ghost" size="icon" class="h-8 w-8" @click="importConfig">
+                <Button variant="ghost" size="icon" class="h-8 w-8 cursor-pointer" @click="importConfig">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                     <polyline points="7 10 12 15 17 10" />
@@ -389,7 +389,7 @@ onUnmounted(() => {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger as-child>
-                <Button variant="ghost" size="icon" class="h-8 w-8" @click="exportConfig">
+                <Button variant="ghost" size="icon" class="h-8 w-8 cursor-pointer" @click="exportConfig">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-upload">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                     <polyline points="17 8 12 3 7 8" />
@@ -406,7 +406,7 @@ onUnmounted(() => {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger as-child>
-                <Button variant="ghost" size="icon" class="h-8 w-8" @click="resetToDefault">
+                <Button variant="ghost" size="icon" class="h-8 w-8 cursor-pointer" @click="resetToDefault">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw">
                     <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
                     <path d="M21 3v5h-5" />
@@ -460,7 +460,7 @@ onUnmounted(() => {
           <span>{{ isLoopSending ? '停止循环' : '循环发送' }}</span>
         </Button>
 
-        <div class="flex items-center justify-center gap-2 h-full border rounded-md">
+        <div class="flex items-center justify-center gap-2 h-full">
           <span class="text-xs whitespace-nowrap">循环间隔:</span>
           <Input
             v-model="loopInterval"
@@ -482,7 +482,9 @@ onUnmounted(() => {
             <TableHead class="w-[50px] text-center">
               启用
             </TableHead>
-            <TableHead>内容</TableHead>
+            <TableHead class="text-center">
+              内容
+            </TableHead>
             <TableHead class="w-[60px] text-center">
               HEX
             </TableHead>
