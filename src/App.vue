@@ -155,7 +155,7 @@ provide('ble', ble)
           </ResizablePanel>
         </ResizablePanelGroup>
 
-        <StatusBar class="bg-sidebar  border-r border-b" />
+        <StatusBar class="bg-sidebar border-r border-b border-t" />
       </div>
       <div
         v-if="showQuickInputPanel"
