@@ -105,7 +105,6 @@ declare module 'vue' {
     ResizablePanelGroup: typeof import('./components/ui/resizable/ResizablePanelGroup.vue')['default']
     ScrollArea: typeof import('./components/ui/scroll-area/ScrollArea.vue')['default']
     ScrollBar: typeof import('./components/ui/scroll-area/ScrollBar.vue')['default']
-    Search: typeof import('./components/Search/Search.vue')['default']
     SearchTool: typeof import('./components/SearchTool/SearchTool.vue')['default']
     Select: typeof import('./components/ui/select/Select.vue')['default']
     SelectContent: typeof import('./components/ui/select/SelectContent.vue')['default']
@@ -164,6 +163,5 @@ declare module 'vue' {
     TooltipProvider: typeof import('./components/ui/tooltip/TooltipProvider.vue')['default']
     TooltipTrigger: typeof import('./components/ui/tooltip/TooltipTrigger.vue')['default']
     TopBar: typeof import('./components/TopBar/TopBar.vue')['default']
-    UserNumberFotter: typeof import('./components/UserNumberFooter/UserNumberFotter.vue')['default']
   }
 }
