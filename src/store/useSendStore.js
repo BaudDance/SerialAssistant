@@ -27,6 +27,7 @@ export const useSendStore = createGlobalState(() => {
   const isAutoSending = ref(false)
 
   const sendData = ref('')
+  const historyIndex = ref(-1) // -1表示当前输入，0及以上表示历史记录索引
 
   const checkDigit = computed(() => {
     if (!checkAlgorithm.value || sendType.value !== 'hex')
@@ -93,7 +94,14 @@ export const useSendStore = createGlobalState(() => {
     }
   })
 
+  const sendHistory = computed(() => {
+    return records.value.filter(item => item.type === 'write')
+  })
+
   function onInput() {
+    // 当用户手动输入时，重置历史索引
+    resetHistoryIndex()
+
     if (sendType.value === 'hex') {
       sendData.value = sendData.value
         .replace(/([^0-9a-f ])/i, '')
@@ -114,10 +122,15 @@ export const useSendStore = createGlobalState(() => {
     onEventFired(e) {
       if (e.ctrlKey && e.key === 's' && e.type === 'keydown')
         e.preventDefault()
+      if (e.key === 'Enter' && e.type === 'keydown') {
+        e.preventDefault()
+      }
     },
   })
   const enter = keys.Enter
   const ctrlS = keys['Ctrl+S']
+  const up = keys.Up
+  const down = keys.Down
 
   watch(enter, (v) => {
     if (v) {
@@ -130,6 +143,19 @@ export const useSendStore = createGlobalState(() => {
     if (v) {
       console.log('Ctrl + S have been pressed')
       reformat()
+    }
+  })
+
+  watch(up, (v) => {
+    if (v) {
+      console.log('Up have been pressed')
+      navigateHistory('up')
+    }
+  })
+  watch(down, (v) => {
+    if (v) {
+      console.log('Down have been pressed')
+      navigateHistory('down')
     }
   })
 
@@ -162,10 +188,87 @@ export const useSendStore = createGlobalState(() => {
     sendData.value = data
   }
 
+  function navigateHistory(direction) {
+    const history = sendHistory.value
+    console.log('History length:', history.length)
+    if (history.length === 0)
+      return
+
+    const oldIndex = historyIndex.value
+
+    if (direction === 'up') {
+      // 向上导航到更早的历史记录
+      if (historyIndex.value < history.length - 1) {
+        historyIndex.value++
+      }
+      else if (historyIndex.value === -1) {
+        // 从当前输入状态开始，显示最新的历史记录
+        historyIndex.value = 0
+      }
+    }
+    else if (direction === 'down') {
+      // 向下导航到更新的历史记录
+      if (historyIndex.value > 0) {
+        historyIndex.value--
+      }
+      else if (historyIndex.value === 0) {
+        // 回到当前输入状态
+        historyIndex.value = -1
+      }
+    }
+
+    console.log('History index changed from', oldIndex, 'to', historyIndex.value)
+
+    // 根据索引设置sendData
+    if (historyIndex.value === -1) {
+      // 回到当前输入状态，清空输入框
+      sendData.value = ''
+      console.log('Cleared input')
+    }
+    else {
+      // 显示历史记录
+      const record = history[history.length - 1 - historyIndex.value]
+      console.log('Selected record:', record)
+      if (record) {
+        console.log('Record display type:', record.display)
+        console.log('Current sendType:', sendType.value)
+        console.log('Record data:', record.data)
+
+        // 根据历史记录的原始发送类型格式化数据
+        if (record.display === 'hex') {
+          sendData.value = bufferToHexFormat(record.data)
+        }
+        else if (record.display === 'ascii') {
+          // 移除行结束符
+          const decoder = new TextDecoder()
+          let text = decoder.decode(record.data)
+          console.log('Decoded text:', JSON.stringify(text))
+          console.log('Line ending:', JSON.stringify(lineEnding.value))
+          // 只有当行结束符不为空且文本确实以行结束符结尾时才移除
+          if (lineEnding.value && text.endsWith(lineEnding.value)) {
+            text = text.slice(0, -lineEnding.value.length)
+          }
+          sendData.value = text
+        }
+        else {
+          // dec格式
+          sendData.value = Array.from(record.data).join(' ')
+        }
+        console.log('Set sendData to:', JSON.stringify(sendData.value))
+      }
+    }
+  }
+
+  // 当用户手动输入时，重置历史索引
+  function resetHistoryIndex() {
+    historyIndex.value = -1
+  }
+
   return {
     isAutoSending,
     sendData,
     clear,
+    sendHistory,
     onInput,
     sendBuffer,
     send,
@@ -174,5 +277,8 @@ export const useSendStore = createGlobalState(() => {
     checkAlgorithms,
     checkDigitHexFormat,
     reformat,
+    resetHistoryIndex,
+    historyIndex,
+    navigateHistory,
   }
 })
