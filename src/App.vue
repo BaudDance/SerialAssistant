@@ -121,7 +121,10 @@ provide('ble', ble)
       />
 
       <div class="w-full h-full flex flex-col">
-        <TopBar class="bg-sidebar  border-t border-r" />
+        <TopBar
+          class="bg-sidebar"
+          :class="[showFullScreen ? 'border-b' : 'border-t']"
+        />
 
         <ResizablePanelGroup
           direction="horizontal"
@@ -156,14 +159,11 @@ provide('ble', ble)
       </div>
       <div
         v-if="showQuickInputPanel"
-        class="h-full bg-sidebar max-w-150 w-full"
-        :class="[showFullScreen ? 'rounded-r-lg' : '']"
+        class="h-full bg-sidebar max-w-150 w-full border-l"
+        :class="[showFullScreen ? '' : 'rounded-r-lg border']"
       >
         <QuickInputPanel />
       </div>
-      <!-- <div class="text-sm m-2 absolute bottom-[15px] lg:bottom-[75px] right-0">
-        powered by 波特律动
-      </div> -->
     </div>
   </div>
 
