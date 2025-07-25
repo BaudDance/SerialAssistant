@@ -71,6 +71,14 @@ export default defineConfig(({ mode }) => {
           },
         },
       },
+      minify: 'terser', // 使用 'terser' 获得更好压缩
+      terserOptions: {
+        compress: {
+          drop_console: true, // 移除 console.* 调用但保留pure_funcs不包括的
+          drop_debugger: true, // 移除 debugger 语句
+          pure_funcs: ['console.log', 'console.info'], // 移除 console.log 和 console.info 调用
+        },
+      },
     },
   }
 })
