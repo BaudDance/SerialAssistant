@@ -124,6 +124,8 @@ export const useSendStore = createGlobalState(() => {
     onEventFired(e) {
       if (e.ctrlKey && e.key === 's' && e.type === 'keydown')
         e.preventDefault()
+      if (e.metaKey && e.key === 's' && e.type === 'keydown')
+        e.preventDefault()
       if (e.key === 'Enter' && e.type === 'keydown') {
         e.preventDefault()
       }
