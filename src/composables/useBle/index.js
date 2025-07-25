@@ -102,7 +102,31 @@ export function useBle(
   async function disconnectDevice() {
     if (!device.value)
       return
-    await device.value.gatt.disconnect()
+
+    console.log('开始断开蓝牙连接...')
+
+    try {
+      // 移除事件监听器
+      device.value.removeEventListener('gattserverdisconnected', onDisconnected)
+
+      // 断开GATT连接
+      if (device.value.gatt && device.value.gatt.connected) {
+        console.log('断开GATT连接')
+        await device.value.gatt.disconnect()
+      }
+
+      // 清理引用
+      writeCharacteristic.value = undefined
+      server.value = undefined
+
+      console.log('蓝牙连接已断开')
+    }
+    catch (error) {
+      console.error('断开蓝牙连接时出现错误:', error)
+      // 即使出错也要设置为未连接状态
+      state.value = 'disconnected'
+      connected.value = false
+    }
   }
   return {
     device,

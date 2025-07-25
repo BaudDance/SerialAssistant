@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watchEffect } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -126,8 +126,8 @@ const downloadFileName = computed(() => {
   return downloadUrl.value.split('/').pop()
 })
 
-watchEffect(() => {
-  if (!visible[dialogKeys.downLoadDriver]) {
+watch(() => visible[dialogKeys.downLoadDriver], (newVal) => {
+  if (!newVal) {
     platform.value = undefined
     chip.value = undefined
   }

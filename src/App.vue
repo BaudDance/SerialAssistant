@@ -1,5 +1,5 @@
 <script setup>
-import { defineAsyncComponent, provide, ref, watchEffect } from 'vue'
+import { defineAsyncComponent, onBeforeUnmount, provide, ref, watch } from 'vue'
 import ActivityBar from '@/components/ActivityBar/ActivityBar.vue'
 import ControlPanel from '@/components/ControlPanel/ControlPanel.vue'
 import RecordPanel from '@/components/RecordPanel/RecordPanel.vue'
@@ -47,13 +47,13 @@ watch(showSendPanel, (newVal) => {
     sendPanelRef.value?.collapse()
   }
 })
-listenNetworkStatus()
+const cleanupNetworkListener = listenNetworkStatus()
 
 // 保存用户在大屏幕下的全屏偏好
 const userFullScreenPreference = ref(showFullScreen.value)
 
-watchEffect(() => {
-  if (fullScreenBreakpoint.value) {
+watch(fullScreenBreakpoint, (newVal) => {
+  if (newVal) {
     // 小于lg时，保存当前状态并强制全屏
     if (!showFullScreen.value) {
       userFullScreenPreference.value = false
@@ -64,12 +64,12 @@ watchEffect(() => {
     // 大于等于lg时，恢复用户偏好
     showFullScreen.value = userFullScreenPreference.value
   }
-})
+}, { immediate: true })
 
 // 监听用户主动切换全屏状态（仅在大屏幕时更新偏好）
-watchEffect(() => {
+watch(showFullScreen, (newVal) => {
   if (!fullScreenBreakpoint.value) {
-    userFullScreenPreference.value = showFullScreen.value
+    userFullScreenPreference.value = newVal
   }
 })
 
@@ -108,6 +108,58 @@ provide('serial', serial)
 
 const ble = useBle({ onReadFrame })
 provide('ble', ble)
+
+// 资源清理 - 防止内存泄露
+onBeforeUnmount(async () => {
+  console.log('App组件卸载，开始清理资源...')
+
+  try {
+    // 关闭串口连接
+    if (serial.connected.value) {
+      console.log('关闭串口连接')
+      await serial.closePort()
+    }
+
+    // 断开蓝牙连接
+    if (ble.connected.value) {
+      console.log('断开蓝牙连接')
+      await ble.disconnectDevice()
+    }
+
+    // 清理网络状态监听器
+    if (cleanupNetworkListener) {
+      console.log('清理网络状态监听器')
+      cleanupNetworkListener()
+    }
+
+    console.log('资源清理完成')
+  }
+  catch (error) {
+    console.error('资源清理过程中出现错误:', error)
+  }
+})
+
+// 监听页面卸载事件
+if (typeof window !== 'undefined') {
+  const handleBeforeUnload = async () => {
+    try {
+      if (serial.connected.value)
+        await serial.closePort()
+      if (ble.connected.value)
+        await ble.disconnectDevice()
+    }
+    catch (error) {
+      console.error('页面卸载时资源清理失败:', error)
+    }
+  }
+
+  window.addEventListener('beforeunload', handleBeforeUnload)
+
+  // 在组件卸载时也要移除这个监听器
+  onBeforeUnmount(() => {
+    window.removeEventListener('beforeunload', handleBeforeUnload)
+  })
+}
 </script>
 
 <template>

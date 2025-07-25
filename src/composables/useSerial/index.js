@@ -115,11 +115,38 @@ export function useSerial(
   }
 
   async function closePort() {
+    console.log('开始关闭串口连接...')
     keepReading = false
-    reader?.cancel()
-    await readingClosed
-    await port.value.close()
-    connected.value = false
+
+    try {
+      // 取消读取操作
+      if (reader) {
+        console.log('取消串口读取器')
+        await reader.cancel()
+        reader = null
+      }
+
+      // 等待读取循环结束
+      if (readingClosed) {
+        console.log('等待读取循环结束')
+        await readingClosed
+        readingClosed = null
+      }
+
+      // 关闭串口
+      if (port.value && port.value.readable) {
+        console.log('关闭串口')
+        await port.value.close()
+      }
+
+      connected.value = false
+      console.log('串口连接已关闭')
+    }
+    catch (error) {
+      console.error('关闭串口时出现错误:', error)
+      // 即使出错也要设置为未连接状态
+      connected.value = false
+    }
   }
   async function sendHex(hexBuffer) {
     const writer = port.value.writable.getWriter()
