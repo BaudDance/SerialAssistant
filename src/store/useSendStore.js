@@ -7,6 +7,8 @@ import { useRecordStore } from '@/store/useRecordStore'
 import { useSerialStore } from '@/store/useSerialStore'
 import { useSettingStore } from '@/store/useSettingStore'
 
+import { getOS } from '@/utils/os'
+
 export const useSendStore = createGlobalState(() => {
   const { sendHex: serialSendHex } = inject('serial')
   const { sendHex: bleSendHex } = inject('ble')
@@ -127,8 +129,11 @@ export const useSendStore = createGlobalState(() => {
       }
     },
   })
+
+  // 根据操作系统选择合适的快捷键
+  const isMac = (getOS() === 'MacOS' || getOS() === 'iOS')
   const enter = keys.Enter
-  const ctrlS = keys['Ctrl+S']
+  const saveKey = isMac ? keys['Cmd+S'] : keys['Ctrl+S']
   const up = keys.Up
   const down = keys.Down
 
@@ -139,7 +144,7 @@ export const useSendStore = createGlobalState(() => {
     }
   })
 
-  watch(ctrlS, (v) => {
+  watch(saveKey, (v) => {
     if (v) {
       console.log('Ctrl + S have been pressed')
       reformat()
