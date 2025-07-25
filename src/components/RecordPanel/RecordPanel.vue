@@ -7,7 +7,7 @@ import { useRecordStore } from '@/store/useRecordStore'
 import { useSerialStore } from '@/store/useSerialStore'
 
 const { bufferToDecFormat, bufferToHexFormat, bufferToString, stringToHtml } = useDataCode()
-const { records, readingRecord, pinBottom, copyRecordContent } = useRecordStore()
+const { records, readingRecord, pinBottom, scrollToRecordIndex, copyRecordContent } = useRecordStore()
 const { recordTypes } = useSerialStore()
 const rootEl = ref(null)
 const showFullDate = ref(false)
@@ -43,6 +43,22 @@ watch(
   },
   { deep: true },
 )
+
+// 监听滚动到指定记录的请求
+watch(scrollToRecordIndex, (newIndex) => {
+  if (newIndex >= 0 && newIndex < records.value.length) {
+    // 找到对应的记录元素并滚动到该位置
+    setTimeout(() => {
+      const recordElements = rootEl.value.querySelectorAll('.chat')
+      if (recordElements[newIndex]) {
+        recordElements[newIndex].scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        })
+      }
+    }, 50)
+  }
+})
 </script>
 
 <template>
