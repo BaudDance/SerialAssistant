@@ -122,19 +122,19 @@ export const useSendStore = createGlobalState(() => {
     onEventFired(e) {
       if (e.ctrlKey && e.key === 's' && e.type === 'keydown')
         e.preventDefault()
-      if (e.key === 'Enter' && e.type === 'keydown') {
+      if (e.key === 'Enter' && e.shiftKey && e.type === 'keydown') {
         e.preventDefault()
       }
     },
   })
-  const enter = keys.Enter
+  const shiftEnter = keys['Shift+Enter']
   const ctrlS = keys['Ctrl+S']
   const up = keys.Up
   const down = keys.Down
 
-  watch(enter, (v) => {
+  watch(shiftEnter, (v) => {
     if (v) {
-      console.log('Enter have been pressed')
+      console.log('Shift+Enter have been pressed')
       send()
     }
   })
