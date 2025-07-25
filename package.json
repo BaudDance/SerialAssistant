@@ -53,6 +53,7 @@
     "postcss": "^8.4.27",
     "rollup-plugin-visualizer": "^5.14.0",
     "simple-git-hooks": "^2.13.0",
+    "terser": "^5.43.1",
     "unplugin-auto-import": "^19.3.0",
     "unplugin-vue-components": "^28.7.0",
     "vite": "npm:rolldown-vite@latest",
