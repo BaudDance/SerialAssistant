@@ -1,4 +1,10 @@
 <script setup>
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { useSendStore } from '@/store/useSendStore'
 import AutoSendButton from './components/AutoSendButton.vue'
 
@@ -57,9 +63,18 @@ const { sendData, clear, onInput, send, sendType, checkAlgorithm, checkAlgorithm
 
       <AutoSendButton />
 
-      <Button :disabled="sendData.length === 0 || isAutoSending" :class="[sendData.length === 0 ? '' : 'cursor-pointer']" @click="send">
-        发送
-      </Button>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger>
+            <Button :disabled="sendData.length === 0 || isAutoSending" :class="[sendData.length === 0 ? '' : 'cursor-pointer']" @click="send">
+              发送
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Shift + ↩︎</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   </div>
 </template>

@@ -126,7 +126,7 @@ export const useSendStore = createGlobalState(() => {
         e.preventDefault()
       if (e.metaKey && e.key === 's' && e.type === 'keydown')
         e.preventDefault()
-      if (e.key === 'Enter' && e.type === 'keydown') {
+      if (e.key === 'Enter' && e.shiftKey && e.type === 'keydown') {
         e.preventDefault()
       }
     },
@@ -134,14 +134,14 @@ export const useSendStore = createGlobalState(() => {
 
   // 根据操作系统选择合适的快捷键
   const isMac = (getOS() === 'MacOS' || getOS() === 'iOS')
-  const enter = keys.Enter
+  const shiftEnter = keys['Shift+Enter']
   const saveKey = isMac ? keys['Cmd+S'] : keys['Ctrl+S']
   const up = keys.Up
   const down = keys.Down
 
-  watch(enter, (v) => {
+  watch(shiftEnter, (v) => {
     if (v) {
-      console.log('Enter have been pressed')
+      console.log('shift+Enter have been pressed')
       send()
     }
   })
