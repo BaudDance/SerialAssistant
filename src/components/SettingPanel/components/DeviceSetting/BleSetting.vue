@@ -1,4 +1,5 @@
 <script setup>
+import { Loader2 } from 'lucide-vue-next'
 import { inject } from 'vue'
 import { Button } from '@/components/ui/button'
 import {
@@ -13,6 +14,8 @@ import { useBleStore } from '@/store/useBleStore'
 
 const {
   connected,
+  connecting,
+  disconnecting,
   deviceName,
   requestDevice,
   connectDevice,
@@ -59,14 +62,34 @@ async function connect() {
         {{ bleType.description }}
       </div>
     </div>
-    <Button v-if="!connected" class="cursor-pointer mb-3" @click="selectDevice">
-      {{ deviceName ? "重新选择" : "选择蓝牙设备" }}
+    <Button
+      v-if="!connected"
+      class="cursor-pointer mb-3"
+      :disabled="connecting || disconnecting"
+      @click="selectDevice"
+    >
+      <Loader2 v-if="connecting" class="w-4 h-4 mr-2 animate-spin" />
+      {{ connecting ? '连接中...' : (deviceName ? "重新选择" : "选择蓝牙设备") }}
     </Button>
-    <Button v-if="connected" class="cursor-pointer mb-3" variant="destructive" @click="disconnectDevice">
-      断 开
+    <Button
+      v-if="connected"
+      class="cursor-pointer mb-3"
+      variant="destructive"
+      :disabled="connecting || disconnecting"
+      @click="disconnectDevice"
+    >
+      <Loader2 v-if="disconnecting" class="w-4 h-4 mr-2 animate-spin" />
+      {{ disconnecting ? '断开中...' : '断 开' }}
     </Button>
-    <Button v-if="!connected && device" class="cursor-pointer mb-3" variant="secondary" @click="connect">
-      重 连
+    <Button
+      v-if="!connected && device"
+      class="cursor-pointer mb-3"
+      variant="secondary"
+      :disabled="connecting || disconnecting"
+      @click="connect"
+    >
+      <Loader2 v-if="connecting" class="w-4 h-4 mr-2 animate-spin" />
+      {{ connecting ? '连接中...' : '重 连' }}
     </Button>
   </div>
 </template>

@@ -1,4 +1,5 @@
 <script setup>
+import { Loader2 } from 'lucide-vue-next'
 import { inject, watch } from 'vue'
 import { useDialog } from '@/components/Dialog'
 import { Button } from '@/components/ui/button'
@@ -17,6 +18,8 @@ const {
   port,
   closePort,
   connected,
+  connecting,
+  disconnecting,
   portName,
   openPort,
   reopenPort,
@@ -151,14 +154,34 @@ const stopBitsList = [
       </Select>
     </div>
 
-    <Button v-if="!connected" class="cursor-pointer mb-3" @click="selectPort">
-      {{ portName ? "重新选择" : "选择串口设备" }}
+    <Button
+      v-if="!connected"
+      class="cursor-pointer mb-3"
+      :disabled="connecting || disconnecting"
+      @click="selectPort"
+    >
+      <Loader2 v-if="connecting" class="w-4 h-4 mr-2 animate-spin" />
+      {{ connecting ? '连接中...' : (portName ? "重新选择" : "选择串口设备") }}
     </Button>
-    <Button v-if="connected" class="cursor-pointer mb-3" variant="destructive" @click="closePort">
-      断 开
+    <Button
+      v-if="connected"
+      class="cursor-pointer mb-3"
+      variant="destructive"
+      :disabled="connecting || disconnecting"
+      @click="closePort"
+    >
+      <Loader2 v-if="disconnecting" class="w-4 h-4 mr-2 animate-spin" />
+      {{ disconnecting ? '断开中...' : '断 开' }}
     </Button>
-    <Button v-if="!connected && port" class="cursor-pointer mb-3" variant="secondary" @click="openSerialPort">
-      重 连
+    <Button
+      v-if="!connected && port"
+      class="cursor-pointer mb-3"
+      variant="secondary"
+      :disabled="connecting || disconnecting"
+      @click="openSerialPort"
+    >
+      <Loader2 v-if="connecting" class="w-4 h-4 mr-2 animate-spin" />
+      {{ connecting ? '连接中...' : '重 连' }}
     </Button>
   </div>
 </template>

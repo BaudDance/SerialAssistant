@@ -35,6 +35,8 @@ export function useSerial(
   const portName = computed(() => getDeviceName(port.value))
   const ports = ref([])
   const connected = ref(false)
+  const connecting = ref(false)
+  const disconnecting = ref(false)
   let keepReading
   let readingClosed
   async function updatePorts() {
@@ -43,6 +45,7 @@ export function useSerial(
 
   async function requestPort() {
     try {
+      connecting.value = true
       nprogress.start()
       const p = await serial.requestPort(options)
       console.debug('requestPort', p)
@@ -58,6 +61,7 @@ export function useSerial(
       return null
     }
     finally {
+      connecting.value = false
       nprogress.done()
     }
   }
@@ -104,9 +108,19 @@ export function useSerial(
   }
 
   async function openPort(options = { baudRate: 9600 }) {
-    await port.value.open(options)
-    readingClosed = startReadLoop()
-    connected.value = true
+    try {
+      connecting.value = true
+      await port.value.open(options)
+      readingClosed = startReadLoop()
+      connected.value = true
+    }
+    catch (error) {
+      console.error('打开串口时出现错误:', error)
+      throw error
+    }
+    finally {
+      connecting.value = false
+    }
   }
 
   async function reopenPort(options = { baudRate: 9600 }) {
@@ -116,8 +130,9 @@ export function useSerial(
 
   async function closePort() {
     console.log('开始关闭串口连接...')
+    disconnecting.value = true
     keepReading = false
-
+    nprogress.start()
     try {
       // 取消读取操作
       if (reader) {
@@ -146,6 +161,10 @@ export function useSerial(
       console.error('关闭串口时出现错误:', error)
       // 即使出错也要设置为未连接状态
       connected.value = false
+    }
+    finally {
+      disconnecting.value = false
+      nprogress.done()
     }
   }
   async function sendHex(hexBuffer) {
@@ -176,5 +195,7 @@ export function useSerial(
     closePort,
     sendHex,
     connected,
+    connecting,
+    disconnecting,
   }
 }
