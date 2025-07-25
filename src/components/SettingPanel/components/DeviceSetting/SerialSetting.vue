@@ -1,4 +1,5 @@
 <script setup>
+import { useTitle } from '@vueuse/core'
 import { Loader2 } from 'lucide-vue-next'
 import { inject, watch } from 'vue'
 import { useDialog } from '@/components/Dialog'
@@ -78,6 +79,41 @@ const stopBitsList = [
   2,
   0,
 ]
+
+const pageTitle = computed(() => {
+  let str = ''
+  if (portName.value) {
+    if (connecting.value) {
+      str = `${str} - 连接中...`
+    }
+    else if (disconnecting.value) {
+      str = `${str} - 断开中...`
+    }
+    else if (connected.value) {
+      str = `${str} - 已连接`
+    }
+    else {
+      str = `${portName.value} - ${str}`
+    }
+  }
+  else {
+    if (connecting.value) {
+      str = `串口连接中...`
+    }
+    else if (disconnecting.value) {
+      str = `串口断开中...`
+    }
+    else if (connected.value) {
+      str = `串口已连接`
+    }
+    else {
+      str = `串口设置`
+    }
+  }
+  return str
+})
+// 注入页面标题
+useTitle(pageTitle)
 </script>
 
 <template>

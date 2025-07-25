@@ -1,4 +1,5 @@
 <script setup>
+import { useTitle } from '@vueuse/core'
 import { Loader2 } from 'lucide-vue-next'
 import { inject } from 'vue'
 import { Button } from '@/components/ui/button'
@@ -32,6 +33,41 @@ async function selectDevice() {
 async function connect() {
   await connectDevice(bleType.value)
 }
+
+const pageTitle = computed(() => {
+  let str = ''
+  if (deviceName.value) {
+    if (connecting.value) {
+      str = `${str} - 连接中...`
+    }
+    else if (disconnecting.value) {
+      str = `${str} - 断开中...`
+    }
+    else if (connected.value) {
+      str = `${str} - 已连接`
+    }
+    else {
+      str = `${deviceName.value} - ${str}`
+    }
+  }
+  else {
+    if (connecting.value) {
+      str = `蓝牙连接中...`
+    }
+    else if (disconnecting.value) {
+      str = `蓝牙断开中...`
+    }
+    else if (connected.value) {
+      str = `蓝牙已连接`
+    }
+    else {
+      str = `蓝牙设置`
+    }
+  }
+  return str
+})
+// 注入页面标题
+useTitle(pageTitle)
 </script>
 
 <template>

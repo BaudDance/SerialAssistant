@@ -13,9 +13,7 @@ import {
   ResizablePanelGroup,
 } from '@/components/ui/resizable'
 import { Toaster } from '@/components/ui/sonner'
-
 import { useBle } from '@/composables/useBle'
-
 import { useLayout } from '@/composables/useLayout'
 import { useSerial } from '@/composables/useSerial'
 import { listenNetworkStatus } from '@/network'
