@@ -173,7 +173,7 @@ onMounted(() => {
     <CommandInput
       v-model="searchQuery"
       data-search-input
-      :placeholder="`搜索记录内容、类型或时间... (${isMac ? 'Cmd+F' : 'Ctrl+F'})`"
+      placeholder="搜索记录"
     />
     <CommandList>
       <CommandEmpty v-if="searchQuery.trim() && searchResults.length === 0">
