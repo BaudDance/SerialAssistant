@@ -1,7 +1,7 @@
 <script  setup>
 import { useLayout } from '@/composables/useLayout'
 
-const { showFullScreen, showSettingPanel, showQuickInputPanel, showSendPanel, fullScreenBreakpoint } = useLayout()
+const { showFullScreen, showTerminalMode, showSettingPanel, showQuickInputPanel, showSendPanel, fullScreenBreakpoint, toggleTerminalMode } = useLayout()
 
 const buttonClass = computed(() => {
   return 'min-w-0 w-8 h-8 p-0 cursor-pointer'
@@ -10,9 +10,44 @@ const buttonClass = computed(() => {
 
 <template>
   <div class="p-2 flex items-center justify-end relative">
-    <SearchTool />
+    <SearchTool v-if="!showTerminalMode" />
 
-    <div class="flex items-center space-x-1">
+    <div class="flex items-center space-x-1 relative">
+      <Popover>
+        <PopoverTrigger as-child>
+          <Button variant="outline" size="sm" class="cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Remix Icon by Remix Design - https://github.com/Remix-Design/RemixIcon/blob/master/License --><path fill="currentColor" d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1m1 2v14h16V5zm8 10h6v2h-6zm-3.333-3L5.838 9.172l1.415-1.415L11.495 12l-4.242 4.243l-1.415-1.415z" /></svg>
+            Terminal Mode
+          </Button>
+          <Separator orientation="vertical" />
+        </PopoverTrigger>
+        <PopoverContent class="w-80">
+          <div class="grid gap-4">
+            <div class="space-y-4">
+              <h4 class="font-medium leading-none">
+                终端模式（实验性）
+              </h4>
+              <p class="text-sm text-muted-foreground">
+                终端模式下，你可以直接在Web通过串口或蓝牙直接与支持shell交互的设备进行命令行交互。
+              </p>
+              <Separator />
+              <p class="text-sm text-muted-foreground">
+                终端模式下，你不能再使用记录面板。
+              </p>
+              <p class="text-sm text-muted-foreground">
+                终端模式下，你不能再使用发送面板，也不能再使用校验位、自动格式化、自动发送等功能。同时将禁用展开/折叠输入面板按钮。
+              </p>
+              <p class="text-sm text-muted-foreground">
+                终端模式下，你不能再使用快捷发送面板。同时将禁用展开/折叠快速输入面板按钮。
+              </p>
+            </div>
+            <Separator />
+            <Button class="cursor-pointer" @click="toggleTerminalMode">
+              <span>{{ showTerminalMode ? '退出终端模式' : '进入终端模式' }}</span>
+            </Button>
+          </div>
+        </PopoverContent>
+      </Popover>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger>
@@ -27,7 +62,7 @@ const buttonClass = computed(() => {
         </Tooltip>
       </TooltipProvider>
 
-      <TooltipProvider>
+      <TooltipProvider v-if="!showTerminalMode">
         <Tooltip>
           <TooltipTrigger>
             <Toggle v-model="showSendPanel" :class="[buttonClass]">
@@ -41,7 +76,7 @@ const buttonClass = computed(() => {
         </Tooltip>
       </TooltipProvider>
 
-      <TooltipProvider>
+      <TooltipProvider v-if="!showTerminalMode">
         <Tooltip>
           <TooltipTrigger>
             <Toggle v-model="showQuickInputPanel" :class="[buttonClass]">
