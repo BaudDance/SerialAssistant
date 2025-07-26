@@ -25,7 +25,7 @@ const DialogProvider = defineAsyncComponent(() => import('@/components/Dialog/Pr
 
 const { readingRecord, addRecord } = useRecordStore()
 const { readType } = useSerialStore()
-const { showFullScreen, fullScreenBreakpoint, showSettingPanel, showQuickInputPanel, showSendPanel } = useLayout()
+const { showFullScreen, showTerminalMode, fullScreenBreakpoint, showSettingPanel, showQuickInputPanel, showSendPanel } = useLayout()
 const settingPanelRef = ref()
 const sendPanelRef = ref()
 
@@ -106,6 +106,12 @@ provide('serial', serial)
 
 const ble = useBle({ onReadFrame })
 provide('ble', ble)
+
+const terminalPanelRef = ref(null)
+function onTerminalAreaResize(_size, _prevSize) {
+  console.log('终端区域调整大小')
+  terminalPanelRef.value?.fit()
+}
 
 // 资源清理 - 防止内存泄露
 onBeforeUnmount(async () => {
@@ -199,7 +205,7 @@ if (typeof window !== 'undefined') {
 
           <ResizableHandle with-handle />
 
-          <ResizablePanel :default-size="80">
+          <ResizablePanel v-if="!showTerminalMode" :default-size="80">
             <ResizablePanelGroup direction="vertical">
               <ResizablePanel :default-size="70">
                 <RecordPanel class="bg-background w-full h-full" />
@@ -213,12 +219,16 @@ if (typeof window !== 'undefined') {
               </ResizablePanel>
             </ResizablePanelGroup>
           </ResizablePanel>
+
+          <ResizablePanel v-else :default-size="80" @resize="onTerminalAreaResize">
+            <TerminalPanel ref="terminalPanelRef" />
+          </ResizablePanel>
         </ResizablePanelGroup>
 
         <StatusBar class="bg-sidebar border-r border-b border-t" />
       </div>
       <div
-        v-if="showQuickInputPanel"
+        v-if="showQuickInputPanel && !showTerminalMode"
         class="h-full bg-sidebar max-w-150 w-full border-l"
         :class="[showFullScreen ? '' : 'rounded-r-lg border']"
       >
