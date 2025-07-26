@@ -1,6 +1,7 @@
 import { createGlobalState } from '@vueuse/core'
 import localforage from 'localforage'
 import { ref } from 'vue'
+import { useLayout } from '@/composables/useLayout'
 import { useSettingStore } from '@/store/useSettingStore'
 
 // 配置 store 使用 IndexedDB
@@ -14,6 +15,7 @@ const store = localforage.createInstance({
 
 export const useRecordCache = createGlobalState(() => {
   const { recordCacheEnabled } = useSettingStore()
+  const { showTerminalMode } = useLayout()
 
   const CACHE_KEY = 'serial_records'
   const BATCH_SIZE = 100 // 批量处理大小
@@ -61,7 +63,8 @@ export const useRecordCache = createGlobalState(() => {
    * @param {Array} records - 要保存的记录数组
    */
   async function saveRecordsToCache(records) {
-    if (!recordCacheEnabled.value || !records.length)
+    // 终端模式下禁用record缓存功能
+    if (!recordCacheEnabled.value || !records.length || showTerminalMode.value)
       return
 
     try {
@@ -97,7 +100,8 @@ export const useRecordCache = createGlobalState(() => {
    * @returns {Promise<Array>} 加载的记录数组
    */
   async function loadRecordsFromCache() {
-    if (!recordCacheEnabled.value)
+    // 终端模式下禁用record缓存功能
+    if (!recordCacheEnabled.value || showTerminalMode.value)
       return []
 
     try {
@@ -190,7 +194,8 @@ export const useRecordCache = createGlobalState(() => {
    * @param {Function} onProgress - 进度回调函数
    */
   async function optimizedSaveRecords(records, onProgress) {
-    if (!recordCacheEnabled.value || !records.length)
+    // 终端模式下禁用record缓存功能
+    if (!recordCacheEnabled.value || !records.length || showTerminalMode.value)
       return
 
     try {

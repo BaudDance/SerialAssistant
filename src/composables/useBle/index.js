@@ -88,7 +88,12 @@ export function useBle(
         value.buffer,
         typeof value.buffer,
       )
-      onReadFrame(new Uint8Array(value.buffer))
+      const uint8Data = new Uint8Array(value.buffer)
+      onReadFrame(uint8Data)
+      if (window.term) {
+        const text = new TextDecoder('utf-8').decode(uint8Data)
+        window.term.write(text)
+      }
     })
 
     writeCharacteristic.value = await service.getCharacteristic(

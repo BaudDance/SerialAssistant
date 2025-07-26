@@ -90,6 +90,9 @@ export function useSerial(
             stop()
             buffer = new Uint8Array([...buffer, ...value])
             onReadData(value)
+            if (window.term) {
+              window.term.write(value)
+            }
             start()
           }
           if (done) {
