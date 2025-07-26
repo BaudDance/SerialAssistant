@@ -136,6 +136,7 @@ export const useSendStore = createGlobalState(() => {
   const isMac = (getOS() === 'MacOS' || getOS() === 'iOS')
   const shiftEnter = keys['Shift+Enter']
   const saveKey = isMac ? keys['Cmd+S'] : keys['Ctrl+S']
+
   const up = keys.Up
   const down = keys.Down
 
