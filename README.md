@@ -13,8 +13,8 @@
     <img src="https://img.shields.io/badge/_在线使用-Live_Demo-4FC3F7?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=1976D2" alt="在线使用 / Online Demo" height="40">
   </a>
 </p>
-<p align="center">
-  <img src="docs/img/app-screenshot.png" alt="screenshot">
+<p align="center" >
+  <img src="docs/img/screenshot-1.png" alt="screenshot">
 </p>
 <br>
 <p align="center">
