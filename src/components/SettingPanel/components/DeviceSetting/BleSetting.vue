@@ -1,4 +1,6 @@
 <script setup>
+import { useTitle } from '@vueuse/core'
+import { Loader2 } from 'lucide-vue-next'
 import { inject } from 'vue'
 import { Button } from '@/components/ui/button'
 import {
@@ -13,6 +15,8 @@ import { useBleStore } from '@/store/useBleStore'
 
 const {
   connected,
+  connecting,
+  disconnecting,
   deviceName,
   requestDevice,
   connectDevice,
@@ -29,6 +33,41 @@ async function selectDevice() {
 async function connect() {
   await connectDevice(bleType.value)
 }
+
+const pageTitle = computed(() => {
+  let str = ''
+  if (deviceName.value) {
+    if (connecting.value) {
+      str = `${str} - 连接中...`
+    }
+    else if (disconnecting.value) {
+      str = `${str} - 断开中...`
+    }
+    else if (connected.value) {
+      str = `${str} - 已连接`
+    }
+    else {
+      str = `${deviceName.value} - ${str}`
+    }
+  }
+  else {
+    if (connecting.value) {
+      str = `蓝牙连接中...`
+    }
+    else if (disconnecting.value) {
+      str = `蓝牙断开中...`
+    }
+    else if (connected.value) {
+      str = `蓝牙已连接`
+    }
+    else {
+      str = `蓝牙设置`
+    }
+  }
+  return str
+})
+// 注入页面标题
+useTitle(pageTitle)
 </script>
 
 <template>
@@ -59,14 +98,34 @@ async function connect() {
         {{ bleType.description }}
       </div>
     </div>
-    <Button v-if="!connected" class="cursor-pointer mb-3" @click="selectDevice">
-      {{ deviceName ? "重新选择" : "选择蓝牙设备" }}
+    <Button
+      v-if="!connected"
+      class="cursor-pointer mb-3"
+      :disabled="connecting || disconnecting"
+      @click="selectDevice"
+    >
+      <Loader2 v-if="connecting" class="w-4 h-4 mr-2 animate-spin" />
+      {{ connecting ? '连接中...' : (deviceName ? "重新选择" : "选择蓝牙设备") }}
     </Button>
-    <Button v-if="connected" class="cursor-pointer mb-3" variant="destructive" @click="disconnectDevice">
-      断 开
+    <Button
+      v-if="connected"
+      class="cursor-pointer mb-3"
+      variant="destructive"
+      :disabled="connecting || disconnecting"
+      @click="disconnectDevice"
+    >
+      <Loader2 v-if="disconnecting" class="w-4 h-4 mr-2 animate-spin" />
+      {{ disconnecting ? '断开中...' : '断 开' }}
     </Button>
-    <Button v-if="!connected && device" class="cursor-pointer mb-3" variant="secondary" @click="connect">
-      重 连
+    <Button
+      v-if="!connected && device"
+      class="cursor-pointer mb-3"
+      variant="secondary"
+      :disabled="connecting || disconnecting"
+      @click="connect"
+    >
+      <Loader2 v-if="connecting" class="w-4 h-4 mr-2 animate-spin" />
+      {{ connecting ? '连接中...' : '重 连' }}
     </Button>
   </div>
 </template>

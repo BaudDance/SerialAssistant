@@ -13,9 +13,7 @@ import {
   ResizablePanelGroup,
 } from '@/components/ui/resizable'
 import { Toaster } from '@/components/ui/sonner'
-
 import { useBle } from '@/composables/useBle'
-
 import { useLayout } from '@/composables/useLayout'
 import { useSerial } from '@/composables/useSerial'
 import { listenNetworkStatus } from '@/network'
@@ -139,18 +137,28 @@ onBeforeUnmount(async () => {
   }
 })
 
-// 监听页面卸载事件
+// 监听页面卸载事件 - 拦截未断开连接的情况
 if (typeof window !== 'undefined') {
-  const handleBeforeUnload = async () => {
-    try {
-      if (serial.connected.value)
-        await serial.closePort()
-      if (ble.connected.value)
-        await ble.disconnectDevice()
+  const handleBeforeUnload = (event) => {
+    // 检查是否有活跃的连接
+    const hasActiveConnection = serial.connected.value || ble.connected.value
+
+    if (hasActiveConnection) {
+      // 阻止页面关闭
+      event.preventDefault()
+
+      // 设置提示信息
+      const message = '检测到串口或蓝牙连接仍处于活跃状态，请先断开连接后再关闭页面。'
+      event.returnValue = message // 兼容旧版浏览器
+      /**
+       * 现代浏览器（Chrome、Firefox、Edge、Safari等）出于 安全考虑 ，不再允许网站自定义 beforeunload 事件的提示信息
+       * 这是为了防止恶意网站使用误导性信息欺骗用户
+       */
+      return message // 实际上现代浏览器只会显示标准的通用提示，如"重新加载站点?"或"离开此网站?"
     }
-    catch (error) {
-      console.error('页面卸载时资源清理失败:', error)
-    }
+
+    // 如果没有活跃连接，允许正常关闭
+    return undefined
   }
 
   window.addEventListener('beforeunload', handleBeforeUnload)

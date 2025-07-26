@@ -7,6 +7,8 @@ import { useRecordStore } from '@/store/useRecordStore'
 import { useSerialStore } from '@/store/useSerialStore'
 import { useSettingStore } from '@/store/useSettingStore'
 
+import { getOS } from '@/utils/os'
+
 export const useSendStore = createGlobalState(() => {
   const { sendHex: serialSendHex } = inject('serial')
   const { sendHex: bleSendHex } = inject('ble')
@@ -122,24 +124,30 @@ export const useSendStore = createGlobalState(() => {
     onEventFired(e) {
       if (e.ctrlKey && e.key === 's' && e.type === 'keydown')
         e.preventDefault()
+      if (e.metaKey && e.key === 's' && e.type === 'keydown')
+        e.preventDefault()
       if (e.key === 'Enter' && e.shiftKey && e.type === 'keydown') {
         e.preventDefault()
       }
     },
   })
+
+  // 根据操作系统选择合适的快捷键
+  const isMac = (getOS() === 'MacOS' || getOS() === 'iOS')
   const shiftEnter = keys['Shift+Enter']
-  const ctrlS = keys['Ctrl+S']
+  const saveKey = isMac ? keys['Cmd+S'] : keys['Ctrl+S']
+
   const up = keys.Up
   const down = keys.Down
 
   watch(shiftEnter, (v) => {
     if (v) {
-      console.log('Shift+Enter have been pressed')
+      console.log('shift+Enter have been pressed')
       send()
     }
   })
 
-  watch(ctrlS, (v) => {
+  watch(saveKey, (v) => {
     if (v) {
       console.log('Ctrl + S have been pressed')
       reformat()

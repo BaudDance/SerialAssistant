@@ -22,9 +22,12 @@ export function useBle(
   const writeCharacteristic = ref(undefined)
   const state = ref('disconnected') // disconnected, connecting, connected, disconnecting
   const connected = ref(false)
+  const connecting = ref(false)
+  const disconnecting = ref(false)
 
   async function requestDevice(type) {
     try {
+      connecting.value = true
       nprogress.start()
       const d = await bluetooth.requestDevice({
         filters: [{ services: [type.service] }],
@@ -41,6 +44,7 @@ export function useBle(
       return null
     }
     finally {
+      connecting.value = false
       nprogress.done()
     }
   }
@@ -50,6 +54,7 @@ export function useBle(
     if (!device.value)
       return
     try {
+      connecting.value = true
       server.value = await device.value.gatt.connect()
       console.log('server', server.value)
       state.value = 'connected'
@@ -61,6 +66,10 @@ export function useBle(
     }
     catch (e) {
       console.log(e)
+      throw e
+    }
+    finally {
+      connecting.value = false
     }
   }
 
@@ -102,8 +111,9 @@ export function useBle(
   async function disconnectDevice() {
     if (!device.value)
       return
-
+    nprogress.start()
     console.log('开始断开蓝牙连接...')
+    disconnecting.value = true
 
     try {
       // 移除事件监听器
@@ -127,11 +137,17 @@ export function useBle(
       state.value = 'disconnected'
       connected.value = false
     }
+    finally {
+      disconnecting.value = false
+      nprogress.done()
+    }
   }
   return {
     device,
     deviceName,
     connected,
+    connecting,
+    disconnecting,
     requestDevice,
     connectDevice,
     disconnectDevice,

@@ -10,8 +10,7 @@ const buttonClass = computed(() => {
 
 <template>
   <div class="p-2 flex items-center justify-end relative">
-    <!-- Todo: 搜索工具 -->
-    <!-- <SearchTool /> -->
+    <SearchTool />
 
     <div class="flex items-center space-x-1">
       <TooltipProvider>

@@ -9,13 +9,12 @@
 </p>
 
 <p align="center">
-    <a href="https://serial.baud-dance.com/">🌐 在线使用 / Online Demo</a>
+  <a href="https://serial.baud-dance.com/" target="_blank">
+    <img src="https://img.shields.io/badge/_在线使用-Live_Demo-4FC3F7?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=1976D2" alt="在线使用 / Online Demo" height="40">
+  </a>
 </p>
 <p align="center">
-    <a href="https://serial.keysking.com/">🌐 备用链接 / Online Demo (Backup)</a>
-</p>
-<p align="center">
-  <img src="./src/assets/app-screenshot.png" alt="screenshot">
+  <img src="docs/img/app-screenshot.png" alt="screenshot">
 </p>
 <br>
 <p align="center">
@@ -45,7 +44,7 @@
 - 📱 **响应式设计** - 支持桌面端，自适应布局
 - 🔌 **多种连接方式** - 支持 USB 串口和蓝牙连接
 - 📊 **实时数据监控** - 实时显示串口数据收发记录
-- 🎨 **现代化界面** - 基于 Vue 3 + Tailwind CSS 构建的美观界面
+- 🎨 **现代化界面** - 基于 Vue 3 + JavaScript +Tailwind CSS 构建的美观界面
 - ⚡ **高性能** - 使用 Rolldown-Vite 构建，支持热重载和快速开发
 - 🛠️ **可定制** - 支持多种数据格式显示和发送选项
 
@@ -227,7 +226,7 @@ pnpm deploy:vercel      # 部署到Vercel（生产环境）
 - **工具库**: VueUse, Day.js
 - **开发工具**: ESLint, Vitest
 
-## 📁 项目结构 / Project Structure
+## 📁 项目主要结构 / Project Structure
 
 ```
 src/
@@ -284,15 +283,15 @@ src/
 ## 📋 TODO
 
 - [ ] 使用 Worker 重构数据处理
-- [ ] SEO 优化
+- [x] SEO 优化
 - [ ] 修复 RTS 拉高部分板子 boot0 的问题
 - [x] 点击时间切换时间显示格式
 - [x] 对话气泡复制按钮
-- [ ] 对话记录保存功能
+- [x] ~~对话记录保存功能~~ 对话记录导出文件（JSON）
 - [x] 快捷输入按钮面板
 - [x] ~~快捷发送键绑定（如 WASD 等按键）~~ 上下键快速输入历史发送记录
 - [ ] 数据曲线绘制（自定义正则表达式或 JS 脚本提取数据）
-- [ ] 搜索功能
+- [x] 搜索功能
 - [ ] 命令行样式的彩色显示（类似 \033[30m）
 - [ ] 关键词彩色高亮
 - [ ] 添加随机小贴士
@@ -319,6 +318,27 @@ src/
 3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
 5. 打开 Pull Request
+
+### 🏆 贡献者 / Contributors
+
+<div align="center">
+  <h3>🌟 感谢所有为这个项目做出贡献的开发者们！ 🌟</h3>
+
+  <!-- 3D 贡献者墙 -->
+  <a href="https://github.com/BaudDance/SerialAssistant/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=BaudDance/SerialAssistant&max=100&columns=20" alt="Contributors" />
+  </a>
+
+  <br>
+  <!-- 贡献者徽章 -->
+  <img src="https://img.shields.io/github/contributors/BaudDance/SerialAssistant?style=for-the-badge&color=ff69b4" alt="Contributors Count">
+  <img src="https://img.shields.io/github/commit-activity/m/BaudDance/SerialAssistant?style=for-the-badge&color=00d4aa" alt="Commit Activity">
+  <img src="https://img.shields.io/github/last-commit/BaudDance/SerialAssistant?style=for-the-badge&color=ffd700" alt="Last Commit">
+
+</div>
+ <br>
+
+> 🎨 贡献者展示由多个开源服务提供支持：[contrib.rocks](https://contrib.rocks)
 
 ## 📄 许可证 / License
 

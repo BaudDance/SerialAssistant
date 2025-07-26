@@ -15,6 +15,7 @@ import { useDataCode } from '@/composables/useDataCode/useDataCode'
 const records = ref([])
 const readingRecord = ref(undefined)
 const pinBottom = ref(true)
+const scrollToRecordIndex = ref(-1) // 用于触发滚动到指定记录
 
 const rxCount = ref(0)
 const txCount = ref(0)
@@ -92,15 +93,25 @@ export function useRecordStore() {
     }
   }
 
+  function scrollToRecord(index) {
+    scrollToRecordIndex.value = index
+    // 重置滚动索引，避免重复触发
+    setTimeout(() => {
+      scrollToRecordIndex.value = -1
+    }, 100)
+  }
+
   return {
     records,
     readingRecord,
     pinBottom,
+    scrollToRecordIndex,
     rxCount,
     txCount,
     addRecord,
     clearRecords,
     exportRecords,
     copyRecordContent,
+    scrollToRecord,
   }
 }
