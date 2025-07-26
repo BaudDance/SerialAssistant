@@ -3,6 +3,7 @@ import { ref } from 'vue'
 
 export const DEFAULT_LAYOUT_CONFIG = Object.freeze({
   showFullScreen: true,
+  showTerminalMode: false,
   showSettingPanel: true,
   showQuickInputPanel: true,
   showTopBar: true,
@@ -25,6 +26,12 @@ export const useLayout = createGlobalState(() => {
   const showFullScreen = useStorage('layout:showFullScreen', ref(DEFAULT_LAYOUT_CONFIG.showFullScreen))
   const toggleFullScreen = () => {
     showFullScreen.value = !showFullScreen.value
+  }
+
+  // 设置面板
+  const showTerminalMode = useStorage('layout:showTerminalMode', ref(DEFAULT_LAYOUT_CONFIG.showTerminalMode))
+  const toggleTerminalMode = () => {
+    showTerminalMode.value = !showTerminalMode.value
   }
 
   // 设置面板
@@ -62,6 +69,7 @@ export const useLayout = createGlobalState(() => {
     // 定义更新器函数映射 - 只需要在这里添加新的配置项
     const updaters = {
       showFullScreen: value => showFullScreen.value = value,
+      showTerminalMode: value => showTerminalMode.value = value,
       showSettingPanel: value => showSettingPanel.value = value,
       showQuickInputPanel: value => showQuickInputPanel.value = value,
       showTopBar: value => showTopBar.value = value,
@@ -87,6 +95,7 @@ export const useLayout = createGlobalState(() => {
   // 获取当前完整配置
   const getCurrentConfig = () => ({
     showFullScreen: showFullScreen.value,
+    showTerminalMode: showTerminalMode.value,
     showSettingPanel: showSettingPanel.value,
     showQuickInputPanel: showQuickInputPanel.value,
     showTopBar: showTopBar.value,
@@ -100,6 +109,7 @@ export const useLayout = createGlobalState(() => {
 
     // 状态
     showFullScreen,
+    showTerminalMode,
     showSettingPanel,
     showQuickInputPanel,
     showTopBar,
@@ -108,6 +118,9 @@ export const useLayout = createGlobalState(() => {
 
     // 全屏控制
     toggleFullScreen,
+
+    // 终端模式控制
+    toggleTerminalMode,
 
     // 设置面板控制
     toggleSettingPanel,

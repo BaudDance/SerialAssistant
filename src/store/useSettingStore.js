@@ -1,4 +1,4 @@
-import { computedAsync, useLocalStorage } from '@vueuse/core'
+import { computedAsync, useLocalStorage, useStorage } from '@vueuse/core'
 
 const deviceType = useLocalStorage('deviceType', 'serial', {
   listenToStorageChanges: false,
@@ -30,6 +30,10 @@ const lineEnding = computedAsync(async () => {
 const sendHexInputMode = useLocalStorage('sendInputHexMode', 'format', {
   listenToStorageChanges: false,
 })
+
+// 记录缓存设置
+const recordCacheEnabled = useStorage('recordCacheEnabled', ref(true))
+
 export function useSettingStore() {
   return {
     lineEndingMode,
@@ -37,5 +41,6 @@ export function useSettingStore() {
     lineEnding,
     deviceType,
     sendHexInputMode,
+    recordCacheEnabled,
   }
 }

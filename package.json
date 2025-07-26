@@ -1,7 +1,7 @@
 {
   "name": "serial-assistant",
   "type": "module",
-  "version": "2.3.0",
+  "version": "3.0.0",
   "private": true,
   "packageManager": "pnpm@10.12.3",
   "scripts": {
@@ -24,10 +24,13 @@
     "@tanstack/vue-table": "^8.21.3",
     "@vee-validate/zod": "^4.15.1",
     "@vueuse/core": "^10.2.1",
+    "@xterm/addon-fit": "^0.10.0",
+    "@xterm/xterm": "^5.5.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
     "fuse.js": "^7.1.0",
+    "localforage": "^1.10.0",
     "lucide-vue-next": "^0.523.0",
     "nprogress": "^0.2.0",
     "reka-ui": "^2.3.1",

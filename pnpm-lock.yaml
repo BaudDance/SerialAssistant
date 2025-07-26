@@ -20,6 +20,12 @@ importers:
       '@vueuse/core':
         specifier: ^10.2.1
         version: 10.11.1(vue@3.5.17(typescript@5.8.3))
+      '@xterm/addon-fit':
+        specifier: ^0.10.0
+        version: 0.10.0(@xterm/xterm@5.5.0)
+      '@xterm/xterm':
+        specifier: ^5.5.0
+        version: 5.5.0
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -32,6 +38,9 @@ importers:
       fuse.js:
         specifier: ^7.1.0
         version: 7.1.0
+      localforage:
+        specifier: ^1.10.0
+        version: 1.10.0
       lucide-vue-next:
         specifier: ^0.523.0
         version: 0.523.0(vue@3.5.17(typescript@5.8.3))
@@ -98,7 +107,7 @@ importers:
         version: 15.5.2
       netlify-cli:
         specifier: ^22.2.2
-        version: 22.2.2(@types/node@22.15.33)(picomatch@4.0.2)(rollup@4.44.1)
+        version: 22.2.2(@types/node@22.15.33)(idb-keyval@6.2.2)(picomatch@4.0.2)(rollup@4.44.1)
       postcss:
         specifier: ^8.4.27
         version: 8.5.6
@@ -1971,6 +1980,14 @@ packages:
     resolution: {integrity: sha512-mBvWew1kZJHfNQVVfVllMjUDwCGN9apPa0t4/z1zaUJ9MzpXjRL3w8fsfJKB8gHN/h4rik9HneKfDbh2fErN+w==}
     engines: {node: ^14.14.0 || >=16.0.0}
 
+  '@xterm/addon-fit@0.10.0':
+    resolution: {integrity: sha512-UFYkDm4HUahf2lnEyHvio51TNGiLK66mqP2JoATy7hRZeXaGMRDr00JiSF7m63vR5WKATF605yEggJKsw0JpMQ==}
+    peerDependencies:
+      '@xterm/xterm': ^5.0.0
+
+  '@xterm/xterm@5.5.0':
+    resolution: {integrity: sha512-hqJHYaQb5OptNunnyAnkHyM8aCjZ1MEIDTQu1iIbbTD/xops91NB5yq1ZK/dC2JDbVWtF23zUtl9JE2NqwT87A==}
+
   abbrev@3.0.1:
     resolution: {integrity: sha512-AO2ac6pjRB3SJmGJo+v5/aK6Omggp6fsLrs6wN9bd35ulu4cCwaAU9+7ZhXjeqHVkaHThLuzH0nZr0YpCDhygg==}
     engines: {node: ^18.17.0 || >=20.5.0}
@@ -3647,6 +3664,9 @@ packages:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
     engines: {node: '>=0.10.0'}
 
+  idb-keyval@6.2.2:
+    resolution: {integrity: sha512-yjD9nARJ/jb1g+CvD0tlhUHOrJ9Sy0P8T9MF3YaLlHnSRpwPfpTX0XIvpmw3gAJUmEu3FiICLBDPXVwyEvrleg==}
+
   ieee754@1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
 
@@ -3665,6 +3685,9 @@ packages:
     resolution: {integrity: sha512-IRqXKlaXwgSMAMtpNzZa1ZAe8m+Sa1770Dhk8VkSsP9LS+iHD62Zd8FQKs8fbPiagBE7BzoFX23cxFnwshpV6w==}
     engines: {node: '>=16.x'}
     hasBin: true
+
+  immediate@3.0.6:
+    resolution: {integrity: sha512-XXOFtyqDjNDAQxVfYxuF7g9Il/IbWmmlQg2MYKOH8ExIT1qg6xc4zyS3HaEEATgs1btfzxq15ciUiY7gjSXRGQ==}
 
   import-fresh@3.3.1:
     resolution: {integrity: sha512-TR3KfrTZTYLPB6jUjfx6MF9WcWrHL9su5TObK4ZkYgBdWKPOFoSoQIdEuTuR82pmtxH2spWG9h6etwfr1pLBqQ==}
@@ -4015,6 +4038,9 @@ packages:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
 
+  lie@3.1.1:
+    resolution: {integrity: sha512-RiNhHysUjhrDQntfYSfY4MU24coXXdEOgw9WGcKHNeEwffDYbF//u87M1EWaMGzuFoSbqW0C9C6lEEhDOAswfw==}
+
   light-my-request@5.14.0:
     resolution: {integrity: sha512-aORPWntbpH5esaYpGOOmri0OHDOe3wC5M2MQxZ9dvMLZm6DnaAn0kJlcbU9hwsQgLzmZyReKwFwwPkR+nHu5kA==}
 
@@ -4106,6 +4132,9 @@ packages:
   local-pkg@1.1.1:
     resolution: {integrity: sha512-WunYko2W1NcdfAFpuLUoucsgULmgDBRkdxHxWQ7mK0cQqwPiy8E1enjuRBrhLtZkB5iScJ1XIPdhVEFK8aOLSg==}
     engines: {node: '>=14'}
+
+  localforage@1.10.0:
+    resolution: {integrity: sha512-14/H1aX7hzBBmmh7sGPd+AOMkkIrHM3Z1PAyGgZigA1H1p5O5ANnMyWzvpAETtG68/dC4pC0ncy3+PPGzXZHPg==}
 
   locate-path@6.0.0:
     resolution: {integrity: sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==}
@@ -8412,6 +8441,12 @@ snapshots:
       merge-options: 3.0.4
       p-event: 5.0.1
 
+  '@xterm/addon-fit@0.10.0(@xterm/xterm@5.5.0)':
+    dependencies:
+      '@xterm/xterm': 5.5.0
+
+  '@xterm/xterm@5.5.0': {}
+
   abbrev@3.0.1: {}
 
   abort-controller@3.0.0:
@@ -10221,6 +10256,9 @@ snapshots:
     dependencies:
       safer-buffer: 2.1.2
 
+  idb-keyval@6.2.2:
+    optional: true
+
   ieee754@1.2.1: {}
 
   ignore@5.3.2: {}
@@ -10230,6 +10268,8 @@ snapshots:
   image-meta@0.2.1: {}
 
   image-size@2.0.2: {}
+
+  immediate@3.0.6: {}
 
   import-fresh@3.3.1:
     dependencies:
@@ -10281,7 +10321,7 @@ snapshots:
 
   ipaddr.js@1.9.1: {}
 
-  ipx@2.1.0(@netlify/blobs@9.1.6):
+  ipx@2.1.0(@netlify/blobs@9.1.6)(idb-keyval@6.2.2):
     dependencies:
       '@fastify/accept-negotiator': 1.1.0
       citty: 0.1.6
@@ -10297,7 +10337,7 @@ snapshots:
       sharp: 0.32.6
       svgo: 3.3.2
       ufo: 1.6.1
-      unstorage: 1.16.1(@netlify/blobs@9.1.6)
+      unstorage: 1.16.1(@netlify/blobs@9.1.6)(idb-keyval@6.2.2)
       xss: 1.0.15
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -10576,6 +10616,10 @@ snapshots:
       prelude-ls: 1.2.1
       type-check: 0.4.0
 
+  lie@3.1.1:
+    dependencies:
+      immediate: 3.0.6
+
   light-my-request@5.14.0:
     dependencies:
       cookie: 0.7.2
@@ -10679,6 +10723,10 @@ snapshots:
       mlly: 1.7.4
       pkg-types: 2.1.1
       quansync: 0.2.10
+
+  localforage@1.10.0:
+    dependencies:
+      lie: 3.1.1
 
   locate-path@6.0.0:
     dependencies:
@@ -11232,7 +11280,7 @@ snapshots:
 
   negotiator@0.6.3: {}
 
-  netlify-cli@22.2.2(@types/node@22.15.33)(picomatch@4.0.2)(rollup@4.44.1):
+  netlify-cli@22.2.2(@types/node@22.15.33)(idb-keyval@6.2.2)(picomatch@4.0.2)(rollup@4.44.1):
     dependencies:
       '@fastify/static': 7.0.4
       '@netlify/api': 14.0.3
@@ -11288,7 +11336,7 @@ snapshots:
       https-proxy-agent: 7.0.6(supports-color@10.0.0)
       inquirer: 8.2.6
       inquirer-autocomplete-prompt: 1.4.0(inquirer@8.2.6)
-      ipx: 2.1.0(@netlify/blobs@9.1.6)
+      ipx: 2.1.0(@netlify/blobs@9.1.6)(idb-keyval@6.2.2)
       is-docker: 3.0.0
       is-stream: 4.0.1
       is-wsl: 3.1.0
@@ -12750,7 +12798,7 @@ snapshots:
       picomatch: 4.0.2
       webpack-virtual-modules: 0.6.2
 
-  unstorage@1.16.1(@netlify/blobs@9.1.6):
+  unstorage@1.16.1(@netlify/blobs@9.1.6)(idb-keyval@6.2.2):
     dependencies:
       anymatch: 3.1.3
       chokidar: 4.0.3
@@ -12762,6 +12810,7 @@ snapshots:
       ufo: 1.6.1
     optionalDependencies:
       '@netlify/blobs': 9.1.6
+      idb-keyval: 6.2.2
 
   untildify@4.0.0: {}
 

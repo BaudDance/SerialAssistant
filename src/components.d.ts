@@ -9,6 +9,8 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     ActivityBar: typeof import('./components/ActivityBar/ActivityBar.vue')['default']
+    Alert: typeof import('./components/ui/alert/Alert.vue')['default']
+    AlertDescription: typeof import('./components/ui/alert/AlertDescription.vue')['default']
     AlertDialog: typeof import('./components/ui/alert-dialog/AlertDialog.vue')['default']
     AlertDialogAction: typeof import('./components/ui/alert-dialog/AlertDialogAction.vue')['default']
     AlertDialogCancel: typeof import('./components/ui/alert-dialog/AlertDialogCancel.vue')['default']
@@ -18,6 +20,7 @@ declare module 'vue' {
     AlertDialogHeader: typeof import('./components/ui/alert-dialog/AlertDialogHeader.vue')['default']
     AlertDialogTitle: typeof import('./components/ui/alert-dialog/AlertDialogTitle.vue')['default']
     AlertDialogTrigger: typeof import('./components/ui/alert-dialog/AlertDialogTrigger.vue')['default']
+    AlertTitle: typeof import('./components/ui/alert/AlertTitle.vue')['default']
     Ascii: typeof import('./components/Dialog/Ascii.vue')['default']
     AutoSendButton: typeof import('./components/SendPanel/components/AutoSendButton.vue')['default']
     Badge: typeof import('./components/ui/badge/Badge.vue')['default']
@@ -99,6 +102,7 @@ declare module 'vue' {
     PopoverTrigger: typeof import('./components/ui/popover/PopoverTrigger.vue')['default']
     Provider: typeof import('./components/Dialog/Provider.vue')['default']
     QuickInputPanel: typeof import('./components/QuickInputPanel/QuickInputPanel.vue')['default']
+    RecordCache: typeof import('./components/RecordCache/RecordCache.vue')['default']
     RecordPanel: typeof import('./components/RecordPanel/RecordPanel.vue')['default']
     ResizableHandle: typeof import('./components/ui/resizable/ResizableHandle.vue')['default']
     ResizablePanel: typeof import('./components/ui/resizable/ResizablePanel.vue')['default']
@@ -154,6 +158,7 @@ declare module 'vue' {
     TagsInputItem: typeof import('./components/ui/tags-input/TagsInputItem.vue')['default']
     TagsInputItemDelete: typeof import('./components/ui/tags-input/TagsInputItemDelete.vue')['default']
     TagsInputItemText: typeof import('./components/ui/tags-input/TagsInputItemText.vue')['default']
+    TerminalPanel: typeof import('./components/TerminalPanel/TerminalPanel.vue')['default']
     Textarea: typeof import('./components/ui/textarea/Textarea.vue')['default']
     Toggle: typeof import('./components/ui/toggle/Toggle.vue')['default']
     ToggleGroup: typeof import('./components/ui/toggle-group/ToggleGroup.vue')['default']
@@ -163,5 +168,6 @@ declare module 'vue' {
     TooltipProvider: typeof import('./components/ui/tooltip/TooltipProvider.vue')['default']
     TooltipTrigger: typeof import('./components/ui/tooltip/TooltipTrigger.vue')['default']
     TopBar: typeof import('./components/TopBar/TopBar.vue')['default']
+    WelcomeToTerminal: typeof import('./components/TerminalPanel/WelcomeToTerminal.vue')['default']
   }
 }
