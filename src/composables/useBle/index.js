@@ -1,6 +1,7 @@
 import { useSupported } from '@vueuse/core'
 import { computed, ref } from 'vue'
 import { useNprogress } from '@/composables/useNprogress'
+import { useRecordCache } from '@/composables/useRecordCache'
 
 export function useBle(
   options = {
@@ -63,6 +64,27 @@ export function useBle(
       // 添加断开连接事件
       device.value.addEventListener('gattserverdisconnected', onDisconnected)
       listenCharacteristic(type)
+
+      // 连接成功后，尝试更新当前会话的设备信息
+      try {
+        const { updateCurrentSessionDevice, createDeviceInfo } = useRecordCache()
+        if (device.value) {
+          const deviceInfo = createDeviceInfo(
+            'bluetooth',
+            device.value.id,
+            device.value.name || 'Bluetooth Device',
+            {
+              deviceId: device.value.id,
+              gatt: device.value.gatt?.connected || false,
+              serviceUUID: type.service,
+            },
+          )
+          updateCurrentSessionDevice(deviceInfo)
+        }
+      }
+      catch (error) {
+        console.warn('更新会话设备信息失败:', error)
+      }
     }
     catch (e) {
       console.log(e)
@@ -157,5 +179,6 @@ export function useBle(
     connectDevice,
     disconnectDevice,
     sendHex,
+    isConnected: connected,
   }
 }
