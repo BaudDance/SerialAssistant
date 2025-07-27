@@ -2,6 +2,8 @@ import { useSupported, useTimeoutFn } from '@vueuse/core'
 import { computed, ref } from 'vue'
 import USBJson from '@/assets/usb-device.json'
 import { useNprogress } from '@/composables/useNprogress'
+import { useRecordCache } from '@/composables/useRecordCache'
+
 /**
  *  Get device name from USBJson
  * @param {SerialPort} port
@@ -37,6 +39,22 @@ export function useSerial(
   const connected = ref(false)
   const connecting = ref(false)
   const disconnecting = ref(false)
+
+  // 获取端口信息
+  const portInfo = computed(() => {
+    if (!port.value)
+      return null
+    const info = port.value.getInfo()
+    return {
+      port: info.usbProductId ? `USB-${info.usbVendorId?.toString(16)?.padStart(4, '0')}-${info.usbProductId?.toString(16)?.padStart(4, '0')}` : 'Unknown',
+      path: info.path || 'Unknown',
+      displayName: portName.value,
+      friendlyName: portName.value || 'Serial Device',
+      vendorId: info.usbVendorId,
+      productId: info.usbProductId,
+      serialNumber: info.serialNumber,
+    }
+  })
   let keepReading
   let readingClosed
   async function updatePorts() {
@@ -116,6 +134,28 @@ export function useSerial(
       await port.value.open(options)
       readingClosed = startReadLoop()
       connected.value = true
+
+      // 连接成功后，尝试更新当前会话的设备信息
+      try {
+        const { updateCurrentSessionDevice, createDeviceInfo } = useRecordCache()
+        if (portInfo.value) {
+          const deviceInfo = createDeviceInfo(
+            'serial',
+            portInfo.value.port,
+            portInfo.value.friendlyName,
+            {
+              vendorId: portInfo.value.vendorId,
+              productId: portInfo.value.productId,
+              serialNumber: portInfo.value.serialNumber,
+              path: portInfo.value.path,
+            },
+          )
+          updateCurrentSessionDevice(deviceInfo)
+        }
+      }
+      catch (error) {
+        console.warn('更新会话设备信息失败:', error)
+      }
     }
     catch (error) {
       console.error('打开串口时出现错误:', error)
@@ -192,6 +232,7 @@ export function useSerial(
     setPort,
     port,
     portName,
+    portInfo,
     ports,
     openPort,
     reopenPort,
@@ -200,5 +241,6 @@ export function useSerial(
     connected,
     connecting,
     disconnecting,
+    isConnected: connected,
   }
 }
