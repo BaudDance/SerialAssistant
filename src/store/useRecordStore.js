@@ -1,8 +1,9 @@
+import { createGlobalState } from '@vueuse/core'
 import dayjs from 'dayjs'
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import { toast } from 'vue-sonner'
 import { useDataCode } from '@/composables/useDataCode/useDataCode'
-import { useRecordCache } from '@/composables/useRecordCache/useRecordCache'
+import { useRecordCache } from '@/composables/useRecordCache'
 import { useSettingStore } from '@/store/useSettingStore'
 /**
  *
@@ -24,27 +25,25 @@ const txCount = ref(0)
 
 const { recordCacheEnabled } = useSettingStore()
 
-// 初始化缓存
+// 初始化会话缓存
 const {
-  debouncedSaveRecords,
-  loadRecordsFromCache,
-  clearRecordsCache,
-  isLoading: isCacheLoading,
-  cacheSize,
-  getCacheStats,
+  debouncedSaveSessionRecords,
+  currentSessionId,
 } = useRecordCache()
-
-// 是否已从缓存加载
-const isLoadedFromCache = ref(false)
 
 function addRecord(record) {
   records.value.push(record)
   rxCount.value += record.type === 'read' ? record.data.length : 0
   txCount.value += record.type === 'write' ? record.data.length : 0
 
-  // 防抖保存到缓存
-  if (recordCacheEnabled.value) {
-    debouncedSaveRecords(records.value)
+  // // 如果启用了缓存但没有当前会话，自动创建一个新会话
+  // if (recordCacheEnabled.value && !currentSessionId.value) {
+  //   createSession()
+  // }
+
+  // 防抖保存到当前会话
+  if (recordCacheEnabled.value && currentSessionId.value) {
+    debouncedSaveSessionRecords(records.value)
   }
 }
 
@@ -52,54 +51,10 @@ function clearRecords() {
   records.value = []
   rxCount.value = 0
   txCount.value = 0
-
-  // 清除缓存
-  if (recordCacheEnabled.value) {
-    clearRecordsCache()
-  }
 }
 
-// 从缓存加载记录
-async function loadRecordsFromCacheStore() {
-  if (isLoadedFromCache.value || !recordCacheEnabled.value)
-    return
-
-  try {
-    const cachedRecords = await loadRecordsFromCache()
-    if (cachedRecords.length > 0) {
-      records.value = cachedRecords
-
-      // 重新计算统计数据
-      rxCount.value = 0
-      txCount.value = 0
-      cachedRecords.forEach((record) => {
-        rxCount.value += record.type === 'read' ? record.data.length : 0
-        txCount.value += record.type === 'write' ? record.data.length : 0
-      })
-
-      toast.success(`已从缓存加载 ${cachedRecords.length} 条记录`)
-    }
-    isLoadedFromCache.value = true
-  }
-  catch (error) {
-    console.error('从缓存加载记录失败:', error)
-    toast.error('从缓存加载记录失败')
-  }
-}
-
-export function useRecordStore() {
+export const useRecordStore = createGlobalState(() => {
   const { bufferToDecFormat, bufferToHexFormat, bufferToString, stringToHtml } = useDataCode()
-
-  // 监听缓存启用状态变化，在启用时自动加载缓存
-  watch(() => recordCacheEnabled.value, (enabled) => {
-    if (enabled && !isLoadedFromCache.value && typeof window !== 'undefined') {
-      loadRecordsFromCacheStore()
-    }
-    else if (!enabled) {
-      // 缓存禁用时重置加载状态，以便重新启用时可以加载
-      isLoadedFromCache.value = false
-    }
-  }, { immediate: true })
 
   function exportRecords() {
     if (!records.value.length) {
@@ -179,13 +134,5 @@ export function useRecordStore() {
     exportRecords,
     copyRecordContent,
     scrollToRecord,
-
-    // 缓存相关
-    loadRecordsFromCacheStore,
-    recordCacheEnabled,
-    isCacheLoading,
-    cacheSize,
-    getCacheStats,
-    isLoadedFromCache,
   }
-}
+})
