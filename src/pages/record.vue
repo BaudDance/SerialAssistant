@@ -194,7 +194,7 @@ onMounted(() => {
     <div class="mb-6">
       <div class="flex items-center justify-between mb-2">
         <h1 class="text-2xl font-bold">
-          会话历史记录 {{ sessionId }}
+          会话历史记录
         </h1>
         <Button variant="outline" size="sm" class="flex items-center gap-2" @click="goToHome">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
