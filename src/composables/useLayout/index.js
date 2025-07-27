@@ -1,4 +1,4 @@
-import { breakpointsTailwind, createGlobalState, useBreakpoints, useStorage } from '@vueuse/core'
+import { breakpointsTailwind, createGlobalState, useBreakpoints, useLocalStorage } from '@vueuse/core'
 import { ref } from 'vue'
 
 export const DEFAULT_LAYOUT_CONFIG = Object.freeze({
@@ -23,43 +23,71 @@ export const useLayout = createGlobalState(() => {
   const fullScreenBreakpoint = breakpoints.smaller('2xl') // 小于2xl（1536px）的屏幕默认全屏
 
   // 全屏状态
-  const showFullScreen = useStorage('layout:showFullScreen', ref(DEFAULT_LAYOUT_CONFIG.showFullScreen))
+  const showFullScreen = useLocalStorage(
+    'layout:showFullScreen',
+    ref(DEFAULT_LAYOUT_CONFIG.showFullScreen),
+    { listenToStorageChanges: false },
+  )
   const toggleFullScreen = () => {
     showFullScreen.value = !showFullScreen.value
   }
 
-  // 设置面板
-  const showTerminalMode = useStorage('layout:showTerminalMode', ref(DEFAULT_LAYOUT_CONFIG.showTerminalMode))
+  // 终端模式
+  const showTerminalMode = useLocalStorage(
+    'layout:showTerminalMode',
+    ref(DEFAULT_LAYOUT_CONFIG.showTerminalMode),
+    { listenToStorageChanges: false },
+  )
   const toggleTerminalMode = () => {
     showTerminalMode.value = !showTerminalMode.value
   }
 
   // 设置面板
-  const showSettingPanel = useStorage('layout:showSettingPanel', ref(DEFAULT_LAYOUT_CONFIG.showSettingPanel))
+  const showSettingPanel = useLocalStorage(
+    'layout:showSettingPanel',
+    ref(DEFAULT_LAYOUT_CONFIG.showSettingPanel),
+    { listenToStorageChanges: false },
+  )
   const toggleSettingPanel = () => {
     showSettingPanel.value = !showSettingPanel.value
   }
 
   // 快捷输入面板
-  const showQuickInputPanel = useStorage('layout:showQuickInputPanel', ref(DEFAULT_LAYOUT_CONFIG.showQuickInputPanel))
+  const showQuickInputPanel = useLocalStorage(
+    'layout:showQuickInputPanel',
+    ref(DEFAULT_LAYOUT_CONFIG.showQuickInputPanel),
+    { listenToStorageChanges: false },
+  )
   const toggleQuickInputPanel = () => {
     showQuickInputPanel.value = !showQuickInputPanel.value
   }
 
   // 顶部栏 - 原则上不建议隐藏，但提供接口供用户自定义
-  const showTopBar = useStorage('layout:showTopBar', ref(DEFAULT_LAYOUT_CONFIG.showTopBar))
+  const showTopBar = useLocalStorage(
+    'layout:showTopBar',
+    ref(DEFAULT_LAYOUT_CONFIG.showTopBar),
+    { listenToStorageChanges: false },
+  )
   const toggleTopBar = () => {
     showTopBar.value = !showTopBar.value
   }
 
   // 活动栏 - 原则上不建议隐藏，但提供接口供用户自定义
-  const showActivityBar = useStorage('layout:showActivityBar', ref(DEFAULT_LAYOUT_CONFIG.showActivityBar))
+  const showActivityBar = useLocalStorage(
+    'layout:showActivityBar',
+    ref(DEFAULT_LAYOUT_CONFIG.showActivityBar),
+    { listenToStorageChanges: false },
+  )
   const toggleActivityBar = () => {
     showActivityBar.value = !showActivityBar.value
   }
 
   // 发送栏
-  const showSendPanel = useStorage('layout:showSendPanel', ref(DEFAULT_LAYOUT_CONFIG.showSendPanel))
+  const showSendPanel = useLocalStorage(
+    'layout:showSendPanel',
+    ref(DEFAULT_LAYOUT_CONFIG.showSendPanel),
+    { listenToStorageChanges: false },
+  )
   const toggleSendPanel = () => {
     showSendPanel.value = !showSendPanel.value
   }
