@@ -121,6 +121,13 @@ function onTerminalAreaResize(_size, _prevSize) {
   terminalPanelRef.value?.fit()
 }
 
+onMounted(() => {
+  if (recordCacheEnabled.value && !currentSessionId.value) {
+    // 如果启用了缓存但没有当前会话，自动创建一个新缓存会话
+    const _sessionId = createSession()
+  }
+})
+
 // 资源清理 - 防止内存泄露
 onBeforeUnmount(async () => {
   console.log('App组件卸载，开始清理资源...')
@@ -182,13 +189,6 @@ if (typeof window !== 'undefined') {
     window.removeEventListener('beforeunload', handleBeforeUnload)
   })
 }
-
-onMounted(() => {
-  if (recordCacheEnabled.value && !currentSessionId.value) {
-    // 如果启用了缓存但没有当前会话，自动创建一个新缓存会话
-    const _sessionId = createSession()
-  }
-})
 </script>
 
 <template>

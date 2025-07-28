@@ -3,7 +3,6 @@ import { useTitle } from '@vueuse/core'
 import dayjs from 'dayjs'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { useDataCode } from '@/composables/useDataCode/useDataCode'
 import { useRecordCache } from '@/composables/useRecordCache'
@@ -18,6 +17,7 @@ useTitle('会话记录')
 const router = useRouter()
 
 const {
+  exportRecords,
   copyRecordContent,
 } = useRecordStore()
 
@@ -43,15 +43,15 @@ const stats = ref({ sessionCount: 0, totalRecords: 0 })
 const showFullDate = ref(false)
 
 // 当前查看的会话信息
-const currentSession = computed(() => {
+const selectedSession = computed(() => {
   if (!sessionId.value)
     return null
   return sessionList.value.find(session => session.id === sessionId.value)
 })
-const currentSessionRecord = ref([])
+const selectedSessionRecord = ref([])
 watch(sessionId, (newId) => {
   if (newId) {
-    currentSessionRecord.value = loadSessionRecords(newId)
+    selectedSessionRecord.value = loadSessionRecords(newId)
   }
 }, { immediate: true })
 
@@ -88,7 +88,7 @@ function toggleRecordDisplay(rIdx, record) {
   const recordTypes = ['hex', 'ascii', 'dec']
   const index = recordTypes.indexOf(record.display)
   record.display = recordTypes[(index + 1) % recordTypes.length]
-  currentSessionRecord.value[rIdx] = record
+  selectedSessionRecord.value[rIdx] = record
 }
 
 // 获取设备显示名称
@@ -140,49 +140,9 @@ function deleteSession(sessionId) {
   }
 }
 
-// 返回首页
-function goToHome() {
-  router.push('/')
-}
-
-// 导出当前会话记录
+// 导出当前选中的会话记录
 function exportCurrentSessionRecords() {
-  if (!currentSessionRecord.value.length) {
-    toast.error('当前会话记录为空，导出失败')
-    return
-  }
-
-  const exportData = currentSessionRecord.value.map((record) => {
-    const type = record.type
-    const timestamp = record.timestamp || new Date(record.time).getTime() || null
-    const time = timestamp ? dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss:SSS') : null
-    const display = record.display
-    const data = record.display === 'hex' ? bufferToHexFormat(record.data) : bufferToString(record.data)
-
-    return {
-      type,
-      data,
-      timestamp,
-      time,
-      display,
-    }
-  })
-
-  const json = JSON.stringify(exportData, null, 2)
-  const blob = new Blob([json], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-
-  const sessionName = currentSession.value ? getDeviceDisplayName(currentSession.value).replace(/[^\w\u4E00-\u9FA5]/g, '_') : 'session'
-  const fileName = `${sessionName}-records-${dayjs().format('YYYY-MM-DD-HH-mm-ss')}.json`
-
-  const a = document.createElement('a')
-  a.href = url
-  a.download = fileName
-  a.click()
-  URL.revokeObjectURL(url)
-  a.remove()
-
-  toast.success('会话记录导出成功')
+  exportRecords(selectedSessionRecord.value)
 }
 
 onMounted(() => {
@@ -195,17 +155,35 @@ onMounted(() => {
   <div class="container mx-auto p-6 max-w-8xl h-screen flex flex-col">
     <!-- 页面标题 -->
     <div class="mb-6">
+      <Breadcrumb class="mb-6">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/#/">
+              首页
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+
+          <BreadcrumbSeparator />
+
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/#/record">
+              会话历史
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+
+          <template v-if="selectedSession">
+            <BreadcrumbSeparator />
+
+            <BreadcrumbItem>
+              <BreadcrumbPage>{{ getDeviceDisplayName(selectedSession) }}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </template>
+        </BreadcrumbList>
+      </Breadcrumb>
       <div class="flex items-center justify-between mb-2">
         <h1 class="text-2xl font-bold">
           会话历史记录
         </h1>
-        <Button variant="outline" size="sm" class="flex items-center gap-2" @click="goToHome">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-            <polyline points="9,22 9,12 15,12 15,22" />
-          </svg>
-          返回首页
-        </Button>
       </div>
       <p class="text-muted-foreground">
         查看所有设备的通讯会话记录
@@ -254,7 +232,7 @@ onMounted(() => {
                     <Button
                       size="sm"
                       variant="ghost"
-                      class="h-8 w-8 p-0"
+                      class="h-8 w-8 p-0 cursor-pointer"
                       @click="loadSession(session.id)"
                     >
                       <div>
@@ -264,7 +242,7 @@ onMounted(() => {
                     <Button
                       size="sm"
                       variant="ghost"
-                      class="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                      class="h-8 w-8 p-0 text-destructive hover:text-destructive cursor-pointer"
                       @click="deleteSession(session.id)"
                     >
                       <div>
@@ -305,7 +283,7 @@ onMounted(() => {
                     <Button
                       size="sm"
                       variant="ghost"
-                      class="h-8 w-8 p-0"
+                      class="h-8 w-8 p-0 cursor-pointer"
                       @click="loadSession(session.id)"
                     >
                       <div>
@@ -315,7 +293,7 @@ onMounted(() => {
                     <Button
                       size="sm"
                       variant="ghost"
-                      class="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                      class="h-8 w-8 p-0 text-destructive hover:text-destructive cursor-pointer"
                       @click="deleteSession(session.id)"
                     >
                       <div>
@@ -356,7 +334,7 @@ onMounted(() => {
                     <Button
                       size="sm"
                       variant="ghost"
-                      class="h-8 w-8 p-0"
+                      class="h-8 w-8 p-0 cursor-pointer"
                       @click="loadSession(session.id)"
                     >
                       <div>
@@ -366,7 +344,7 @@ onMounted(() => {
                     <Button
                       size="sm"
                       variant="ghost"
-                      class="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                      class="h-8 w-8 p-0 text-destructive hover:text-destructive cursor-pointer"
                       @click="deleteSession(session.id)"
                     >
                       <div>
@@ -395,28 +373,27 @@ onMounted(() => {
       </div>
 
       <!-- 右侧：记录查看区域 -->
-      <div class="flex-1 flex flex-col space-y-4 min-h-0">
-        <div v-if="currentSession" class="border rounded-lg flex-1 flex flex-col min-h-0">
+      <div v-if="sessionList.length > 0" class="flex-1 flex flex-col space-y-4 min-h-0">
+        <div v-if="selectedSession" class="border rounded-lg flex-1 flex flex-col min-h-0">
           <!-- 记录查看头部 -->
           <div class="border-b p-4 flex-shrink-0">
             <div class="flex items-center justify-between">
               <div class="space-y-2">
                 <h3 class="font-medium">
-                  {{ getDeviceDisplayName(currentSession) }}
+                  {{ getDeviceDisplayName(selectedSession) }}
                 </h3>
                 <p class="text-xs text-muted-foreground">
-                  更新于 {{ formatTime(currentSession.updatedAt) }} · {{ currentSessionRecord.length }} 条记录
+                  更新于 {{ formatTime(selectedSession.updatedAt) }} · {{ selectedSessionRecord.length }} 条记录
                 </p>
               </div>
               <div class="flex items-center gap-2">
-                <Button variant="outline" size="sm" class="flex items-center gap-2" @click="exportCurrentSessionRecords">
+                <Button variant="ghost" size="sm" class="cursor-pointer" @click="exportCurrentSessionRecords">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M4 12a8 8 0 1 0 16 0" />
                     <path stroke-linejoin="round" d="m12 2l3 3m-3-3l-3 3m3-3v10" />
                   </svg>
-                  导出
                 </Button>
-                <Button variant="ghost" size="sm" @click="closeRecordView">
+                <Button variant="ghost" size="sm" class="cursor-pointer" @click="closeRecordView">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M18 6L6 18M6 6l12 12" />
                   </svg>
@@ -427,7 +404,7 @@ onMounted(() => {
 
           <!-- 记录内容区域 -->
           <div class="flex-1 overflow-y-auto p-4 space-y-2 min-h-0">
-            <template v-for="(record, rIdx) in currentSessionRecord" :key="record.time">
+            <template v-for="(record, rIdx) in selectedSessionRecord" :key="record.time">
               <div v-if="record.type == 'read'" class="chat chat-start group">
                 <div class="chat-header mx-2 flex">
                   <div class="text-sm opacity-70 cursor-pointer hover:opacity-100 transition-opacity" @click="toggleTimeFormat">
@@ -489,7 +466,7 @@ onMounted(() => {
             </template>
 
             <!-- 空记录状态 -->
-            <div v-if="currentSessionRecord.length === 0" class="text-center py-8 text-muted-foreground">
+            <div v-if="selectedSessionRecord.length === 0" class="text-center py-8 text-muted-foreground">
               <div class="w-12 h-12 mx-auto mb-4 opacity-50">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
