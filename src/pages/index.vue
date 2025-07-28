@@ -15,11 +15,9 @@ import {
 import { Toaster } from '@/components/ui/sonner'
 import { useBle } from '@/composables/useBle'
 import { useLayout } from '@/composables/useLayout'
-import { useRecordCache } from '@/composables/useRecordCache'
 import { useSerial } from '@/composables/useSerial'
 import { useRecordStore } from '@/store/useRecordStore'
 import { useSerialStore } from '@/store/useSerialStore'
-import { useSettingStore } from '@/store/useSettingStore'
 import { listenNetworkStatus } from '@/utils/network'
 import 'vue-sonner/style.css'
 
@@ -30,8 +28,6 @@ defineOptions({
 const DialogProvider = defineAsyncComponent(() => import('@/components/Dialog/Provider.vue'))
 
 const { readingRecord, addRecord } = useRecordStore()
-const { currentSessionId, createSession } = useRecordCache()
-const { recordCacheEnabled } = useSettingStore()
 const { readType } = useSerialStore()
 const { showFullScreen, showTerminalMode, fullScreenBreakpoint, showSettingPanel, showQuickInputPanel, showSendPanel } = useLayout()
 const settingPanelRef = ref()
@@ -120,13 +116,6 @@ function onTerminalAreaResize(_size, _prevSize) {
   console.log('终端区域调整大小')
   terminalPanelRef.value?.fit()
 }
-
-onMounted(() => {
-  if (recordCacheEnabled.value && !currentSessionId.value) {
-    // 如果启用了缓存但没有当前会话，自动创建一个新缓存会话
-    const _sessionId = createSession()
-  }
-})
 
 // 资源清理 - 防止内存泄露
 onBeforeUnmount(async () => {
