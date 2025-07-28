@@ -17,10 +17,10 @@ import { useBle } from '@/composables/useBle'
 import { useLayout } from '@/composables/useLayout'
 import { useRecordCache } from '@/composables/useRecordCache'
 import { useSerial } from '@/composables/useSerial'
-import { listenNetworkStatus } from '@/network'
 import { useRecordStore } from '@/store/useRecordStore'
 import { useSerialStore } from '@/store/useSerialStore'
 import { useSettingStore } from '@/store/useSettingStore'
+import { listenNetworkStatus } from '@/utils/network'
 import 'vue-sonner/style.css'
 
 defineOptions({
