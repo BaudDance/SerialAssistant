@@ -7,7 +7,6 @@ export const useRecordCache = createGlobalState(() => {
   const { recordCacheEnabled } = useSettingStore()
   const { showTerminalMode } = useLayout()
 
-  const SESSIONS_KEY = 'session_list'
   const BATCH_SIZE = 100 // 批量处理大小
   const DEBOUNCE_DELAY = 500 // 防抖延迟
 
@@ -16,10 +15,10 @@ export const useRecordCache = createGlobalState(() => {
 
   // 会话管理状态
   const currentSessionId = ref(null)
-  const sessionList = useStorage(SESSIONS_KEY, ref([]))
+  const sessionList = useStorage('session:list', ref([]))
 
   // 会话记录存储
-  const sessionRecords = useStorage('session_records', ref({}))
+  const sessionRecords = useStorage('session:records', ref({}))
 
   // 防抖定时器
   let debounceTimer = null
