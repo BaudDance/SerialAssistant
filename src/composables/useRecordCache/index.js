@@ -16,7 +16,6 @@ export const useRecordCache = createGlobalState(() => {
 
   // 会话管理状态
   const currentSessionId = ref(null)
-  const currentSessionTitle = ref('')
   const sessionList = useStorage(SESSIONS_KEY, ref([]))
 
   // 会话记录存储
@@ -95,7 +94,6 @@ export const useRecordCache = createGlobalState(() => {
 
     // 设置为当前会话
     currentSessionId.value = sessionId
-    currentSessionTitle.value = sessionTitle
 
     return sessionId
   }
@@ -263,7 +261,6 @@ export const useRecordCache = createGlobalState(() => {
       // 如果删除的是当前会话，清空当前会话
       if (currentSessionId.value === sessionId) {
         currentSessionId.value = null
-        currentSessionTitle.value = ''
         cacheSize.value = 0
       }
     }
@@ -285,7 +282,6 @@ export const useRecordCache = createGlobalState(() => {
 
       // 重置当前会话
       currentSessionId.value = null
-      currentSessionTitle.value = ''
       cacheSize.value = 0
     }
     catch (error) {
@@ -407,7 +403,6 @@ export const useRecordCache = createGlobalState(() => {
     // 状态
     cacheSize,
     currentSessionId,
-    currentSessionTitle,
     sessionList,
     sessionRecords,
 
