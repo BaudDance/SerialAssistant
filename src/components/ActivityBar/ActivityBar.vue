@@ -13,8 +13,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-import { useLayout } from '@/composables/useLayout'
-
 const { open } = useDialog()
 const router = useRouter()
 
@@ -30,13 +28,9 @@ const showRecordAlert = ref(false)
 
 const isDark = useDark()
 const toggleDark = useToggle(isDark)
-const { fullScreenBreakpoint } = useLayout()
 
 const buttonClass = computed(() => {
-  if (fullScreenBreakpoint.value) {
-    return 'w-6 h-6 p-0.75'
-  }
-  return 'w-12 h-12 p-3'
+  return 'w-6 h-6 p-0.75'
 })
 
 // 处理会话历史按钮点击
