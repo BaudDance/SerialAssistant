@@ -1,4 +1,5 @@
 <script setup>
+import { useTitle } from '@vueuse/core'
 import dayjs from 'dayjs'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -11,6 +12,8 @@ import { useRecordStore } from '@/store/useRecordStore'
 defineOptions({
   name: 'RecordPage',
 })
+
+useTitle('会话记录')
 
 const router = useRouter()
 
