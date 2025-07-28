@@ -36,14 +36,9 @@ function addRecord(record) {
   rxCount.value += record.type === 'read' ? record.data.length : 0
   txCount.value += record.type === 'write' ? record.data.length : 0
 
-  // // 如果启用了缓存但没有当前会话，自动创建一个新会话
-  // if (recordCacheEnabled.value && !currentSessionId.value) {
-  //   createSession()
-  // }
-
   // 防抖保存到当前会话
   if (recordCacheEnabled.value && currentSessionId.value) {
-    debouncedSaveSessionRecords(records.value)
+    debouncedSaveSessionRecords(records.value, currentSessionId.value)
   }
 }
 
@@ -56,13 +51,13 @@ function clearRecords() {
 export const useRecordStore = createGlobalState(() => {
   const { bufferToDecFormat, bufferToHexFormat, bufferToString, stringToHtml } = useDataCode()
 
-  function exportRecords() {
-    if (!records.value.length) {
+  function exportRecords(list = records.value) {
+    if (!list.length) {
       toast.error('记录为空，导出失败')
       return
     }
 
-    const exportData = records.value.map((record) => {
+    const exportData = list.map((record) => {
       const type = record.type
       const timestamp = record.timestamp || new Date(record.time).getTime() || null
       const time = timestamp ? dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss:SSS') : null

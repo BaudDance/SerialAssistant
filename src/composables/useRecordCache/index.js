@@ -7,6 +7,7 @@ export const useRecordCache = createGlobalState(() => {
   const { recordCacheEnabled } = useSettingStore()
   const { showTerminalMode } = useLayout()
 
+  const CACHE_PREFIX = 'session:' // 缓存前缀
   const BATCH_SIZE = 100 // 批量处理大小
   const DEBOUNCE_DELAY = 500 // 防抖延迟
 
@@ -15,10 +16,19 @@ export const useRecordCache = createGlobalState(() => {
 
   // 会话管理状态
   const currentSessionId = ref(null)
-  const sessionList = useStorage('session:list', ref([]))
+  const sessionList = useStorage(`${CACHE_PREFIX}list`, ref([]))
 
   // 会话记录存储
-  const sessionRecords = useStorage('session:records', ref({}))
+  const sessionRecords = useStorage(`${CACHE_PREFIX}records`, ref({}))
+  function getSessionRecords(sessionId) {
+    return sessionRecords.value[`session_${sessionId}`]
+  }
+  function setSessionRecords(sessionId, records) {
+    sessionRecords.value[`session_${sessionId}`] = records
+  }
+  function removeSessionRecords(sessionId) {
+    delete sessionRecords.value[`session_${sessionId}`]
+  }
 
   // 防抖定时器
   let debounceTimer = null
@@ -100,25 +110,24 @@ export const useRecordCache = createGlobalState(() => {
   /**
    * 保存会话记录
    * @param {Array} records - 要保存的记录数组
-   * @param {string} sessionId - 会话ID，可选，默认使用当前会话
+   * @param {string} sessionId - 会话ID
    */
-  function saveSessionRecords(records, sessionId = null) {
+  function saveSessionRecords(records, sessionId) {
     // 终端模式下禁用record缓存功能
     if (!recordCacheEnabled.value || !records.length || showTerminalMode.value)
       return
 
-    const targetSessionId = sessionId || currentSessionId.value
-    if (!targetSessionId) {
-      console.warn('没有活跃的会话，无法保存记录')
+    if (!sessionId) {
+      console.error('sessionId不能为空')
       return
     }
 
     try {
       const serializedRecords = serializeRecords(records)
-      sessionRecords.value[`session_${targetSessionId}`] = serializedRecords
+      setSessionRecords(sessionId, serializedRecords)
 
       // 更新会话信息
-      updateSessionInfo(targetSessionId, {
+      updateSessionInfo(sessionId, {
         updatedAt: Date.now(),
         recordCount: serializedRecords.length,
       })
@@ -133,9 +142,14 @@ export const useRecordCache = createGlobalState(() => {
   /**
    * 防抖保存会话记录
    * @param {Array} records - 要保存的记录数组
-   * @param {string} sessionId - 会话ID，可选
+   * @param {string} sessionId - 会话ID，必需
    */
-  function debouncedSaveSessionRecords(records, sessionId = null) {
+  function debouncedSaveSessionRecords(records, sessionId) {
+    if (!sessionId) {
+      console.error('sessionId不能为空')
+      return
+    }
+
     if (debounceTimer) {
       clearTimeout(debounceTimer)
     }
@@ -147,21 +161,21 @@ export const useRecordCache = createGlobalState(() => {
 
   /**
    * 从会话加载记录
-   * @param {string} sessionId - 会话ID，可选，默认使用当前会话
+   * @param {string} sessionId - 会话ID
    * @returns {Array} 加载的记录数组
    */
-  function loadSessionRecords(sessionId = null) {
+  function loadSessionRecords(sessionId) {
     // 终端模式下禁用record缓存功能
     if (!recordCacheEnabled.value || showTerminalMode.value)
       return []
 
-    const targetSessionId = sessionId || currentSessionId.value
-    if (!targetSessionId) {
+    if (!sessionId) {
+      console.error('sessionId不能为空')
       return []
     }
 
     try {
-      const serializedRecords = sessionRecords.value[`session_${targetSessionId}`]
+      const serializedRecords = getSessionRecords(sessionId)
       if (!serializedRecords)
         return []
 
@@ -194,9 +208,14 @@ export const useRecordCache = createGlobalState(() => {
    * 更新当前会话的设备信息
    * @param {object} deviceInfo - 设备信息
    */
-  function updateCurrentSessionDevice(deviceInfo) {
-    if (currentSessionId.value) {
-      updateSessionInfo(currentSessionId.value, {
+  function updateCurrentSessionDevice(sessionId, deviceInfo) {
+    if (!sessionId) {
+      console.error('sessionId不能为空')
+      return
+    }
+
+    if (sessionId) {
+      updateSessionInfo(sessionId, {
         deviceInfo,
         updatedAt: Date.now(),
       })
@@ -252,7 +271,7 @@ export const useRecordCache = createGlobalState(() => {
   function deleteSession(sessionId) {
     try {
       // 删除会话记录
-      delete sessionRecords.value[`session_${sessionId}`]
+      removeSessionRecords(sessionId)
 
       // 从会话列表中移除
       sessionList.value = sessionList.value.filter(s => s.id !== sessionId)
@@ -346,16 +365,15 @@ export const useRecordCache = createGlobalState(() => {
    * 优化大量数据的会话保存性能
    * @param {Array} records - 记录数组
    * @param {Function} onProgress - 进度回调函数
-   * @param {string} sessionId - 会话ID，可选
+   * @param {string} sessionId - 会话ID
    */
-  function optimizedSaveSessionRecords(records, onProgress, sessionId = null) {
+  function optimizedSaveSessionRecords(records, onProgress, sessionId) {
     // 终端模式下禁用record缓存功能
     if (!recordCacheEnabled.value || !records.length || showTerminalMode.value)
       return
 
-    const targetSessionId = sessionId || currentSessionId.value
-    if (!targetSessionId) {
-      console.warn('没有活跃的会话，无法保存记录')
+    if (!sessionId) {
+      console.error('sessionId不能为空')
       return
     }
 
@@ -383,10 +401,10 @@ export const useRecordCache = createGlobalState(() => {
         }
       }
 
-      sessionRecords.value[`session_${targetSessionId}`] = serializedRecords
+      setSessionRecords(sessionId, serializedRecords)
 
       // 更新会话信息
-      updateSessionInfo(targetSessionId, {
+      updateSessionInfo(sessionId, {
         updatedAt: Date.now(),
         recordCount: serializedRecords.length,
       })

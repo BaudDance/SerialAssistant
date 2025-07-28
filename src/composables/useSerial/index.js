@@ -137,8 +137,8 @@ export function useSerial(
 
       // 连接成功后，尝试更新当前会话的设备信息
       try {
-        const { updateCurrentSessionDevice, createDeviceInfo } = useRecordCache()
-        if (portInfo.value) {
+        const { updateCurrentSessionDevice, createDeviceInfo, currentSessionId } = useRecordCache()
+        if (portInfo.value && currentSessionId.value) {
           const deviceInfo = createDeviceInfo(
             'serial',
             portInfo.value.port,
@@ -150,7 +150,7 @@ export function useSerial(
               path: portInfo.value.path,
             },
           )
-          updateCurrentSessionDevice(deviceInfo)
+          updateCurrentSessionDevice(currentSessionId.value, deviceInfo)
         }
       }
       catch (error) {

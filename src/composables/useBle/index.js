@@ -67,8 +67,8 @@ export function useBle(
 
       // 连接成功后，尝试更新当前会话的设备信息
       try {
-        const { updateCurrentSessionDevice, createDeviceInfo } = useRecordCache()
-        if (device.value) {
+        const { updateCurrentSessionDevice, createDeviceInfo, currentSessionId } = useRecordCache()
+        if (device.value && currentSessionId.value) {
           const deviceInfo = createDeviceInfo(
             'bluetooth',
             device.value.id,
@@ -79,7 +79,7 @@ export function useBle(
               serviceUUID: type.service,
             },
           )
-          updateCurrentSessionDevice(deviceInfo)
+          updateCurrentSessionDevice(currentSessionId.value, deviceInfo)
         }
       }
       catch (error) {
