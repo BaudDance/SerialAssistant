@@ -1,4 +1,5 @@
 <script setup>
+import { useTitle } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
 
@@ -11,6 +12,8 @@ const router = useRouter()
 function goHome() {
   router.push('/')
 }
+
+useTitle('404 - 页面未找到')
 </script>
 
 <template>
