@@ -13,7 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useRecordCache } from '@/composables/useRecordCache'
 import { useSerialStore } from '@/store/useSerialStore.js'
+import { useSettingStore } from '@/store/useSettingStore'
 
 const {
   port,
@@ -28,6 +30,9 @@ const {
 } = inject('serial')
 const { baudRate, baudRateList, dataBits, stopBits, parity, flowControl, serialRate, defaultBaudRateList } = useSerialStore()
 const { open } = useDialog()
+const { createSession } = useRecordCache()
+const { recordCacheEnabled } = useSettingStore()
+
 function openSerialPort() {
   openPort({
     baudRate: Number.parseInt(baudRate.value),
@@ -51,6 +56,10 @@ watch([baudRate, dataBits, stopBits, parity, flowControl], (_newPort) => {
 
 async function selectPort() {
   if (await requestPort()) {
+    if (recordCacheEnabled.value) {
+    // 如果启用了缓存，创建一个新缓存会话
+      const _sessionId = createSession()
+    }
     openSerialPort()
   }
 }

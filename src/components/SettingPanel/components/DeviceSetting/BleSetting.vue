@@ -11,7 +11,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useRecordCache } from '@/composables/useRecordCache'
 import { useBleStore } from '@/store/useBleStore'
+import { useSettingStore } from '@/store/useSettingStore'
 
 const {
   connected,
@@ -24,9 +26,14 @@ const {
   disconnectDevice,
 } = inject('ble')
 const { bleTypes, bleSelected, bleType } = useBleStore()
-
+const { createSession } = useRecordCache()
+const { recordCacheEnabled } = useSettingStore()
 async function selectDevice() {
   if (await requestDevice(bleType.value)) {
+    if (recordCacheEnabled.value) {
+    // 如果启用了缓存，创建一个新缓存会话
+      const _sessionId = createSession()
+    }
     connect()
   }
 }
