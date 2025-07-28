@@ -12,7 +12,6 @@ export const useRecordCache = createGlobalState(() => {
   const DEBOUNCE_DELAY = 500 // 防抖延迟
 
   // 缓存状态
-  const isLoading = ref(false)
   const cacheSize = ref(0)
 
   // 会话管理状态
@@ -118,7 +117,6 @@ export const useRecordCache = createGlobalState(() => {
     }
 
     try {
-      isLoading.value = true
       const serializedRecords = serializeRecords(records)
       sessionRecords.value[`session_${targetSessionId}`] = serializedRecords
 
@@ -132,9 +130,6 @@ export const useRecordCache = createGlobalState(() => {
     }
     catch (error) {
       console.error('保存会话记录失败:', error)
-    }
-    finally {
-      isLoading.value = false
     }
   }
 
@@ -169,7 +164,6 @@ export const useRecordCache = createGlobalState(() => {
     }
 
     try {
-      isLoading.value = true
       const serializedRecords = sessionRecords.value[`session_${targetSessionId}`]
       if (!serializedRecords)
         return []
@@ -182,39 +176,7 @@ export const useRecordCache = createGlobalState(() => {
       console.error('从会话加载记录失败:', error)
       return []
     }
-    finally {
-      isLoading.value = false
-    }
   }
-
-  /**
-   * 保存会话列表
-   */
-  // function saveSessionList() {
-  //   try {
-  //     // 深度克隆会话列表以确保可以正确存储到localStorage
-  //     const sessionsToSave = JSON.parse(JSON.stringify(sessionList.value))
-  //     storage.setItem(SESSIONS_KEY, sessionsToSave)
-  //   }
-  //   catch (error) {
-  //     console.error('保存会话列表失败:', error)
-  //   }
-  // }
-
-  /**
-   * 加载会话列表
-   */
-  // function loadSessionList() {
-  //   try {
-  //     const sessions = storage.getItem(SESSIONS_KEY)
-  //     if (sessions && Array.isArray(sessions)) {
-  //       sessionList.value = sessions
-  //     }
-  //   }
-  //   catch (error) {
-  //     console.error('加载会话列表失败:', error)
-  //   }
-  // }
 
   /**
    * 更新会话信息
@@ -228,7 +190,6 @@ export const useRecordCache = createGlobalState(() => {
         ...sessionList.value[sessionIndex],
         ...updates,
       }
-      // saveSessionList()
     }
   }
 
@@ -298,7 +259,6 @@ export const useRecordCache = createGlobalState(() => {
 
       // 从会话列表中移除
       sessionList.value = sessionList.value.filter(s => s.id !== sessionId)
-      // saveSessionList()
 
       // 如果删除的是当前会话，清空当前会话
       if (currentSessionId.value === sessionId) {
@@ -405,8 +365,6 @@ export const useRecordCache = createGlobalState(() => {
     }
 
     try {
-      isLoading.value = true
-
       // 分批处理大量数据
       const batches = []
       for (let i = 0; i < records.length; i += BATCH_SIZE) {
@@ -443,14 +401,10 @@ export const useRecordCache = createGlobalState(() => {
     catch (error) {
       console.error('优化保存会话记录失败:', error)
     }
-    finally {
-      isLoading.value = false
-    }
   }
 
   return {
     // 状态
-    isLoading,
     cacheSize,
     currentSessionId,
     currentSessionTitle,
@@ -464,7 +418,6 @@ export const useRecordCache = createGlobalState(() => {
     loadSessionRecords,
     deleteSession,
     clearAllSessions,
-    // loadSessionList,
     updateSessionInfo,
     updateCurrentSessionDevice,
     getSessionsByDevice,
