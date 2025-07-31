@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue'
 import { useDataCode } from '@/composables/useDataCode/useDataCode'
 import { useSerialStore } from '@/store/useSerialStore'
 import { useSettingStore } from '@/store/useSettingStore'
@@ -6,7 +7,8 @@ import { dialogKeys, useDialog } from './composable'
 
 const { visible } = useDialog()
 const { dataCode } = useDataCode()
-const { lineEndingMode } = useSettingStore()
+const { lineEndingMode, lineSelfEnding } = useSettingStore()
+const showCustomInput = computed(() => lineEndingMode.value === '自定义')
 const { hasDecTyps } = useSerialStore()
 </script>
 
@@ -47,6 +49,17 @@ const { hasDecTyps } = useSerialStore()
               </SelectGroup>
             </SelectContent>
           </Select>
+        </div>
+
+        <div v-if="showCustomInput" class="flex h-9 items-center">
+          <Label class="w-36">自定义结束符</Label>
+          <div class="w-full flex items-center gap-2">
+            <Input
+              v-model="lineSelfEnding"
+              placeholder="自定义结束字符串"
+              class="w-full"
+            />
+          </div>
         </div>
 
         <div class="flex h-9">
