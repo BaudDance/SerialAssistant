@@ -1,6 +1,6 @@
 <script setup>
 import { useLocalStorage } from '@vueuse/core'
-import { computed, inject, onMounted, onUnmounted, ref } from 'vue'
+import { computed, inject, nextTick, onMounted, onUnmounted, ref, useId } from 'vue'
 import { toast } from 'vue-sonner'
 import draggable from 'vuedraggable'
 import {
@@ -52,30 +52,36 @@ const isLoopSending = ref(false)
 const loopInterval = ref(5000) // 默认循环间隔5秒
 const loopTimer = ref(null)
 
+// 备注显示状态
+const showRemarks = useLocalStorage('quickInputs:showRemarks', ref(true), {
+  listenToStorageChanges: false,
+})
+
 // 默认快捷输入数据
 const defaultQuickInputs = [
-  { id: 1, enabled: true, content: 'AT+RST', index: 1, delay: 1000, isHex: false },
-  { id: 2, enabled: true, content: 'AT+GMR', index: 2, delay: 1000, isHex: false },
-  { id: 3, enabled: true, content: 'AT+CWLAP', index: 3, delay: 1000, isHex: false },
-  { id: 4, enabled: false, content: '01 02 03 04', index: 4, delay: 1000, isHex: true },
-  { id: 5, enabled: false, content: 'AT+CWJAP="SSID","PASSWORD"', index: 5, delay: 1000, isHex: false },
+  { id: useId(), enabled: true, content: 'AT+RST', remark: '重启模块', index: 1, delay: 1000, isHex: false, showRemarkEdit: false },
+  { id: useId(), enabled: true, content: 'AT+GMR', remark: '查询版本信息', index: 2, delay: 1000, isHex: false, showRemarkEdit: false },
+  { id: useId(), enabled: true, content: 'AT+CWLAP', remark: '扫描WiFi热点', index: 3, delay: 1000, isHex: false, showRemarkEdit: false },
+  { id: useId(), enabled: false, content: '01 02 03 04', remark: 'HEX测试数据', index: 4, delay: 1000, isHex: true, showRemarkEdit: false },
+  { id: useId(), enabled: false, content: 'AT+CWJAP="SSID","PASSWORD"', remark: '连接WiFi网络', index: 5, delay: 1000, isHex: false, showRemarkEdit: false },
 ]
+
+console.log('useId:', defaultQuickInputs)
 
 // 使用本地存储保存快捷输入数据
 const quickInputs = useLocalStorage('quickInputs', defaultQuickInputs)
 
 // 新增一行
 function addRow() {
-  const newId = quickInputs.value.length > 0
-    ? Math.max(...quickInputs.value.map(item => item.id)) + 1
-    : 1
   quickInputs.value.push({
-    id: newId,
+    id: useId(),
     enabled: false,
     content: '',
     index: quickInputs.value.length + 1,
     delay: 1000,
     isHex: sendType.value === 'hex',
+    remark: '',
+    showRemarkEdit: false,
   })
   updateIndexes()
 }
@@ -288,6 +294,28 @@ onMounted(() => {
   updateIndexes()
 })
 
+// 切换备注编辑状态
+function toggleRemarkEdit(item) {
+  item.showRemarkEdit = !item.showRemarkEdit
+  if (item.showRemarkEdit) {
+    nextTick(() => {
+      // 查找当前项对应的输入框并聚焦
+      const inputs = document.querySelectorAll('.remark-input')
+      const targetInput = Array.from(inputs).find(input =>
+        input.closest('tr')?.querySelector('input[placeholder="请输入内容"]')?.value === item.content,
+      )
+      if (targetInput) {
+        targetInput.focus()
+      }
+    })
+  }
+}
+
+// 切换备注显示状态
+function toggleRemarkVisibility() {
+  showRemarks.value = !showRemarks.value
+}
+
 onUnmounted(() => {
   stopLoopSending()
 })
@@ -482,8 +510,28 @@ onUnmounted(() => {
             <TableHead class="w-[50px] text-center">
               启用
             </TableHead>
-            <TableHead class="text-center">
-              内容
+            <TableHead class="flex justify-center items-center gap-2">
+              <div>内容</div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger as-child>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      class="h-7 w-7 cursor-pointer"
+                      :class="{ 'bg-accent': showRemarks }"
+                      @click="toggleRemarkVisibility"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-circle">
+                        <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+                      </svg>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{{ showRemarks ? '隐藏备注' : '显示备注' }}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </TableHead>
             <TableHead class="w-[60px] text-center">
               HEX
@@ -522,11 +570,38 @@ onUnmounted(() => {
                       <circle cx="15" cy="19" r="1" />
                     </svg>
                   </div>
-                  <Input
-                    v-model="item.content"
-                    placeholder="请输入内容"
-                    class="w-full"
-                  />
+                  <div class="w-full space-y-1">
+                    <Input
+                      v-model="item.content"
+                      placeholder="请输入内容"
+                    />
+                    <div v-if="showRemarks">
+                      <div
+                        v-if="item.remark || item.showRemarkEdit"
+                        class="text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+                        @click="toggleRemarkEdit(item)"
+                      >
+                        <template v-if="!item.showRemarkEdit">
+                          {{ item.remark || '点击添加备注' }}
+                        </template>
+                        <Input
+                          v-else
+                          v-model="item.remark"
+                          placeholder="输入备注内容"
+                          class="text-xs h-6 remark-input"
+                          @blur="item.showRemarkEdit = false"
+                          @keyup.enter="item.showRemarkEdit = false"
+                        />
+                      </div>
+                      <div
+                        v-else
+                        class="text-xs text-muted-foreground/50 cursor-pointer hover:text-muted-foreground transition-colors"
+                        @click="toggleRemarkEdit(item)"
+                      >
+                        点击添加备注
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </TableCell>
               <TableCell class="text-center">
