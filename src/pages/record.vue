@@ -2,7 +2,6 @@
 import { useTitle } from '@vueuse/core'
 import dayjs from 'dayjs'
 import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { useDataCode } from '@/composables/useDataCode/useDataCode'
 import { useRecordCache } from '@/composables/useRecordCache'
@@ -13,8 +12,6 @@ defineOptions({
 })
 
 useTitle('会话记录')
-
-const router = useRouter()
 
 const {
   exportRecords,
