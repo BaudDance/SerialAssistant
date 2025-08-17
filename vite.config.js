@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => {
 
       // https://github.com/antfu/unplugin-auto-import
       AutoImport({
-        include: [/\.[jt]sx?$/, /\.vue$/, /\.vue\?vue/, /\.md$/],
+        include: [/\.[jt]sx?$/, /\.vue$/, /\.vue\?vue/],
         imports: [
           'vue',
           '@vueuse/core',
@@ -35,7 +35,7 @@ export default defineConfig(({ mode }) => {
         // allow auto load markdown components under `./src/components/`
         extensions: ['vue', 'md'],
         // allow auto import and register components used in markdown
-        include: [/\.vue$/, /\.vue\?vue/, /\.md$/],
+        include: [/\.vue$/, /\.vue\?vue/],
         dts: 'src/components.d.ts',
       }),
 
@@ -54,6 +54,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
+      host: true,
       port: Number(env.VITE_APP_DEV_PORT),
     },
     build: {
