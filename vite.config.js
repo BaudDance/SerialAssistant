@@ -12,6 +12,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   return {
+    base: '/',
     plugins: [
       vue(),
 
@@ -75,9 +76,12 @@ export default defineConfig(({ mode }) => {
       minify: 'terser', // 使用 'terser' 获得更好压缩
       terserOptions: {
         compress: {
-          drop_console: true, // 移除 console.* 调用但保留pure_funcs不包括的
+          drop_console: false, // 在生产环境保留 console，方便调试 Docker 构建问题
           drop_debugger: true, // 移除 debugger 语句
-          pure_funcs: ['console.log', 'console.info'], // 移除 console.log 和 console.info 调用
+          pure_funcs: [], // 暂时不移除任何函数调用
+        },
+        mangle: {
+          keep_fnames: true, // 保持函数名，避免某些依赖库出错
         },
       },
     },
