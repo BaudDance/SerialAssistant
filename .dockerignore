@@ -1,53 +1,40 @@
-# 版本控制
-.git
-.gitignore
-.github
-
 # 依赖目录
 node_modules
 
-# 构建输出
+# 构建产物
 dist
-dist-ssr
+.vite
 
-# 日志文件
-logs
+# 开发工具
+.vscode
+.idea
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
 
-# 编辑器目录和文件
-.vscode
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# Git
+.git
+.gitignore
+.github
 
-# 测试文件
+# 测试
+coverage
 test
+*.test.js
+*.spec.js
 vitest.config.js
 
-# 本地环境文件
+# 环境变量
+.env
 .env.local
 .env.*.local
 
-# Docker相关
+# 其他
+.DS_Store
+README.md
+CHANGELOG.md
+docker-compose.yml
 Dockerfile
 .dockerignore
-
-# 其他不需要的文件
-README.md
-LICENSE
-.editorconfig
-.nvmrc
-.npmrc
-*stats.html
-
-# Netlify相关
-.netlify
-netlify.toml
