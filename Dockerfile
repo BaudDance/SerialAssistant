@@ -9,14 +9,14 @@ WORKDIR /app
 ## 安装pnpm
 RUN npm install -g pnpm@10
 
-## 复制package.json和pnpm-workspace.yaml
-COPY package.json pnpm-workspace.yaml* ./
+## 复制依赖相关文件
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+## 安装依赖
+RUN pnpm install --frozen-lockfile
 
 ## 复制所有文件
 COPY . .
-
-## 安装依赖
-RUN pnpm install
 
 ## 构建应用
 RUN pnpm build
@@ -30,7 +30,7 @@ FROM nginx:stable-alpine AS production
 COPY --from=build /app/dist /usr/share/nginx/html
 
 ## 复制nginx配置文件
-COPY --from=build /app/nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 ## 暴露nginx容器80端口
 EXPOSE 80
