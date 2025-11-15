@@ -16,7 +16,8 @@ export function useBle(
       && (await navigator.bluetooth.getAvailability()),
   )
   const nprogress = useNprogress()
-  const bluetooth = navigator.bluetooth
+  // 安全地访问 navigator.bluetooth，避免在不支持的环境中报错
+  const bluetooth = (typeof navigator !== 'undefined' && 'bluetooth' in navigator) ? navigator.bluetooth : null
   const device = ref(undefined)
   const deviceName = computed(() => device.value?.name)
   const server = ref(undefined)
@@ -27,6 +28,10 @@ export function useBle(
   const disconnecting = ref(false)
 
   async function requestDevice(type) {
+    if (!bluetooth) {
+      console.warn('Web Bluetooth API 不支持')
+      return null
+    }
     try {
       connecting.value = true
       nprogress.start()
