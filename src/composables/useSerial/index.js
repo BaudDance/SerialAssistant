@@ -32,7 +32,8 @@ export function useSerial(
   const { onReadData, onReadFrame } = options
   const nprogress = useNprogress()
   const isSupported = useSupported(() => navigator && 'serial' in navigator)
-  const serial = navigator.serial
+  // 安全地访问 navigator.serial，避免在不支持的环境中报错
+  const serial = isSupported.value ? navigator.serial : null
   const port = ref(undefined)
   const portName = computed(() => getDeviceName(port.value))
   const ports = ref([])
@@ -58,10 +59,16 @@ export function useSerial(
   let keepReading
   let readingClosed
   async function updatePorts() {
+    if (!serial)
+      return
     ports.value = await serial.getPorts()
   }
 
   async function requestPort() {
+    if (!serial) {
+      console.warn('Web Serial API 不支持')
+      return null
+    }
     try {
       connecting.value = true
       nprogress.start()
@@ -219,13 +226,15 @@ export function useSerial(
     writer.releaseLock()
   }
 
-  serial.addEventListener('disconnect', async (event) => {
-    if (port.value == event.target) {
-      await closePort()
-    }
-  })
-
-  updatePorts()
+  // 只在支持 Web Serial API 的环境中添加事件监听器
+  if (serial) {
+    serial.addEventListener('disconnect', async (event) => {
+      if (port.value == event.target) {
+        await closePort()
+      }
+    })
+    updatePorts()
+  }
   return {
     isSupported,
     requestPort,
