@@ -1,13 +1,17 @@
-import { useSupported, useTimeoutFn } from '@vueuse/core'
-import { computed, ref } from 'vue'
+import { useSupported } from '@vueuse/core'
+import { computed, ref, watch } from 'vue'
 import USBJson from '@/assets/usb-device.json'
+import { useDataCode } from '@/composables/useDataCode/useDataCode'
 import { useNprogress } from '@/composables/useNprogress'
 import { useRecordCache } from '@/composables/useRecordCache'
+import { useSerialWorker } from '@/composables/useSerialWorker'
+import { useSerialStore } from '@/store/useSerialStore'
+import { useSettingStore } from '@/store/useSettingStore'
 
 /**
- *  Get device name from USBJson
+ * Get device name from USBJson
  * @param {SerialPort} port
- * @returns
+ * @returns device display name
  */
 export function getDeviceName(port) {
   if (!port)
@@ -18,21 +22,17 @@ export function getDeviceName(port) {
   const vendor = USBJson[usbVendorId.toString(16).padStart(4, '0')]
   if (!vendor)
     return undefined
-  const product = vendor.devices[usbProductId.toString(16).padStart(4, '0')]
-  console.debug('getDeviceName', product ? product.name : undefined)
+  const product = vendor.devices[usbProductId?.toString(16)?.padStart(4, '0')]
   return product ? product.devname : undefined
 }
 
-export function useSerial(
-  options = {
-    onReadData: (data) => {},
-    onReadFrame: (frame) => {},
-  },
-) {
-  const { onReadData, onReadFrame } = options
+export function useSerial() {
   const nprogress = useNprogress()
+  const worker = useSerialWorker()
+  const { readType } = useSerialStore()
+  const { recordCacheEnabled } = useSettingStore()
+  const { dataCode } = useDataCode()
   const isSupported = useSupported(() => navigator && 'serial' in navigator)
-  // 安全地访问 navigator.serial，避免在不支持的环境中报错
   const serial = isSupported.value ? navigator.serial : null
   const port = ref(undefined)
   const portName = computed(() => getDeviceName(port.value))
@@ -41,7 +41,6 @@ export function useSerial(
   const connecting = ref(false)
   const disconnecting = ref(false)
 
-  // 获取端口信息
   const portInfo = computed(() => {
     if (!port.value)
       return null
@@ -56,15 +55,14 @@ export function useSerial(
       serialNumber: info.serialNumber,
     }
   })
-  let keepReading
-  let readingClosed
+
   async function updatePorts() {
     if (!serial)
       return
     ports.value = await serial.getPorts()
   }
 
-  async function requestPort() {
+  async function requestPort(options = {}) {
     if (!serial) {
       console.warn('Web Serial API 不支持')
       return null
@@ -73,10 +71,9 @@ export function useSerial(
       connecting.value = true
       nprogress.start()
       const p = await serial.requestPort(options)
-      console.debug('requestPort', p)
       if (p) {
         port.value = p
-        updatePorts()
+        await updatePorts()
         return p
       }
       return null
@@ -94,78 +91,65 @@ export function useSerial(
   function setPort(p) {
     port.value = p
   }
-  let reader
-  async function startReadLoop() {
-    let buffer = new Uint8Array()
-    const { start, stop } = useTimeoutFn(
-      () => {
-        onReadFrame(buffer)
-        buffer = new Uint8Array()
-      },
-      5,
-      { immediate: false },
-    )
-    keepReading = true
-    while (port.value.readable && keepReading) {
-      reader = port.value.readable.getReader()
-      try {
-        while (keepReading) {
-          const { value, done } = await reader.read()
-          if (value) {
-            stop()
-            buffer = new Uint8Array([...buffer, ...value])
-            onReadData(value)
-            if (window.term) {
-              window.term.write(value)
-            }
-            start()
-          }
-          if (done) {
-            reader.releaseLock()
-            break
-          }
-        }
+
+  async function updateWorkerSettings() {
+    await worker.updateSettings({
+      readDisplay: readType.value,
+      dataCode: dataCode.value,
+      recordCacheEnabled: recordCacheEnabled.value,
+    })
+  }
+
+  async function updateCurrentSessionDevice() {
+    try {
+      const { updateCurrentSessionDevice, createDeviceInfo, currentSessionId } = useRecordCache()
+      if (portInfo.value && currentSessionId.value) {
+        const deviceInfo = createDeviceInfo(
+          'serial',
+          portInfo.value.port,
+          portInfo.value.friendlyName,
+          {
+            vendorId: portInfo.value.vendorId,
+            productId: portInfo.value.productId,
+            serialNumber: portInfo.value.serialNumber,
+            path: portInfo.value.path,
+          },
+        )
+        await updateCurrentSessionDevice(currentSessionId.value, deviceInfo)
       }
-      catch (error) {
-        console.error(error)
-      }
-      finally {
-        reader.releaseLock()
-      }
+    }
+    catch (error) {
+      console.warn('更新会话设备信息失败:', error)
     }
   }
 
   async function openPort(options = { baudRate: 9600 }) {
+    if (!port.value)
+      throw new Error('请先选择串口设备')
+
     try {
       connecting.value = true
+      await updateWorkerSettings()
       await port.value.open(options)
-      readingClosed = startReadLoop()
+      await worker.attachSerialStreams({
+        readable: port.value.readable,
+        writable: port.value.writable,
+        sessionId: worker.currentSessionId.value,
+        readDisplay: readType.value,
+        dataCode: dataCode.value,
+        recordCacheEnabled: recordCacheEnabled.value,
+      }, [port.value.readable, port.value.writable])
       connected.value = true
-
-      // 连接成功后，尝试更新当前会话的设备信息
-      try {
-        const { updateCurrentSessionDevice, createDeviceInfo, currentSessionId } = useRecordCache()
-        if (portInfo.value && currentSessionId.value) {
-          const deviceInfo = createDeviceInfo(
-            'serial',
-            portInfo.value.port,
-            portInfo.value.friendlyName,
-            {
-              vendorId: portInfo.value.vendorId,
-              productId: portInfo.value.productId,
-              serialNumber: portInfo.value.serialNumber,
-              path: portInfo.value.path,
-            },
-          )
-          updateCurrentSessionDevice(currentSessionId.value, deviceInfo)
-        }
-      }
-      catch (error) {
-        console.warn('更新会话设备信息失败:', error)
-      }
+      await updateCurrentSessionDevice()
     }
     catch (error) {
       console.error('打开串口时出现错误:', error)
+      try {
+        await worker.closeSerialStreams()
+        await port.value?.close()
+      }
+      catch {}
+      connected.value = false
       throw error
     }
     finally {
@@ -179,37 +163,22 @@ export function useSerial(
   }
 
   async function closePort() {
-    console.log('开始关闭串口连接...')
     disconnecting.value = true
-    keepReading = false
     nprogress.start()
     try {
-      // 取消读取操作
-      if (reader) {
-        console.log('取消串口读取器')
-        await reader.cancel()
-        reader = null
+      await worker.closeSerialStreams()
+      if (port.value) {
+        try {
+          await port.value.close()
+        }
+        catch (error) {
+          console.warn('关闭串口对象失败:', error)
+        }
       }
-
-      // 等待读取循环结束
-      if (readingClosed) {
-        console.log('等待读取循环结束')
-        await readingClosed
-        readingClosed = null
-      }
-
-      // 关闭串口
-      if (port.value && port.value.readable) {
-        console.log('关闭串口')
-        await port.value.close()
-      }
-
       connected.value = false
-      console.log('串口连接已关闭')
     }
     catch (error) {
       console.error('关闭串口时出现错误:', error)
-      // 即使出错也要设置为未连接状态
       connected.value = false
     }
     finally {
@@ -217,24 +186,23 @@ export function useSerial(
       nprogress.done()
     }
   }
-  async function sendHex(hexBuffer) {
-    const writer = port.value.writable.getWriter()
-    await writer.write(hexBuffer)
 
-    // 允许稍后关闭串口。
-    writer.close()
-    writer.releaseLock()
+  async function sendHex(hexBuffer) {
+    await worker.sendSerial(hexBuffer)
   }
 
-  // 只在支持 Web Serial API 的环境中添加事件监听器
+  watch([readType, dataCode, recordCacheEnabled], () => {
+    updateWorkerSettings().catch(error => console.warn('更新串口 Worker 设置失败:', error))
+  }, { immediate: true })
+
   if (serial) {
     serial.addEventListener('disconnect', async (event) => {
-      if (port.value == event.target) {
+      if (port.value === event.target)
         await closePort()
-      }
     })
     updatePorts()
   }
+
   return {
     isSupported,
     requestPort,
@@ -251,5 +219,8 @@ export function useSerial(
     connecting,
     disconnecting,
     isConnected: connected,
+    setTerminalActive: worker.setTerminalActive,
+    onTerminalData: worker.onTerminalData,
+    ackTerminalData: worker.ackTerminalData,
   }
 }

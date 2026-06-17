@@ -27,7 +27,7 @@ defineOptions({
 
 const DialogProvider = defineAsyncComponent(() => import('@/components/Dialog/Provider.vue'))
 
-const { readingRecord, addRecord } = useRecordStore()
+const { addRecord } = useRecordStore()
 const { readType } = useSerialStore()
 const { showFullScreen, showTerminalMode, fullScreenBreakpoint, showSettingPanel, showQuickInputPanel, showSendPanel } = useLayout()
 const settingPanelRef = ref()
@@ -75,40 +75,19 @@ watch(showFullScreen, (newVal) => {
   }
 })
 
-function onReadData(data) {
-  if (readingRecord.value) {
-    readingRecord.value = {
-      ...readingRecord.value,
-      data: Uint8Array.from([...readingRecord.value.data, ...data]),
-    }
-  }
-  else {
-    readingRecord.value = {
-      type: 'read',
-      data,
-      time: new Date(),
-      display: readType.value,
-    }
-  }
-}
-
-function onReadFrame(frame) {
+async function onBleReadFrame(frame) {
   addRecord({
     type: 'read',
     data: frame,
     time: new Date(),
     display: readType.value,
   })
-  readingRecord.value = undefined
 }
 
-const serial = useSerial({
-  onReadData,
-  onReadFrame,
-})
+const serial = useSerial()
 provide('serial', serial)
 
-const ble = useBle({ onReadFrame })
+const ble = useBle({ onReadFrame: onBleReadFrame })
 provide('ble', ble)
 
 const terminalPanelRef = ref(null)

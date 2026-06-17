@@ -12,7 +12,7 @@ import { getOS } from '@/utils/os'
 export const useSendStore = createGlobalState(() => {
   const { sendHex: serialSendHex } = inject('serial')
   const { sendHex: bleSendHex } = inject('ble')
-  const { records, addRecord } = useRecordStore()
+  const { records, addRecord, getRecentWriteRecords } = useRecordStore()
   const { lineEnding, deviceType, sendHexInputMode } = useSettingStore()
   const { sendType } = useSerialStore()
   const { checkAlgorithm, checkAlgorithms } = useCheckDigit()
@@ -77,13 +77,15 @@ export const useSendStore = createGlobalState(() => {
   }
 
   async function send() {
-    await sendHex(sendBuffer.value)
-    addRecord({
+    const data = sendBuffer.value
+    await sendHex(data)
+    await addRecord({
       type: 'write',
-      data: sendBuffer.value,
+      data,
       time: new Date(),
       display: sendType.value,
     })
+    await refreshSendHistory()
   }
   watch(sendType, (value) => {
     if (!sendData.value)
@@ -96,9 +98,18 @@ export const useSendStore = createGlobalState(() => {
     }
   })
 
+  const workerSendHistory = ref([])
   const sendHistory = computed(() => {
+    if (getRecentWriteRecords)
+      return workerSendHistory.value
     return records.value.filter(item => item.type === 'write')
   })
+
+  async function refreshSendHistory() {
+    if (!getRecentWriteRecords)
+      return
+    workerSendHistory.value = await getRecentWriteRecords(100)
+  }
 
   function onInput() {
     // 当用户手动输入时，重置历史索引
@@ -140,32 +151,40 @@ export const useSendStore = createGlobalState(() => {
   const up = keys.Up
   const down = keys.Down
 
-  watch(shiftEnter, (v) => {
-    if (v) {
-      console.log('shift+Enter have been pressed')
-      send()
-    }
-  })
+  if (shiftEnter) {
+    watch(shiftEnter, (v) => {
+      if (v) {
+        console.log('shift+Enter have been pressed')
+        send()
+      }
+    })
+  }
 
-  watch(saveKey, (v) => {
-    if (v) {
-      console.log('Ctrl + S have been pressed')
-      reformat()
-    }
-  })
+  if (saveKey) {
+    watch(saveKey, (v) => {
+      if (v) {
+        console.log('Ctrl + S have been pressed')
+        reformat()
+      }
+    })
+  }
 
-  watch(up, (v) => {
-    if (v) {
-      console.log('Up have been pressed')
-      navigateHistory('up')
-    }
-  })
-  watch(down, (v) => {
-    if (v) {
-      console.log('Down have been pressed')
-      navigateHistory('down')
-    }
-  })
+  if (up) {
+    watch(up, (v) => {
+      if (v) {
+        console.log('Up have been pressed')
+        navigateHistory('up')
+      }
+    })
+  }
+  if (down) {
+    watch(down, (v) => {
+      if (v) {
+        console.log('Down have been pressed')
+        navigateHistory('down')
+      }
+    })
+  }
 
   function reformat() {
     if (sendType.value === 'hex') {
@@ -196,7 +215,9 @@ export const useSendStore = createGlobalState(() => {
     sendData.value = data
   }
 
-  function navigateHistory(direction) {
+  async function navigateHistory(direction) {
+    if (getRecentWriteRecords)
+      await refreshSendHistory()
     const history = sendHistory.value
     console.log('History length:', history.length)
     if (history.length === 0)

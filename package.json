@@ -22,6 +22,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.11",
     "@tanstack/vue-table": "^8.21.3",
+    "@tanstack/vue-virtual": "^3.13.11",
     "@vee-validate/zod": "^4.15.1",
     "@vueuse/core": "^10.2.1",
     "@xterm/addon-fit": "^0.10.0",

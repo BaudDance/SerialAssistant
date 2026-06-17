@@ -11,7 +11,7 @@ import { useSendStore } from '@/store/useSendStore'
 import { useSerialStore } from '@/store/useSerialStore'
 
 const { readType, sendType, nextReadType, nextSendType } = useSerialStore()
-const { pinBottom, clearRecords, readingRecord, rxCount, txCount, exportRecords } = useRecordStore()
+const { pinBottom, clearRecords, exportRecords } = useRecordStore()
 const { clear } = useSendStore()
 
 function toggleReadType() {

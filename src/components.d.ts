@@ -109,6 +109,7 @@ declare module 'vue' {
     PopoverTrigger: typeof import('./components/ui/popover/PopoverTrigger.vue')['default']
     Provider: typeof import('./components/Dialog/Provider.vue')['default']
     QuickInputPanel: typeof import('./components/QuickInputPanel/QuickInputPanel.vue')['default']
+    RecordList: typeof import('./components/RecordPanel/RecordList.vue')['default']
     RecordPanel: typeof import('./components/RecordPanel/RecordPanel.vue')['default']
     ResizableHandle: typeof import('./components/ui/resizable/ResizableHandle.vue')['default']
     ResizablePanel: typeof import('./components/ui/resizable/ResizablePanel.vue')['default']

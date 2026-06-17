@@ -12,7 +12,7 @@ import { useLayout } from '@/composables/useLayout'
 import { useRecordStore } from '@/store/useRecordStore'
 import { useSendStore } from '@/store/useSendStore'
 
-const { readingRecord, txCount, rxCount } = useRecordStore()
+const { liveRecordPreview, txCount, rxCount } = useRecordStore()
 const { showTerminalMode } = useLayout()
 const { online, pause } = useOnline()
 onBeforeUnmount(() => {
@@ -86,7 +86,7 @@ const {
         </div>
         <Separator orientation="vertical" />
         <div>
-          Rx: {{ rxCount + (readingRecord?.data.length || 0) }} Bytes
+          Rx: {{ rxCount + (liveRecordPreview?.byteLength || 0) }} Bytes
         </div>
       </template>
     </div>

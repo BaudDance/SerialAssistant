@@ -25,6 +25,7 @@ const fitAddon = new FitAddon()
 
 // xterm 实例
 window.term = null
+let cleanupTerminalData = null
 
 const xtermOptions = computed(() => ({
   fontFamily: 'Consolas, \'Courier New\', monospace',
@@ -82,9 +83,23 @@ function initTerminal(el) {
     console.log('term.onData', word)
     sendData(word)
   })
+
+  cleanupTerminalData = serial.onTerminalData?.(({ dataBuffer }) => {
+    if (!window.term) {
+      serial.ackTerminalData?.()
+      return
+    }
+    window.term.write(new Uint8Array(dataBuffer), () => {
+      serial.ackTerminalData?.()
+    })
+  })
+  updateTerminalActive()
 }
 
 function disposeTerminal() {
+  updateTerminalActive(false)
+  cleanupTerminalData?.()
+  cleanupTerminalData = null
   window.term?.dispose()
   window.term = null
 }
@@ -94,6 +109,21 @@ function onTerminalResize() {
 }
 function removeResizeListener() {
   window.removeEventListener('resize', fitTerm)
+}
+
+function updateTerminalActive(forceActive) {
+  const active = typeof forceActive === 'boolean'
+    ? forceActive
+    : Boolean(
+        window.term
+        && isConnected.value
+        && deviceType.value === 'serial'
+        && document.visibilityState === 'visible',
+      )
+  const result = serial.setTerminalActive?.(active)
+  result?.catch?.((error) => {
+    console.warn('更新终端接收状态失败:', error)
+  })
 }
 
 watch(isDark, (val) => {
@@ -115,7 +145,18 @@ watch(isConnected, (val) => {
   }
 })
 
+watch(deviceType, () => {
+  updateTerminalActive()
+})
+
+function onVisibilityChange() {
+  updateTerminalActive()
+}
+
+document.addEventListener('visibilitychange', onVisibilityChange)
+
 onBeforeUnmount(() => {
+  document.removeEventListener('visibilitychange', onVisibilityChange)
   removeResizeListener()
   disposeTerminal()
 })
