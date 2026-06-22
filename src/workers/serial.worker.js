@@ -830,6 +830,7 @@ async function handleAttachSerialStreams(payload) {
   await recomputeCurrentStats(currentSessionId)
   terminalCursorIndex = recordCounts.get(currentSessionId) || 0
   terminalHasStarted = false
+  writeQueue = Promise.resolve()
   writer = writableStream?.getWriter()
   readLoopPromise = startReadLoop()
   return {
@@ -840,9 +841,17 @@ async function handleAttachSerialStreams(payload) {
 
 async function handleCloseSerialStreams() {
   keepReading = false
+  const activeReader = reader
+  const activeWriter = writer
+  const activeReadLoop = readLoopPromise
+
   if (frameTimer) {
     clearTimeout(frameTimer)
     frameTimer = null
+  }
+  if (terminalFlushTimer) {
+    clearTimeout(terminalFlushTimer)
+    terminalFlushTimer = null
   }
   try {
     await flushFrame()
@@ -851,15 +860,40 @@ async function handleCloseSerialStreams() {
     console.warn('关闭串口前保存帧失败:', error)
   }
   try {
-    await reader?.cancel()
+    await activeReader?.cancel()
   }
   catch {}
   try {
-    await readLoopPromise
+    await activeReadLoop
   }
   catch {}
   try {
-    writer?.releaseLock()
+    await writeQueue
+  }
+  catch (error) {
+    console.warn('关闭串口前等待发送队列失败:', error)
+  }
+  writeQueue = Promise.resolve()
+  try {
+    await activeWriter?.close()
+  }
+  catch (error) {
+    if (activeWriter) {
+      console.warn('关闭串口写入流失败，尝试中止:', error)
+      try {
+        await activeWriter.abort(error)
+      }
+      catch (abortError) {
+        console.warn('中止串口写入流失败:', abortError)
+      }
+    }
+  }
+  try {
+    activeWriter?.releaseLock()
+  }
+  catch {}
+  try {
+    activeReader?.releaseLock()
   }
   catch {}
   reader = null
@@ -875,10 +909,14 @@ async function handleCloseSerialStreams() {
 
 async function handleSendSerial(payload) {
   const data = new Uint8Array(payload.dataBuffer || [])
-  if (!writer)
+  const activeWriter = writer
+  if (!activeWriter)
     throw new Error('串口未连接，无法发送数据')
-  writeQueue = writeQueue.then(() => writer.write(data))
-  await writeQueue
+  const queuedWrite = writeQueue
+    .catch(() => {})
+    .then(() => activeWriter.write(data))
+  writeQueue = queuedWrite.catch(() => {})
+  await queuedWrite
   return { ok: true }
 }
 

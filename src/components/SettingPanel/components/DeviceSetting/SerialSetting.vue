@@ -2,6 +2,7 @@
 import { useTitle } from '@vueuse/core'
 import { Loader2 } from 'lucide-vue-next'
 import { inject, watch } from 'vue'
+import { toast } from 'vue-sonner'
 import { useDialog } from '@/components/Dialog'
 import { Button } from '@/components/ui/button'
 import {
@@ -33,25 +34,38 @@ const { open } = useDialog()
 const { createSession } = useRecordCache()
 const { recordCacheEnabled } = useSettingStore()
 
-function openSerialPort() {
-  openPort({
+function serialOptions() {
+  return {
     baudRate: Number.parseInt(baudRate.value),
     dataBits: Number.parseInt(dataBits.value),
     stopBits: Number.parseFloat(stopBits.value),
     parity: parity.value,
     flowControl: flowControl.value,
-  })
+  }
 }
+
+async function runSerialAction(action, message) {
+  try {
+    await action()
+  }
+  catch (error) {
+    console.error(message, error)
+    toast.error(`${message}：${error?.message || String(error)}`)
+  }
+}
+
+async function openSerialPort() {
+  await runSerialAction(() => openPort(serialOptions()), '串口连接失败')
+}
+
+async function closeSerialPort() {
+  await runSerialAction(() => closePort(), '串口未完全释放')
+}
+
 watch([baudRate, dataBits, stopBits, parity, flowControl], (_newPort) => {
-  if (!port.value || !connected)
+  if (!port.value || !connected.value)
     return
-  reopenPort({
-    baudRate: Number.parseInt(baudRate.value),
-    dataBits: Number.parseInt(dataBits.value),
-    stopBits: Number.parseFloat(stopBits.value),
-    parity: parity.value,
-    flowControl: flowControl.value,
-  })
+  runSerialAction(() => reopenPort(serialOptions()), '串口重连失败')
 })
 
 async function selectPort() {
@@ -60,7 +74,7 @@ async function selectPort() {
     // 如果启用了缓存，创建一个新缓存会话
       const _sessionId = createSession()
     }
-    openSerialPort()
+    await openSerialPort()
   }
 }
 
@@ -213,7 +227,7 @@ useTitle(pageTitle)
       class="cursor-pointer mb-3"
       variant="destructive"
       :disabled="connecting || disconnecting"
-      @click="closePort"
+      @click="closeSerialPort"
     >
       <Loader2 v-if="disconnecting" class="w-4 h-4 mr-2 animate-spin" />
       {{ disconnecting ? '断开中...' : '断 开' }}

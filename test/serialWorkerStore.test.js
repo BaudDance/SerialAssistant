@@ -14,6 +14,7 @@ describe('serial worker record access facade', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals()
+    vi.restoreAllMocks()
   })
 
   it('stores records and fetches only the requested range', async () => {
@@ -81,5 +82,86 @@ describe('serial worker record access facade', () => {
 
     const { row } = await worker.setRecordDisplay('session_search:0', 'hex')
     expect(row.text).toBe('0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x20, 0x77, 0x6F, 0x72, 0x6B, 0x65, 0x72')
+  })
+})
+
+describe('serial worker migration marker fallback', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+  })
+
+  it('keeps using the worker when localStorage cannot write the migration marker', async () => {
+    vi.resetModules()
+
+    const values = new Map([
+      ['session:list', JSON.stringify([{ id: 'legacy_session', title: 'Legacy Session' }])],
+      ['session:records', JSON.stringify({})],
+    ])
+
+    const quotaError = new DOMException('Quota exceeded', 'QuotaExceededError')
+    const localStorageMock = {
+      getItem: vi.fn(key => values.get(key) ?? null),
+      removeItem: vi.fn((key) => {
+        values.delete(key)
+      }),
+      setItem: vi.fn((key, value) => {
+        if (key === 'session:indexeddb:migrated')
+          throw quotaError
+        values.set(key, value)
+      }),
+    }
+
+    class FakeWorker {
+      static instance = null
+
+      constructor() {
+        this.listeners = new Map()
+        this.messages = []
+        FakeWorker.instance = this
+      }
+
+      addEventListener(type, handler) {
+        if (!this.listeners.has(type))
+          this.listeners.set(type, [])
+        this.listeners.get(type).push(handler)
+      }
+
+      postMessage(message) {
+        this.messages.push(message)
+        const payload = {
+          migrated: message.type === 'init',
+          sessions: [],
+          currentSessionId: null,
+          stats: {
+            rxCount: 0,
+            txCount: 0,
+            recordCount: 0,
+            liveRecordPreview: null,
+          },
+        }
+        queueMicrotask(() => {
+          for (const handler of this.listeners.get('message') || [])
+            handler({ data: { id: message.id, payload } })
+        })
+      }
+    }
+
+    vi.stubGlobal('localStorage', localStorageMock)
+    vi.stubGlobal('Worker', FakeWorker)
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const module = await import('../src/composables/useSerialWorker/index.js')
+    const worker = module.useSerialWorker()
+
+    await worker.ready()
+    await worker.clearAllSessions()
+
+    expect(localStorageMock.setItem).toHaveBeenCalledWith('session:indexeddb:migrated', expect.any(String))
+    expect(localStorageMock.removeItem).toHaveBeenCalledWith('session:list')
+    expect(localStorageMock.removeItem).toHaveBeenCalledWith('session:records')
+    expect(FakeWorker.instance.messages.map(message => message.type)).toEqual(['init', 'clearAllSessions'])
+    expect(errorSpy).not.toHaveBeenCalledWith('初始化串口 Worker 失败:', expect.anything())
   })
 })

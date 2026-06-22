@@ -2,6 +2,40 @@ import { createGlobalState } from '@vueuse/core'
 import { ref } from 'vue'
 
 const MIGRATION_KEY = 'session:indexeddb:migrated'
+const LEGACY_SESSION_LIST_KEY = 'session:list'
+const LEGACY_SESSION_RECORDS_KEY = 'session:records'
+
+function getLocalStorage() {
+  try {
+    return globalThis.localStorage || null
+  }
+  catch (error) {
+    console.warn('访问本地会话缓存失败:', error)
+    return null
+  }
+}
+
+function writeStorageItem(storage, key, value) {
+  try {
+    storage.setItem(key, value)
+    return true
+  }
+  catch (error) {
+    console.warn(`写入本地会话缓存失败(${key}):`, error)
+    return false
+  }
+}
+
+function removeStorageItem(storage, key) {
+  try {
+    storage.removeItem(key)
+    return true
+  }
+  catch (error) {
+    console.warn(`删除本地会话缓存失败(${key}):`, error)
+    return false
+  }
+}
 
 function toArrayBuffer(data) {
   if (data instanceof ArrayBuffer)
@@ -21,16 +55,18 @@ function normalizeRecord(record) {
 }
 
 function readLegacySnapshot() {
-  if (typeof localStorage === 'undefined')
-    return null
-  if (localStorage.getItem(MIGRATION_KEY))
+  const storage = getLocalStorage()
+  if (!storage)
     return null
 
   try {
-    const sessionList = JSON.parse(localStorage.getItem('session:list') || '[]')
-    const sessionRecords = JSON.parse(localStorage.getItem('session:records') || '{}')
+    if (storage.getItem(MIGRATION_KEY))
+      return null
+
+    const sessionList = JSON.parse(storage.getItem(LEGACY_SESSION_LIST_KEY) || '[]')
+    const sessionRecords = JSON.parse(storage.getItem(LEGACY_SESSION_RECORDS_KEY) || '{}')
     if (!Array.isArray(sessionList) || (!sessionList.length && !Object.keys(sessionRecords).length)) {
-      localStorage.setItem(MIGRATION_KEY, 'empty')
+      writeStorageItem(storage, MIGRATION_KEY, 'empty')
       return null
     }
     return { sessionList, sessionRecords }
@@ -277,9 +313,15 @@ export const useSerialWorker = createGlobalState(() => {
   }
 
   function markMigrationDone(result) {
-    if (typeof localStorage === 'undefined' || !result?.migrated)
+    if (!result?.migrated)
       return
-    localStorage.setItem(MIGRATION_KEY, String(Date.now()))
+    const storage = getLocalStorage()
+    if (!storage)
+      return
+
+    removeStorageItem(storage, LEGACY_SESSION_LIST_KEY)
+    removeStorageItem(storage, LEGACY_SESSION_RECORDS_KEY)
+    writeStorageItem(storage, MIGRATION_KEY, String(Date.now()))
   }
 
   function ensureWorker() {

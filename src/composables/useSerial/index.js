@@ -123,6 +123,30 @@ export function useSerial() {
     }
   }
 
+  function waitForSerialRelease() {
+    return new Promise(resolve => setTimeout(resolve, 50))
+  }
+
+  async function closeSerialPortObject() {
+    const activePort = port.value
+    if (!activePort)
+      return
+
+    try {
+      await activePort.close()
+    }
+    catch (error) {
+      await waitForSerialRelease()
+      try {
+        await activePort.close()
+      }
+      catch (retryError) {
+        console.warn('首次关闭串口对象失败:', error)
+        throw retryError
+      }
+    }
+  }
+
   async function openPort(options = { baudRate: 9600 }) {
     if (!port.value)
       throw new Error('请先选择串口设备')
@@ -146,9 +170,16 @@ export function useSerial() {
       console.error('打开串口时出现错误:', error)
       try {
         await worker.closeSerialStreams()
-        await port.value?.close()
       }
-      catch {}
+      catch (closeWorkerError) {
+        console.warn('打开失败后清理串口 Worker 失败:', closeWorkerError)
+      }
+      try {
+        await closeSerialPortObject()
+      }
+      catch (closePortError) {
+        console.warn('打开失败后关闭串口对象失败:', closePortError)
+      }
       connected.value = false
       throw error
     }
@@ -162,23 +193,29 @@ export function useSerial() {
     await openPort(options)
   }
 
-  async function closePort() {
+  async function closePort({ forceDisconnected = false } = {}) {
     disconnecting.value = true
     nprogress.start()
+    let closeError = null
     try {
-      await worker.closeSerialStreams()
-      if (port.value) {
-        try {
-          await port.value.close()
-        }
-        catch (error) {
-          console.warn('关闭串口对象失败:', error)
-        }
+      try {
+        await worker.closeSerialStreams()
       }
-      connected.value = false
-    }
-    catch (error) {
-      console.error('关闭串口时出现错误:', error)
+      catch (error) {
+        console.warn('关闭串口 Worker 流失败:', error)
+        closeError ||= error
+      }
+      try {
+        await closeSerialPortObject()
+      }
+      catch (error) {
+        console.error('关闭串口对象失败:', error)
+        closeError ||= error
+      }
+      if (closeError && !forceDisconnected) {
+        connected.value = true
+        throw closeError
+      }
       connected.value = false
     }
     finally {
@@ -198,7 +235,7 @@ export function useSerial() {
   if (serial) {
     serial.addEventListener('disconnect', async (event) => {
       if (port.value === event.target)
-        await closePort()
+        await closePort({ forceDisconnected: true })
     })
     updatePorts()
   }
