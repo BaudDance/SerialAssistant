@@ -1,4 +1,6 @@
 <script setup>
+import { FilePlus2 } from 'lucide-vue-next'
+import { computed, ref } from 'vue'
 import { Badge } from '@/components/ui/badge'
 import {
   Tooltip,
@@ -9,10 +11,14 @@ import {
 import { useRecordStore } from '@/store/useRecordStore'
 import { useSendStore } from '@/store/useSendStore'
 import { useSerialStore } from '@/store/useSerialStore'
+import { useSettingStore } from '@/store/useSettingStore'
 
 const { readType, sendType, nextReadType, nextSendType } = useSerialStore()
 const { pinBottom, clearRecords, exportRecords } = useRecordStore()
-const { clear } = useSendStore()
+const { isAutoSending, isFileSending, selectFile } = useSendStore()
+const { deviceType } = useSettingStore()
+const fileInputRef = ref(null)
+const fileButtonDisabled = computed(() => isAutoSending.value || isFileSending.value || deviceType.value !== 'serial')
 
 function toggleReadType() {
   nextReadType()
@@ -24,6 +30,16 @@ function toggleSendType() {
 function togglePinBottom() {
   pinBottom.value = !pinBottom.value
 }
+function openFilePicker() {
+  if (fileButtonDisabled.value)
+    return
+  fileInputRef.value?.click()
+}
+async function onFileChange(event) {
+  const file = event.target.files?.[0]
+  await selectFile(file)
+  event.target.value = ''
+}
 const typeCssMap = {
   ascii: 'border-yellow-600 text-yellow-600',
   hex: 'border-cyan-600 text-cyan-600',
@@ -33,6 +49,13 @@ const typeCssMap = {
 
 <template>
   <div class="flex items-center px-3 space-x-3 py-2">
+    <input
+      ref="fileInputRef"
+      type="file"
+      class="hidden"
+      @change="onFileChange"
+    >
+
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger>
@@ -98,6 +121,24 @@ const typeCssMap = {
     </TooltipProvider>
 
     <div class="flex-1" />
+
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <Badge
+            :class="[fileButtonDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer ']"
+            variant="outline"
+            @click="openFilePicker"
+          >
+            <FilePlus2 />
+            发送文件
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{{ deviceType === 'serial' ? '发送文件' : 'BLE 暂不支持文件发送' }}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
 
     <TooltipProvider>
       <Tooltip>

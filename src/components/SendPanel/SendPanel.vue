@@ -1,6 +1,4 @@
 <script setup>
-import { FilePlus2 } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
 import FilePayloadCard from '@/components/FilePayload/FilePayloadCard.vue'
 import {
   Tooltip,
@@ -9,7 +7,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { useSendStore } from '@/store/useSendStore'
-import { useSettingStore } from '@/store/useSettingStore'
 import AutoSendButton from './components/AutoSendButton.vue'
 
 const {
@@ -21,40 +18,17 @@ const {
   checkAlgorithms,
   checkDigitHexFormat,
   reformat,
-  isAutoSending,
   isFileSending,
   fileSendProgress,
   selectedFilePayload,
   canSend,
-  selectFile,
   removeSelectedFile,
   openSelectedFilePreview,
 } = useSendStore()
-const { deviceType } = useSettingStore()
-
-const fileInputRef = ref(null)
-const fileButtonDisabled = computed(() => isAutoSending.value || isFileSending.value || deviceType.value !== 'serial')
-
-function openFilePicker() {
-  fileInputRef.value?.click()
-}
-
-async function onFileChange(event) {
-  const file = event.target.files?.[0]
-  await selectFile(file)
-  event.target.value = ''
-}
 </script>
 
 <template>
   <div class="flex flex-col h-full">
-    <input
-      ref="fileInputRef"
-      type="file"
-      class="hidden"
-      @change="onFileChange"
-    >
-
     <div v-if="selectedFilePayload" class="flex-1 min-h-0 p-3">
       <FilePayloadCard
         :payload="selectedFilePayload"
@@ -78,19 +52,6 @@ async function onFileChange(event) {
     />
 
     <div class="p-3  flex justify-end space-x-2">
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger>
-            <Button variant="ghost" size="icon" class="h-9 w-9 cursor-pointer" :disabled="fileButtonDisabled" @click="openFilePicker">
-              <FilePlus2 class="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{{ deviceType === 'serial' ? '添加文件' : 'BLE 暂不支持文件发送' }}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-
       <TooltipProvider v-if="!selectedFilePayload && sendType === 'hex'">
         <Tooltip>
           <TooltipTrigger>
