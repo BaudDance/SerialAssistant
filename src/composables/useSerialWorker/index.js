@@ -1,5 +1,6 @@
 import { createGlobalState } from '@vueuse/core'
 import { ref } from 'vue'
+import { createFileMeta, FILE_RECORD_DISPLAY, fileSummaryText } from '@/utils/filePayload'
 
 const MIGRATION_KEY = 'session:indexeddb:migrated'
 const LEGACY_SESSION_LIST_KEY = 'session:list'
@@ -98,6 +99,8 @@ function createLocalBackend() {
 
   function renderText(record) {
     const data = new Uint8Array(record.dataBuffer || record.data || [])
+    if (record.display === FILE_RECORD_DISPLAY)
+      return fileSummaryText(record.fileMeta, data.byteLength)
     if (record.display === 'ascii')
       return new TextDecoder().decode(data)
     if (record.display === 'dec')
@@ -123,12 +126,37 @@ function createLocalBackend() {
       index: record.index,
       type: record.type,
       display: record.display,
+      fileMeta: record.fileMeta || null,
       time: record.time,
       firstSeenAt: record.firstSeenAt,
       lastSeenAt: record.lastSeenAt,
       byteLength: record.byteLength,
       text,
       html: record.display === 'ascii' ? htmlEscape(text) : '',
+    }
+  }
+
+  function toSummary(record) {
+    const row = toRow(record)
+    return {
+      id: row.id,
+      index: row.index,
+      type: row.type,
+      display: row.display,
+      fileMeta: row.fileMeta,
+      time: row.time,
+      firstSeenAt: row.firstSeenAt,
+      lastSeenAt: row.lastSeenAt,
+      byteLength: row.byteLength,
+      text: row.text,
+    }
+  }
+
+  function parseRecordId(id) {
+    const lastColon = id.lastIndexOf(':')
+    return {
+      sessionId: id.slice(0, lastColon),
+      index: Number(id.slice(lastColon + 1)),
     }
   }
 
@@ -186,6 +214,9 @@ function createLocalBackend() {
         lastSeenAt: payload.lastSeenAt || payload.time || Date.now(),
         byteLength: data.byteLength,
         dataBuffer: data.buffer,
+        fileMeta: payload.display === FILE_RECORD_DISPLAY
+          ? createFileMeta(payload.fileMeta, data.byteLength)
+          : undefined,
       }
       list.push(record)
       const session = sessions.find(item => item.id === sessionId)
@@ -207,13 +238,25 @@ function createLocalBackend() {
       }
     }
     if (type === 'getRecordContent') {
-      const [sessionId, indexText] = payload.id.split(':')
-      const record = getRecords(sessionId)[Number(indexText)]
+      const { sessionId, index } = parseRecordId(payload.id)
+      const record = getRecords(sessionId)[index]
       return { text: record ? renderText(record) : '' }
     }
+    if (type === 'getRecordPayload') {
+      const { sessionId, index } = parseRecordId(payload.id)
+      const record = getRecords(sessionId)[index]
+      return {
+        record: record
+          ? {
+              ...toSummary(record),
+              dataBuffer: toArrayBuffer(record.dataBuffer),
+            }
+          : null,
+      }
+    }
     if (type === 'setRecordDisplay') {
-      const [sessionId, indexText] = payload.id.split(':')
-      const record = getRecords(sessionId)[Number(indexText)]
+      const { sessionId, index } = parseRecordId(payload.id)
+      const record = getRecords(sessionId)[index]
       if (record)
         record.display = payload.display
       return { row: record ? toRow(record) : null }
@@ -238,6 +281,14 @@ function createLocalBackend() {
           .filter(record => record.type === 'write')
           .slice(-(payload.limit || 100))
           .map(record => ({ ...record, dataBuffer: toArrayBuffer(record.dataBuffer) })),
+      }
+    }
+    if (type === 'getRecentWriteRecordSummaries') {
+      return {
+        records: getRecords(payload.sessionId)
+          .filter(record => record.type === 'write')
+          .slice(-(payload.limit || 100))
+          .map(toSummary),
       }
     }
     if (type === 'clearRecords') {
@@ -438,8 +489,16 @@ export const useSerialWorker = createGlobalState(() => {
     fetchRecordRows: (sessionId, start, end) => request('fetchRecordRows', { sessionId, start, end }),
     setRecordDisplay: (id, display) => request('setRecordDisplay', { id, display }),
     getRecordContent: id => request('getRecordContent', { id }),
+    getRecordPayload: async (id) => {
+      const result = await request('getRecordPayload', { id })
+      return result.record ? normalizeRecord(result.record) : null
+    },
     searchRecords: (sessionId, query, limit = 50) => request('searchRecords', { sessionId, query, limit }),
     exportRecords: sessionId => request('exportRecords', { sessionId }),
+    getRecentWriteRecordSummaries: async (sessionId, limit = 100) => {
+      const result = await request('getRecentWriteRecordSummaries', { sessionId, limit })
+      return result.records || []
+    },
     getRecentWriteRecords: async (sessionId, limit = 100) => {
       const result = await request('getRecentWriteRecords', { sessionId, limit })
       return (result.records || []).map(normalizeRecord)

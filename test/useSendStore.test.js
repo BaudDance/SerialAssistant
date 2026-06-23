@@ -2,6 +2,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
 import { useSendStore } from '../src/store/useSendStore.js'
 
+const mockSerialSendHex = vi.hoisted(() => vi.fn())
+const mockBleSendHex = vi.hoisted(() => vi.fn())
+const mockAddRecord = vi.hoisted(() => vi.fn())
+const mockGetRecordPayload = vi.hoisted(() => vi.fn())
+
 // 创建全局的mock records
 const mockRecords = ref([])
 
@@ -20,8 +25,8 @@ vi.mock('vue', async () => {
   const actual = await vi.importActual('vue')
   return {
     ...actual,
-    inject: vi.fn(() => ({
-      sendHex: vi.fn(),
+    inject: vi.fn(key => ({
+      sendHex: key === 'serial' ? mockSerialSendHex : mockBleSendHex,
     })),
   }
 })
@@ -47,7 +52,8 @@ vi.mock('@/composables/useDataCode/useDataCode', () => ({
 vi.mock('@/store/useRecordStore', () => ({
   useRecordStore: () => ({
     records: mockRecords,
-    addRecord: vi.fn(),
+    addRecord: mockAddRecord,
+    getRecordPayload: mockGetRecordPayload,
   }),
 }))
 
@@ -71,6 +77,9 @@ describe('useSendStore - 历史导航功能', () => {
   beforeEach(() => {
     // 重置所有mock
     vi.clearAllMocks()
+    mockAddRecord.mockResolvedValue(undefined)
+    mockSerialSendHex.mockResolvedValue(undefined)
+    mockBleSendHex.mockResolvedValue(undefined)
 
     // 设置模拟的历史记录
     mockRecords.value = [
@@ -338,6 +347,99 @@ describe('useSendStore - 历史导航功能', () => {
 
       expect(store.historyIndex?.value).toBe(initialIndex)
       expect(store.sendData.value).toBe(initialSendData)
+    })
+  })
+
+  describe('文件发送和文件历史', () => {
+    it('应该按原始字节分片发送文件并在成功后清空文件草稿', async () => {
+      const bytes = new Uint8Array(16 * 1024 + 2)
+      bytes[0] = 0x12
+      bytes[16 * 1024] = 0x34
+      bytes[16 * 1024 + 1] = 0x56
+      const file = {
+        name: 'firmware.bin',
+        size: bytes.byteLength,
+        type: 'application/octet-stream',
+        lastModified: 123,
+        arrayBuffer: vi.fn(() => Promise.resolve(bytes.buffer.slice(0))),
+      }
+      store.sendData.value = 'draft'
+
+      await store.selectFile(file)
+      expect(store.selectedFilePayload.value.name).toBe('firmware.bin')
+      expect(store.sendData.value).toBe('')
+
+      await store.send()
+
+      expect(mockSerialSendHex).toHaveBeenCalledTimes(2)
+      expect(mockSerialSendHex.mock.calls[0][0]).toHaveLength(16 * 1024)
+      expect(Array.from(mockSerialSendHex.mock.calls[1][0])).toEqual([0x34, 0x56])
+      expect(mockAddRecord).toHaveBeenCalledWith(expect.objectContaining({
+        type: 'write',
+        display: 'file',
+        fileMeta: expect.objectContaining({
+          name: 'firmware.bin',
+          size: bytes.byteLength,
+          type: 'application/octet-stream',
+          lastModified: 123,
+        }),
+      }))
+      expect(store.selectedFilePayload.value).toBeNull()
+      expect(store.sendData.value).toBe('draft')
+    })
+
+    it('发送文件失败时应该保留文件草稿且不新增记录', async () => {
+      mockSerialSendHex.mockRejectedValueOnce(new Error('write failed'))
+      const bytes = new Uint8Array([0x01, 0x02])
+      const file = {
+        name: 'broken.bin',
+        size: bytes.byteLength,
+        type: '',
+        lastModified: 0,
+        arrayBuffer: vi.fn(() => Promise.resolve(bytes.buffer.slice(0))),
+      }
+
+      await store.selectFile(file)
+      await expect(store.send()).rejects.toThrow('write failed')
+
+      expect(store.selectedFilePayload.value.name).toBe('broken.bin')
+      expect(mockAddRecord).not.toHaveBeenCalled()
+    })
+
+    it('上下键历史应该把文件记录恢复为文件卡片并在退出历史时恢复原草稿', async () => {
+      mockRecords.value = [
+        {
+          type: 'write',
+          data: new Uint8Array([0x01, 0x02, 0x03]),
+          time: new Date(),
+          display: 'file',
+          fileMeta: {
+            name: 'image.bmp',
+            size: 3,
+            type: 'image/bmp',
+            lastModified: 456,
+          },
+        },
+      ]
+      store.sendData.value = 'AT'
+
+      await store.navigateHistory?.('up')
+
+      expect(store.historyIndex?.value).toBe(0)
+      expect(store.sendData.value).toBe('')
+      expect(store.selectedFilePayload.value).toMatchObject({
+        name: 'image.bmp',
+        size: 3,
+        type: 'image/bmp',
+        lastModified: 456,
+      })
+      expect(Array.from(store.selectedFilePayload.value.data)).toEqual([0x01, 0x02, 0x03])
+
+      await store.navigateHistory?.('down')
+
+      expect(store.historyIndex?.value).toBe(-1)
+      expect(store.selectedFilePayload.value).toBeNull()
+      expect(store.sendData.value).toBe('AT')
     })
   })
 })

@@ -1,10 +1,11 @@
 <script setup>
-import { onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useSendStore } from '@/store/useSendStore'
 
-const { isAutoSending, send } = useSendStore()
+const { isAutoSending, isFileSending, selectedFilePayload, send } = useSendStore()
 
 const autoSendTime = ref(1000)
+const disabled = computed(() => !!selectedFilePayload.value || isFileSending.value)
 
 let timer = null
 
@@ -31,6 +32,11 @@ watch(isAutoSending, (enabled) => {
   }
 })
 
+watch(disabled, (value) => {
+  if (value)
+    isAutoSending.value = false
+})
+
 // 销毁定时器防止内存泄漏
 onBeforeUnmount(() => {
   clearTimeout(timer)
@@ -42,7 +48,7 @@ onBeforeUnmount(() => {
 <template>
   <Popover>
     <PopoverTrigger as-child class="cursor-pointer text-md">
-      <Button variant="ghost">
+      <Button variant="ghost" :disabled="disabled">
         自动发送
       </Button>
     </PopoverTrigger>
@@ -55,7 +61,7 @@ onBeforeUnmount(() => {
                 自动发送设置
               </span>
             </div>
-            <Switch id="autoSendSwitch" v-model="isAutoSending" class="cursor-pointer" :disabled="!autoSendTime || autoSendTime <= 0" />
+            <Switch id="autoSendSwitch" v-model="isAutoSending" class="cursor-pointer" :disabled="disabled || !autoSendTime || autoSendTime <= 0" />
           </h4>
           <p class="text-sm text-muted-foreground">
             {{ autoSendTime ? `启用后自动每 ${autoSendTime} 毫秒发送一次数据` : '请输入自动发送间隔时间' }}

@@ -1,4 +1,7 @@
 <script setup>
+import { FilePlus2 } from 'lucide-vue-next'
+import { computed, ref } from 'vue'
+import FilePayloadCard from '@/components/FilePayload/FilePayloadCard.vue'
 import {
   Tooltip,
   TooltipContent,
@@ -6,14 +9,65 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { useSendStore } from '@/store/useSendStore'
+import { useSettingStore } from '@/store/useSettingStore'
 import AutoSendButton from './components/AutoSendButton.vue'
 
-const { sendData, clear, onInput, send, sendType, checkAlgorithm, checkAlgorithms, checkDigitHexFormat, reformat, isAutoSending } = useSendStore()
+const {
+  sendData,
+  onInput,
+  send,
+  sendType,
+  checkAlgorithm,
+  checkAlgorithms,
+  checkDigitHexFormat,
+  reformat,
+  isAutoSending,
+  isFileSending,
+  fileSendProgress,
+  selectedFilePayload,
+  canSend,
+  selectFile,
+  removeSelectedFile,
+  openSelectedFilePreview,
+} = useSendStore()
+const { deviceType } = useSettingStore()
+
+const fileInputRef = ref(null)
+const fileButtonDisabled = computed(() => isAutoSending.value || isFileSending.value || deviceType.value !== 'serial')
+
+function openFilePicker() {
+  fileInputRef.value?.click()
+}
+
+async function onFileChange(event) {
+  const file = event.target.files?.[0]
+  await selectFile(file)
+  event.target.value = ''
+}
 </script>
 
 <template>
   <div class="flex flex-col h-full">
+    <input
+      ref="fileInputRef"
+      type="file"
+      class="hidden"
+      @change="onFileChange"
+    >
+
+    <div v-if="selectedFilePayload" class="flex-1 min-h-0 p-3">
+      <FilePayloadCard
+        :payload="selectedFilePayload"
+        removable
+        :disabled="isFileSending"
+        :progress="fileSendProgress"
+        @view="openSelectedFilePreview"
+        @remove="removeSelectedFile"
+      />
+    </div>
+
     <textarea
+      v-else
       id="send-panel-input"
       v-model="sendData"
       type="text-area"
@@ -24,7 +78,20 @@ const { sendData, clear, onInput, send, sendType, checkAlgorithm, checkAlgorithm
     />
 
     <div class="p-3  flex justify-end space-x-2">
-      <TooltipProvider v-if="sendType === 'hex'">
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger>
+            <Button variant="ghost" size="icon" class="h-9 w-9 cursor-pointer" :disabled="fileButtonDisabled" @click="openFilePicker">
+              <FilePlus2 class="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{{ deviceType === 'serial' ? '添加文件' : 'BLE 暂不支持文件发送' }}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <TooltipProvider v-if="!selectedFilePayload && sendType === 'hex'">
         <Tooltip>
           <TooltipTrigger>
             <Button as-child variant="ghost" class="w-9 h-9 cursor-pointer p-1.5" @click="reformat">
@@ -37,7 +104,7 @@ const { sendData, clear, onInput, send, sendType, checkAlgorithm, checkAlgorithm
         </Tooltip>
       </TooltipProvider>
 
-      <DropdownMenu v-if="sendType === 'hex'">
+      <DropdownMenu v-if="!selectedFilePayload && sendType === 'hex'">
         <DropdownMenuTrigger as-child class="cursor-pointer text-md">
           <Button variant="ghost">
             {{
@@ -66,8 +133,8 @@ const { sendData, clear, onInput, send, sendType, checkAlgorithm, checkAlgorithm
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger>
-            <Button :disabled="sendData.length === 0 || isAutoSending" :class="[sendData.length === 0 ? '' : 'cursor-pointer']" @click="send">
-              发送
+            <Button :disabled="!canSend" :class="[canSend ? 'cursor-pointer' : '']" @click="send">
+              {{ isFileSending ? `${fileSendProgress}%` : '发送' }}
             </Button>
           </TooltipTrigger>
           <TooltipContent>

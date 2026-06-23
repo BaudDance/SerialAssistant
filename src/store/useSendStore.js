@@ -1,5 +1,7 @@
 import { createGlobalState, useMagicKeys } from '@vueuse/core'
 import { computed, inject, ref, watch } from 'vue'
+import { toast } from 'vue-sonner'
+import { dialogKeys, useDialog } from '@/components/Dialog/composable'
 import { useCheckDigit } from '@/composables/useCheckDigit/useCheckDigit'
 import { useDataCode } from '@/composables/useDataCode/useDataCode'
 
@@ -7,12 +9,26 @@ import { useRecordStore } from '@/store/useRecordStore'
 import { useSerialStore } from '@/store/useSerialStore'
 import { useSettingStore } from '@/store/useSettingStore'
 
+import {
+  createFilePayload,
+  FILE_RECORD_DISPLAY,
+  FILE_SEND_CHUNK_SIZE,
+  fileMetaFromPayload,
+  LARGE_FILE_WARNING_SIZE,
+} from '@/utils/filePayload'
 import { getOS } from '@/utils/os'
 
 export const useSendStore = createGlobalState(() => {
   const { sendHex: serialSendHex } = inject('serial')
   const { sendHex: bleSendHex } = inject('ble')
-  const { records, addRecord, getRecentWriteRecords } = useRecordStore()
+  const {
+    records,
+    addRecord,
+    getRecordPayload,
+    getRecentWriteRecords,
+    getRecentWriteRecordSummaries,
+  } = useRecordStore()
+  const { open: openDialog } = useDialog()
   const { lineEnding, deviceType, sendHexInputMode } = useSettingStore()
   const { sendType } = useSerialStore()
   const { checkAlgorithm, checkAlgorithms } = useCheckDigit()
@@ -29,7 +45,19 @@ export const useSendStore = createGlobalState(() => {
   const isAutoSending = ref(false)
 
   const sendData = ref('')
+  const selectedFilePayload = ref(null)
+  const textDraftBeforeFile = ref('')
+  const fileSendProgress = ref(0)
+  const isFileSending = ref(false)
+  const historyDraftSnapshot = ref(null)
   const historyIndex = ref(-1) // -1表示当前输入，0及以上表示历史记录索引
+
+  const hasSelectedFile = computed(() => !!selectedFilePayload.value)
+  const canSend = computed(() => {
+    if (hasSelectedFile.value)
+      return deviceType.value === 'serial' && !isFileSending.value && !isAutoSending.value
+    return sendData.value.length > 0 && !isAutoSending.value
+  })
 
   const checkDigit = computed(() => {
     if (!checkAlgorithm.value || sendType.value !== 'hex')
@@ -76,7 +104,85 @@ export const useSendStore = createGlobalState(() => {
     }
   }
 
+  async function sendFileChunks(data) {
+    if (deviceType.value !== 'serial')
+      throw new Error('BLE 暂不支持文件发送')
+
+    if (data.byteLength === 0) {
+      fileSendProgress.value = 100
+      return
+    }
+
+    for (let offset = 0; offset < data.byteLength; offset += FILE_SEND_CHUNK_SIZE) {
+      const end = Math.min(offset + FILE_SEND_CHUNK_SIZE, data.byteLength)
+      await serialSendHex(data.subarray(offset, end))
+      fileSendProgress.value = Math.round((end / data.byteLength) * 100)
+    }
+  }
+
+  function clearSelectedFilePayload({ restoreText = true } = {}) {
+    selectedFilePayload.value = null
+    fileSendProgress.value = 0
+    if (restoreText)
+      sendData.value = textDraftBeforeFile.value
+    textDraftBeforeFile.value = ''
+  }
+
+  async function sendFile() {
+    const payload = selectedFilePayload.value
+    if (!payload)
+      return
+
+    isFileSending.value = true
+    fileSendProgress.value = 0
+    try {
+      await sendFileChunks(payload.data)
+      try {
+        await addRecord({
+          type: 'write',
+          data: payload.data,
+          time: new Date(),
+          display: FILE_RECORD_DISPLAY,
+          fileMeta: fileMetaFromPayload(payload),
+        })
+      }
+      catch (error) {
+        console.error('保存文件发送记录失败:', error)
+        toast.error('文件发送成功，但记录保存失败')
+      }
+
+      try {
+        await refreshSendHistory()
+      }
+      catch (error) {
+        console.warn('刷新发送历史失败:', error)
+      }
+      clearSelectedFilePayload()
+      resetHistoryIndex()
+    }
+    catch (error) {
+      console.error('文件发送失败:', error)
+      toast.error(error?.message || '文件发送失败')
+      throw error
+    }
+    finally {
+      isFileSending.value = false
+      fileSendProgress.value = selectedFilePayload.value ? fileSendProgress.value : 0
+    }
+  }
+
+  async function readFileBytes(file) {
+    if (typeof file.arrayBuffer === 'function')
+      return new Uint8Array(await file.arrayBuffer())
+    return new Uint8Array(await new Response(file).arrayBuffer())
+  }
+
   async function send() {
+    if (selectedFilePayload.value) {
+      await sendFile()
+      return
+    }
+
     const data = sendBuffer.value
     await sendHex(data)
     await addRecord({
@@ -87,7 +193,41 @@ export const useSendStore = createGlobalState(() => {
     })
     await refreshSendHistory()
   }
+
+  async function selectFile(file) {
+    if (!file)
+      return
+    if (deviceType.value !== 'serial') {
+      toast.warning('BLE 暂不支持文件发送')
+      return
+    }
+
+    resetHistoryIndex()
+    if (!selectedFilePayload.value)
+      textDraftBeforeFile.value = sendData.value
+
+    const data = await readFileBytes(file)
+    selectedFilePayload.value = createFilePayload({ file, data })
+    sendData.value = ''
+    fileSendProgress.value = 0
+
+    if (file.size > LARGE_FILE_WARNING_SIZE)
+      toast.warning('文件较大，发送和查看可能耗时')
+  }
+
+  function removeSelectedFile() {
+    resetHistoryIndex()
+    clearSelectedFilePayload()
+  }
+
+  function openSelectedFilePreview() {
+    if (!selectedFilePayload.value)
+      return
+    openDialog(dialogKeys.filePreview, selectedFilePayload.value)
+  }
   watch(sendType, (value) => {
+    if (selectedFilePayload.value)
+      return
     if (!sendData.value)
       return
     if (value === 'hex') {
@@ -100,12 +240,16 @@ export const useSendStore = createGlobalState(() => {
 
   const workerSendHistory = ref([])
   const sendHistory = computed(() => {
-    if (getRecentWriteRecords)
+    if (getRecentWriteRecordSummaries || getRecentWriteRecords)
       return workerSendHistory.value
     return records.value.filter(item => item.type === 'write')
   })
 
   async function refreshSendHistory() {
+    if (getRecentWriteRecordSummaries) {
+      workerSendHistory.value = await getRecentWriteRecordSummaries(100)
+      return
+    }
     if (!getRecentWriteRecords)
       return
     workerSendHistory.value = await getRecentWriteRecords(100)
@@ -127,6 +271,10 @@ export const useSendStore = createGlobalState(() => {
   }
 
   function clear() {
+    if (selectedFilePayload.value) {
+      clearSelectedFilePayload()
+      return
+    }
     sendData.value = ''
   }
 
@@ -215,8 +363,98 @@ export const useSendStore = createGlobalState(() => {
     sendData.value = data
   }
 
+  function createDraftSnapshot() {
+    if (selectedFilePayload.value) {
+      return {
+        type: FILE_RECORD_DISPLAY,
+        payload: createFilePayload({
+          data: selectedFilePayload.value.data,
+          fileMeta: fileMetaFromPayload(selectedFilePayload.value),
+        }),
+        textDraftBeforeFile: textDraftBeforeFile.value,
+      }
+    }
+
+    return {
+      type: 'text',
+      sendData: sendData.value,
+      textDraftBeforeFile: textDraftBeforeFile.value,
+    }
+  }
+
+  function restoreDraftSnapshot(snapshot) {
+    if (snapshot?.type === FILE_RECORD_DISPLAY) {
+      selectedFilePayload.value = snapshot.payload
+      textDraftBeforeFile.value = snapshot.textDraftBeforeFile || ''
+      sendData.value = ''
+      fileSendProgress.value = 0
+      return
+    }
+
+    selectedFilePayload.value = null
+    textDraftBeforeFile.value = ''
+    fileSendProgress.value = 0
+    sendData.value = snapshot?.sendData || ''
+  }
+
+  function applyPayloadRecord(payloadRecord) {
+    if (!payloadRecord)
+      return
+    const recordData = payloadRecord.data || new Uint8Array(payloadRecord.dataBuffer || [])
+
+    if (payloadRecord.display === FILE_RECORD_DISPLAY) {
+      selectedFilePayload.value = createFilePayload({
+        data: recordData,
+        fileMeta: payloadRecord.fileMeta || {
+          name: payloadRecord.text,
+          size: payloadRecord.byteLength,
+        },
+      })
+      textDraftBeforeFile.value = historyDraftSnapshot.value?.type === 'text'
+        ? historyDraftSnapshot.value.sendData
+        : ''
+      sendData.value = ''
+      fileSendProgress.value = 0
+      return
+    }
+
+    selectedFilePayload.value = null
+    textDraftBeforeFile.value = ''
+
+    if (payloadRecord.display === 'hex') {
+      sendData.value = bufferToHexFormat(recordData)
+    }
+    else if (payloadRecord.display === 'ascii') {
+      const decoder = new TextDecoder()
+      let text = decoder.decode(recordData)
+      if (lineEnding.value && text.endsWith(lineEnding.value))
+        text = text.slice(0, -lineEnding.value.length)
+      sendData.value = text
+    }
+    else {
+      sendData.value = Array.from(recordData).join(' ')
+    }
+  }
+
+  function applyHistoryRecord(record) {
+    if (!record)
+      return undefined
+
+    if (record.data || record.dataBuffer) {
+      applyPayloadRecord(record)
+      return undefined
+    }
+
+    if (!record.id || !getRecordPayload) {
+      applyPayloadRecord(record)
+      return undefined
+    }
+
+    return getRecordPayload(record.id).then(applyPayloadRecord)
+  }
+
   async function navigateHistory(direction) {
-    if (getRecentWriteRecords)
+    if (getRecentWriteRecordSummaries || getRecentWriteRecords)
       await refreshSendHistory()
     const history = sendHistory.value
     console.log('History length:', history.length)
@@ -224,6 +462,8 @@ export const useSendStore = createGlobalState(() => {
       return
 
     const oldIndex = historyIndex.value
+    if (oldIndex === -1 && direction === 'up')
+      historyDraftSnapshot.value = createDraftSnapshot()
 
     if (direction === 'up') {
       // 向上导航到更早的历史记录
@@ -248,59 +488,44 @@ export const useSendStore = createGlobalState(() => {
 
     console.log('History index changed from', oldIndex, 'to', historyIndex.value)
 
-    // 根据索引设置sendData
+    if (oldIndex === -1 && historyIndex.value === -1)
+      return
+
     if (historyIndex.value === -1) {
-      // 回到当前输入状态，清空输入框
-      sendData.value = ''
-      console.log('Cleared input')
+      restoreDraftSnapshot(historyDraftSnapshot.value)
+      historyDraftSnapshot.value = null
     }
     else {
-      // 显示历史记录
       const record = history[history.length - 1 - historyIndex.value]
       console.log('Selected record:', record)
-      if (record) {
-        console.log('Record display type:', record.display)
-        console.log('Current sendType:', sendType.value)
-        console.log('Record data:', record.data)
-
-        // 根据历史记录的原始发送类型格式化数据
-        if (record.display === 'hex') {
-          sendData.value = bufferToHexFormat(record.data)
-        }
-        else if (record.display === 'ascii') {
-          // 移除行结束符
-          const decoder = new TextDecoder()
-          let text = decoder.decode(record.data)
-          console.log('Decoded text:', JSON.stringify(text))
-          console.log('Line ending:', JSON.stringify(lineEnding.value))
-          // 只有当行结束符不为空且文本确实以行结束符结尾时才移除
-          if (lineEnding.value && text.endsWith(lineEnding.value)) {
-            text = text.slice(0, -lineEnding.value.length)
-          }
-          sendData.value = text
-        }
-        else {
-          // dec格式
-          sendData.value = Array.from(record.data).join(' ')
-        }
-        console.log('Set sendData to:', JSON.stringify(sendData.value))
-      }
+      const pendingApply = applyHistoryRecord(record)
+      if (pendingApply)
+        await pendingApply
     }
   }
 
   // 当用户手动输入时，重置历史索引
   function resetHistoryIndex() {
     historyIndex.value = -1
+    historyDraftSnapshot.value = null
   }
 
   return {
     isAutoSending,
+    isFileSending,
+    fileSendProgress,
+    selectedFilePayload,
+    hasSelectedFile,
+    canSend,
     sendData,
     clear,
     sendHistory,
     onInput,
     sendBuffer,
     send,
+    selectFile,
+    removeSelectedFile,
+    openSelectedFilePreview,
     sendType,
     checkAlgorithm,
     checkAlgorithms,

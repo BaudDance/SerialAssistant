@@ -8,6 +8,9 @@ export {}
 declare global {
   const DEFAULT_LAYOUT_CONFIG: typeof import('./composables/useLayout/index.js')['DEFAULT_LAYOUT_CONFIG']
   const EffectScope: typeof import('vue')['EffectScope']
+  const FILE_RECORD_DISPLAY: typeof import('./utils/filePayload.js')['FILE_RECORD_DISPLAY']
+  const FILE_SEND_CHUNK_SIZE: typeof import('./utils/filePayload.js')['FILE_SEND_CHUNK_SIZE']
+  const LARGE_FILE_WARNING_SIZE: typeof import('./utils/filePayload.js')['LARGE_FILE_WARNING_SIZE']
   const asyncComputed: typeof import('@vueuse/core')['asyncComputed']
   const autoResetRef: typeof import('@vueuse/core')['autoResetRef']
   const computed: typeof import('vue')['computed']
@@ -17,8 +20,11 @@ declare global {
   const computedWithControl: typeof import('@vueuse/core')['computedWithControl']
   const controlledComputed: typeof import('@vueuse/core')['controlledComputed']
   const controlledRef: typeof import('@vueuse/core')['controlledRef']
+  const copyToUint8Array: typeof import('./utils/filePayload.js')['copyToUint8Array']
   const createApp: typeof import('vue')['createApp']
   const createEventHook: typeof import('@vueuse/core')['createEventHook']
+  const createFileMeta: typeof import('./utils/filePayload.js')['createFileMeta']
+  const createFilePayload: typeof import('./utils/filePayload.js')['createFilePayload']
   const createGlobalState: typeof import('@vueuse/core')['createGlobalState']
   const createInjectionState: typeof import('@vueuse/core')['createInjectionState']
   const createReactiveFn: typeof import('@vueuse/core')['createReactiveFn']
@@ -34,6 +40,9 @@ declare global {
   const eagerComputed: typeof import('@vueuse/core')['eagerComputed']
   const effectScope: typeof import('vue')['effectScope']
   const extendRef: typeof import('@vueuse/core')['extendRef']
+  const fileMetaFromPayload: typeof import('./utils/filePayload.js')['fileMetaFromPayload']
+  const fileSummaryText: typeof import('./utils/filePayload.js')['fileSummaryText']
+  const formatFileSize: typeof import('./utils/filePayload.js')['formatFileSize']
   const generateUUID: typeof import('./utils/uuid.js')['generateUUID']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
   const getCurrentScope: typeof import('vue')['getCurrentScope']
@@ -102,6 +111,7 @@ declare global {
   const toReactive: typeof import('@vueuse/core')['toReactive']
   const toRef: typeof import('vue')['toRef']
   const toRefs: typeof import('vue')['toRefs']
+  const toUint8Array: typeof import('./utils/filePayload.js')['toUint8Array']
   const toValue: typeof import('vue')['toValue']
   const triggerRef: typeof import('vue')['triggerRef']
   const tryOnBeforeMount: typeof import('@vueuse/core')['tryOnBeforeMount']
@@ -312,6 +322,9 @@ declare module 'vue' {
   interface ComponentCustomProperties {
     readonly DEFAULT_LAYOUT_CONFIG: UnwrapRef<typeof import('./composables/useLayout/index.js')['DEFAULT_LAYOUT_CONFIG']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
+    readonly FILE_RECORD_DISPLAY: UnwrapRef<typeof import('./utils/filePayload.js')['FILE_RECORD_DISPLAY']>
+    readonly FILE_SEND_CHUNK_SIZE: UnwrapRef<typeof import('./utils/filePayload.js')['FILE_SEND_CHUNK_SIZE']>
+    readonly LARGE_FILE_WARNING_SIZE: UnwrapRef<typeof import('./utils/filePayload.js')['LARGE_FILE_WARNING_SIZE']>
     readonly asyncComputed: UnwrapRef<typeof import('@vueuse/core')['asyncComputed']>
     readonly autoResetRef: UnwrapRef<typeof import('@vueuse/core')['autoResetRef']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
@@ -321,8 +334,11 @@ declare module 'vue' {
     readonly computedWithControl: UnwrapRef<typeof import('@vueuse/core')['computedWithControl']>
     readonly controlledComputed: UnwrapRef<typeof import('@vueuse/core')['controlledComputed']>
     readonly controlledRef: UnwrapRef<typeof import('@vueuse/core')['controlledRef']>
+    readonly copyToUint8Array: UnwrapRef<typeof import('./utils/filePayload.js')['copyToUint8Array']>
     readonly createApp: UnwrapRef<typeof import('vue')['createApp']>
     readonly createEventHook: UnwrapRef<typeof import('@vueuse/core')['createEventHook']>
+    readonly createFileMeta: UnwrapRef<typeof import('./utils/filePayload.js')['createFileMeta']>
+    readonly createFilePayload: UnwrapRef<typeof import('./utils/filePayload.js')['createFilePayload']>
     readonly createGlobalState: UnwrapRef<typeof import('@vueuse/core')['createGlobalState']>
     readonly createInjectionState: UnwrapRef<typeof import('@vueuse/core')['createInjectionState']>
     readonly createReactiveFn: UnwrapRef<typeof import('@vueuse/core')['createReactiveFn']>
@@ -338,6 +354,9 @@ declare module 'vue' {
     readonly eagerComputed: UnwrapRef<typeof import('@vueuse/core')['eagerComputed']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly extendRef: UnwrapRef<typeof import('@vueuse/core')['extendRef']>
+    readonly fileMetaFromPayload: UnwrapRef<typeof import('./utils/filePayload.js')['fileMetaFromPayload']>
+    readonly fileSummaryText: UnwrapRef<typeof import('./utils/filePayload.js')['fileSummaryText']>
+    readonly formatFileSize: UnwrapRef<typeof import('./utils/filePayload.js')['formatFileSize']>
     readonly generateUUID: UnwrapRef<typeof import('./utils/uuid.js')['generateUUID']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
@@ -406,6 +425,7 @@ declare module 'vue' {
     readonly toReactive: UnwrapRef<typeof import('@vueuse/core')['toReactive']>
     readonly toRef: UnwrapRef<typeof import('vue')['toRef']>
     readonly toRefs: UnwrapRef<typeof import('vue')['toRefs']>
+    readonly toUint8Array: UnwrapRef<typeof import('./utils/filePayload.js')['toUint8Array']>
     readonly toValue: UnwrapRef<typeof import('vue')['toValue']>
     readonly triggerRef: UnwrapRef<typeof import('vue')['triggerRef']>
     readonly tryOnBeforeMount: UnwrapRef<typeof import('@vueuse/core')['tryOnBeforeMount']>

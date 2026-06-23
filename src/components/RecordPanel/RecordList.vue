@@ -2,8 +2,11 @@
 import { useVirtualizer } from '@tanstack/vue-virtual'
 import dayjs from 'dayjs'
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { dialogKeys, useDialog } from '@/components/Dialog/composable'
+import FilePayloadCard from '@/components/FilePayload/FilePayloadCard.vue'
 import { useRecordStore } from '@/store/useRecordStore'
 import { useSerialStore } from '@/store/useSerialStore'
+import { FILE_RECORD_DISPLAY } from '@/utils/filePayload'
 
 const props = defineProps({
   sessionId: {
@@ -41,8 +44,9 @@ const ENTERING_ROW_TTL_MS = 220
 const ENTERING_ROW_LIMIT = 12
 const PROGRAMMATIC_SCROLL_IGNORE_MS = 160
 
-const { fetchRecordRows, setRecordDisplay, copyRecordContent, recordCount } = useRecordStore()
+const { fetchRecordRows, setRecordDisplay, copyRecordContent, getRecordPayload, recordCount } = useRecordStore()
 const { recordTypes } = useSerialStore()
+const { open: openDialog } = useDialog()
 
 const rootEl = ref(null)
 const rowsByIndex = ref({})
@@ -380,6 +384,9 @@ async function loadVisibleRows({
 }
 
 async function toggleRecordDisplay(record) {
+  if (record.display === FILE_RECORD_DISPLAY)
+    return
+
   const index = recordTypes.value.indexOf(record.display)
   const display = recordTypes.value[(index + 1) % recordTypes.value.length]
   const row = await setRecordDisplay(record.id, display)
@@ -389,6 +396,16 @@ async function toggleRecordDisplay(record) {
       [row.index]: row,
     }
   }
+}
+
+async function openFilePreview(record) {
+  if (!record || record.display !== FILE_RECORD_DISPLAY)
+    return
+
+  const payload = await getRecordPayload(record.id)
+  if (!payload)
+    return
+  openDialog(dialogKeys.filePreview, payload)
 }
 
 function scrollToIndex(index, align = 'center') {
@@ -560,7 +577,10 @@ defineExpose({
                 {{ formatRecordTime(rowsByIndex[virtualRow.index]) }}
               </div>
               <div class="w-4" />
-              <div class="cursor-pointer" @click="() => toggleRecordDisplay(rowsByIndex[virtualRow.index])">
+              <div
+                :class="rowsByIndex[virtualRow.index].display === FILE_RECORD_DISPLAY ? 'text-muted-foreground' : 'cursor-pointer'"
+                @click="() => toggleRecordDisplay(rowsByIndex[virtualRow.index])"
+              >
                 {{ rowsByIndex[virtualRow.index].display }}
               </div>
               <div class="w-4" />
@@ -569,7 +589,13 @@ defineExpose({
               </div>
             </div>
             <div class="chat-bubble break-words text-sm">
-              <div v-if="rowsByIndex[virtualRow.index].display === 'ascii'" v-html="rowsByIndex[virtualRow.index].html" />
+              <FilePayloadCard
+                v-if="rowsByIndex[virtualRow.index].display === FILE_RECORD_DISPLAY"
+                class="min-w-64 max-w-full"
+                :payload="rowsByIndex[virtualRow.index]"
+                @view="() => openFilePreview(rowsByIndex[virtualRow.index])"
+              />
+              <div v-else-if="rowsByIndex[virtualRow.index].display === 'ascii'" v-html="rowsByIndex[virtualRow.index].html" />
               <div v-else>
                 {{ rowsByIndex[virtualRow.index].text }}
               </div>

@@ -4,6 +4,7 @@ import { ref } from 'vue'
 import { toast } from 'vue-sonner'
 import { useDataCode } from '@/composables/useDataCode/useDataCode'
 import { useSerialWorker } from '@/composables/useSerialWorker'
+import { FILE_RECORD_DISPLAY, fileSummaryText } from '@/utils/filePayload'
 
 const records = ref([])
 const readingRecord = ref(undefined)
@@ -58,6 +59,8 @@ export const useRecordStore = createGlobalState(() => {
     if (recordOrId.text)
       return recordOrId.text
     if (recordOrId.data) {
+      if (recordOrId.display === FILE_RECORD_DISPLAY)
+        return fileSummaryText(recordOrId.fileMeta, recordOrId.data.byteLength)
       if (recordOrId.display === 'hex')
         return bufferToHexFormat(recordOrId.data)
       if (recordOrId.display === 'ascii')
@@ -69,6 +72,23 @@ export const useRecordStore = createGlobalState(() => {
       return text || ''
     }
     return ''
+  }
+
+  async function getRecordPayload(recordOrId) {
+    if (!recordOrId)
+      return null
+    if (recordOrId.data) {
+      return {
+        ...recordOrId,
+        data: recordOrId.data instanceof Uint8Array ? recordOrId.data : new Uint8Array(recordOrId.data || []),
+      }
+    }
+
+    const id = typeof recordOrId === 'string' ? recordOrId : recordOrId.id
+    if (!id)
+      return null
+
+    return worker.getRecordPayload(id)
   }
 
   async function copyRecordContent(recordOrId) {
@@ -91,13 +111,17 @@ export const useRecordStore = createGlobalState(() => {
 
     const exportData = list.map((record) => {
       const timestamp = record.timestamp || new Date(record.time).getTime() || null
-      const data = record.display === 'hex' ? bufferToHexFormat(record.data) : bufferToString(record.data)
+      const data = record.display === FILE_RECORD_DISPLAY
+        ? fileSummaryText(record.fileMeta, record.byteLength || record.data?.byteLength)
+        : record.display === 'hex' ? bufferToHexFormat(record.data) : bufferToString(record.data)
       return {
         type: record.type,
         data,
         timestamp,
         time: timestamp ? dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss:SSS') : null,
         display: record.display,
+        fileMeta: record.fileMeta || null,
+        byteLength: record.byteLength || record.data?.byteLength || 0,
       }
     })
 
@@ -138,6 +162,10 @@ export const useRecordStore = createGlobalState(() => {
     return worker.getRecentWriteRecords(sessionId, limit)
   }
 
+  async function getRecentWriteRecordSummaries(limit = 100, sessionId = worker.currentSessionId.value) {
+    return worker.getRecentWriteRecordSummaries(sessionId, limit)
+  }
+
   function scrollToRecord(index) {
     scrollToRecordIndex.value = index
     setTimeout(() => {
@@ -161,8 +189,10 @@ export const useRecordStore = createGlobalState(() => {
     exportRecords,
     copyRecordContent,
     getRecordContent,
+    getRecordPayload,
     searchRecords,
     getRecentWriteRecords,
+    getRecentWriteRecordSummaries,
     scrollToRecord,
   }
 })

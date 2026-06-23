@@ -83,6 +83,53 @@ describe('serial worker record access facade', () => {
     const { row } = await worker.setRecordDisplay('session_search:0', 'hex')
     expect(row.text).toBe('0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x20, 0x77, 0x6F, 0x72, 0x6B, 0x65, 0x72')
   })
+
+  it('stores file records as summaries and fetches raw payload on demand', async () => {
+    await worker.createSession({
+      id: 'session_file',
+      title: 'File Session',
+      createdAt: 1000,
+      updatedAt: 1000,
+      recordCount: 0,
+      deviceInfo: { type: 'serial', port: 'USB-3', name: 'File Serial', details: {} },
+    })
+    await worker.appendRecord({
+      type: 'write',
+      display: 'file',
+      time: 1000,
+      data: new Uint8Array([0x42, 0x4D, 0x01]),
+      fileMeta: {
+        name: 'screen.bmp',
+        size: 3,
+        type: 'image/bmp',
+        lastModified: 123,
+      },
+    })
+
+    const { rows } = await worker.fetchRecordRows('session_file', 0, 1)
+
+    expect(rows[0]).toMatchObject({
+      id: 'session_file:0',
+      display: 'file',
+      byteLength: 3,
+      text: 'screen.bmp (3 B)',
+      fileMeta: {
+        name: 'screen.bmp',
+        size: 3,
+        type: 'image/bmp',
+        lastModified: 123,
+      },
+    })
+    expect(rows[0].dataBuffer).toBeUndefined()
+
+    const summaries = await worker.getRecentWriteRecordSummaries('session_file', 10)
+    expect(summaries[0].dataBuffer).toBeUndefined()
+    expect(summaries[0].text).toBe('screen.bmp (3 B)')
+
+    const payload = await worker.getRecordPayload('session_file:0')
+    expect(Array.from(payload.data)).toEqual([0x42, 0x4D, 0x01])
+    expect(payload.fileMeta.name).toBe('screen.bmp')
+  })
 })
 
 describe('serial worker migration marker fallback', () => {

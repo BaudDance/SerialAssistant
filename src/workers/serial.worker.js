@@ -1,3 +1,5 @@
+import { createFileMeta, FILE_RECORD_DISPLAY, fileSummaryText } from '../utils/filePayload.js'
+
 const DB_NAME = 'serial-assistant-records'
 const DB_VERSION = 1
 const FRAME_IDLE_MS = 5
@@ -194,6 +196,8 @@ function stringToHtml(str) {
 
 function formatRecordText(record) {
   const data = new Uint8Array(record.dataBuffer || record.data || [])
+  if (record.display === FILE_RECORD_DISPLAY)
+    return fileSummaryText(record.fileMeta, data.byteLength)
   if (record.display === 'ascii')
     return bufferToString(data)
   if (record.display === 'dec')
@@ -202,18 +206,36 @@ function formatRecordText(record) {
 }
 
 function toRecordRow(record) {
+  const isFileRecord = record.display === FILE_RECORD_DISPLAY
   const text = formatRecordText(record)
   return {
     id: record.id,
     index: record.index,
     type: record.type,
     display: record.display,
+    fileMeta: record.fileMeta || null,
     time: record.time,
     firstSeenAt: record.firstSeenAt,
     lastSeenAt: record.lastSeenAt,
     byteLength: record.byteLength,
     text,
-    html: record.display === 'ascii' ? stringToHtml(text) : '',
+    html: !isFileRecord && record.display === 'ascii' ? stringToHtml(text) : '',
+  }
+}
+
+function toRecordSummary(record) {
+  const row = toRecordRow(record)
+  return {
+    id: row.id,
+    index: row.index,
+    type: row.type,
+    display: row.display,
+    fileMeta: row.fileMeta,
+    time: row.time,
+    firstSeenAt: row.firstSeenAt,
+    lastSeenAt: row.lastSeenAt,
+    byteLength: row.byteLength,
+    text: row.text,
   }
 }
 
@@ -311,6 +333,9 @@ async function appendRecord(payload) {
   const dataBuffer = toArrayBuffer(payload.dataBuffer || payload.data)
   const byteLength = dataBuffer.byteLength
   const now = Date.now()
+  const fileMeta = payload.display === FILE_RECORD_DISPLAY
+    ? createFileMeta(payload.fileMeta, byteLength)
+    : undefined
   const record = {
     id: `${sessionId}:${index}`,
     sessionId,
@@ -323,6 +348,7 @@ async function appendRecord(payload) {
     timestamp: payload.timestamp || payload.time || now,
     byteLength,
     dataBuffer,
+    fileMeta,
   }
 
   recordCounts.set(sessionId, index + 1)
@@ -538,6 +564,21 @@ async function handleGetRecordContent(payload) {
   return { text: record ? formatRecordText(record) : '' }
 }
 
+async function handleGetRecordPayload(payload) {
+  const { sessionId, index } = parseRecordId(payload.id)
+  const record = await fetchRecordByIndex(sessionId, index)
+  if (!record)
+    return { record: null }
+
+  const dataBuffer = toArrayBuffer(record.dataBuffer || record.data)
+  return {
+    record: {
+      ...toRecordSummary(record),
+      dataBuffer,
+    },
+  }
+}
+
 async function handleSearchRecords(payload) {
   const sessionId = payload.sessionId || currentSessionId
   const query = (payload.query || '').trim().toLowerCase()
@@ -577,6 +618,38 @@ async function handleSearchRecords(payload) {
   }
 
   return { results, total }
+}
+
+async function handleGetRecentWriteRecordSummaries(payload) {
+  const sessionId = payload.sessionId || currentSessionId
+  const limit = payload.limit || 100
+  const records = []
+
+  if (!dbAvailable || !persistEnabled) {
+    const writes = getMemoryRecords(sessionId).filter(record => record.type === 'write')
+    records.push(...writes.slice(-limit))
+  }
+  else if (sessionId) {
+    const tx = db.transaction('records', 'readonly')
+    const range = IDBKeyRange.only([sessionId, 'write'])
+    const request = tx.objectStore('records').index('bySessionType').openCursor(range, 'prev')
+    await new Promise((resolve, reject) => {
+      request.onsuccess = () => {
+        const cursor = request.result
+        if (!cursor || records.length >= limit) {
+          resolve()
+          return
+        }
+        records.unshift(cursor.value)
+        cursor.continue()
+      }
+      request.onerror = () => reject(request.error)
+    })
+  }
+
+  return {
+    records: records.map(toRecordSummary),
+  }
 }
 
 async function handleGetRecentWriteRecords(payload) {
@@ -725,6 +798,8 @@ async function handleExportRecords(payload) {
       firstSeenAt: record.firstSeenAt,
       lastSeenAt: record.lastSeenAt,
       display: record.display,
+      fileMeta: record.fileMeta || null,
+      byteLength: record.byteLength,
     })))
   }
   return {
@@ -1042,8 +1117,12 @@ async function dispatch(type, payload) {
       return handleSetRecordDisplay(payload)
     case 'getRecordContent':
       return handleGetRecordContent(payload)
+    case 'getRecordPayload':
+      return handleGetRecordPayload(payload)
     case 'searchRecords':
       return handleSearchRecords(payload)
+    case 'getRecentWriteRecordSummaries':
+      return handleGetRecentWriteRecordSummaries(payload)
     case 'getRecentWriteRecords':
       return handleGetRecentWriteRecords(payload)
     case 'clearRecords':
