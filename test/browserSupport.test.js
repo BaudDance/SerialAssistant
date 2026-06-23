@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   getSerialBrowserSupportStatus,
+  getSerialLocationInfo,
   hasWebSerial,
   isLikelyMobileDevice,
   SERIAL_BROWSER_SUPPORT_REASONS,
@@ -32,12 +33,22 @@ function createWindow({
   isSecureContext = true,
   protocol = 'https:',
   hostname = 'serial.baud-dance.com',
+  host = hostname,
+  href = `${protocol}//${host}/`,
+  pathname = '/',
+  search = '',
+  hash = '',
 } = {}) {
   return {
     isSecureContext,
     location: {
       protocol,
       hostname,
+      host,
+      href,
+      pathname,
+      search,
+      hash,
     },
   }
 }
@@ -123,6 +134,29 @@ describe('browser support detection', () => {
 
     expect(status.supported).toBe(true)
     expect(status.isSecureContext).toBe(true)
+  })
+
+  it('recommends https for deployed http URLs', () => {
+    const location = getSerialLocationInfo({
+      window: createWindow({
+        isSecureContext: false,
+        protocol: 'http:',
+        hostname: 'serial.example.com',
+        host: 'serial.example.com:8080',
+        href: 'http://serial.example.com:8080/tools?tab=serial#connect',
+        pathname: '/tools',
+        search: '?tab=serial',
+        hash: '#connect',
+      }),
+    })
+
+    expect(location).toEqual(expect.objectContaining({
+      protocol: 'http:',
+      hostname: 'serial.example.com',
+      host: 'serial.example.com:8080',
+      isTrustedLocalHost: false,
+      recommendedHttpsUrl: 'https://serial.example.com:8080/tools?tab=serial#connect',
+    }))
   })
 
   it('detects iPadOS desktop-style user agents as mobile by touch-capable Mac platform', () => {

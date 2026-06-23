@@ -52,7 +52,8 @@
     <meta name="bilibili:image" content="https://serial.baud-dance.com/serial.svg" />
 
     <!-- Additional SEO -->
-    <meta name="theme-color" content="#1f2937" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111827" />
     <meta name="msapplication-TileColor" content="#1f2937" />
     <meta name="application-name" content="波特律动串口助手" />
     <meta name="apple-mobile-web-app-title" content="串口助手" />
@@ -63,7 +64,35 @@
     <!-- Canonical URL -->
     <link rel="canonical" href="https://serial.baud-dance.com/" />
 
+    <script>
+      ;(() => {
+        try {
+          const mode = localStorage.getItem('vueuse-color-scheme') || 'auto'
+          const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches
+          document.documentElement.classList.toggle('dark', mode === 'dark' || (mode === 'auto' && prefersDark))
+        } catch (_) {}
+      })()
+    </script>
+
     <style>
+      :root {
+        color-scheme: light;
+        --app-fallback-background: #ffffff;
+        --app-fallback-foreground: #171717;
+        --app-fallback-muted: #737373;
+        --app-fallback-border: rgb(0 0 0 / 10%);
+        --app-fallback-spinner-track: rgb(0 0 0 / 12%);
+      }
+
+      .dark {
+        color-scheme: dark;
+        --app-fallback-background: #111827;
+        --app-fallback-foreground: #f8fafc;
+        --app-fallback-muted: #cbd5e1;
+        --app-fallback-border: rgb(255 255 255 / 12%);
+        --app-fallback-spinner-track: rgb(203 213 225 / 28%);
+      }
+
       .app-fallback {
         min-height: 100svh;
         box-sizing: border-box;
@@ -71,8 +100,8 @@
         align-items: center;
         justify-content: center;
         padding: 24px;
-        color: #f8fafc;
-        background: #111827;
+        color: var(--foreground, var(--app-fallback-foreground));
+        background: var(--background, var(--app-fallback-background));
         font-family:
           Inter,
           ui-sans-serif,
@@ -84,43 +113,62 @@
       }
 
       .app-fallback__panel {
-        width: min(100%, 560px);
-        padding: 28px;
-        border: 1px solid rgb(255 255 255 / 12%);
-        border-radius: 8px;
-        background: #1f2937;
-        box-shadow: 0 24px 80px rgb(0 0 0 / 32%);
+        width: min(100%, 320px);
+        text-align: center;
       }
 
       .app-fallback__brand {
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 12px;
-        margin-bottom: 24px;
+        gap: 10px;
       }
 
       .app-fallback__brand img {
-        width: 40px;
-        height: 40px;
+        width: 48px;
+        height: 48px;
       }
 
       .app-fallback__eyebrow {
-        margin: 0;
-        color: #cbd5e1;
-        font-size: 13px;
+        display: none;
       }
 
       .app-fallback h1 {
         margin: 0;
-        font-size: 26px;
-        line-height: 1.25;
+        font-size: 20px;
+        line-height: 1.35;
         letter-spacing: 0;
       }
 
       .app-fallback p {
-        margin: 12px 0 0;
-        color: #cbd5e1;
-        line-height: 1.7;
+        margin: 8px 0 0;
+        color: var(--muted-foreground, var(--app-fallback-muted));
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .app-fallback__status {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        margin-top: 18px;
+      }
+
+      .app-fallback__spinner {
+        width: 20px;
+        height: 20px;
+        flex: 0 0 auto;
+        border: 2px solid var(--border, var(--app-fallback-spinner-track));
+        border-top-color: var(--foreground, var(--app-fallback-foreground));
+        border-radius: 999px;
+        animation: app-fallback-spin 0.8s linear infinite;
+      }
+
+      @keyframes app-fallback-spin {
+        to {
+          transform: rotate(360deg);
+        }
       }
     </style>
 
@@ -150,7 +198,7 @@
   </head>
   <body>
     <div id="app">
-      <div class="app-fallback" role="alert">
+      <div class="app-fallback" role="status" aria-live="polite">
         <div class="app-fallback__panel">
           <div class="app-fallback__brand">
             <img src="/serial.svg" alt="" aria-hidden="true" />
@@ -159,10 +207,29 @@
               <strong>串口助手</strong>
             </div>
           </div>
-          <h1>当前环境暂不适合串口调试</h1>
-          <p>请复制当前网址，在电脑上的 Chrome 或 Edge 中打开。</p>
+          <div class="app-fallback__status">
+            <div class="app-fallback__spinner" aria-hidden="true"></div>
+            <div>
+              <h1>启动中</h1>
+            </div>
+          </div>
         </div>
       </div>
+      <noscript>
+        <div class="app-fallback" role="alert">
+          <div class="app-fallback__panel">
+            <div class="app-fallback__brand">
+              <img src="/serial.svg" alt="" aria-hidden="true" />
+              <div>
+                <p class="app-fallback__eyebrow">波特律动</p>
+                <strong>串口助手</strong>
+              </div>
+            </div>
+            <h1>需要启用 JavaScript</h1>
+            <p>请在浏览器设置中允许 JavaScript 后刷新页面。</p>
+          </div>
+        </div>
+      </noscript>
     </div>
     <script type="module" src="/src/main.js"></script>
   </body>

@@ -1,5 +1,5 @@
 import { useSupported } from '@vueuse/core'
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import USBJson from '@/assets/usb-device.json'
 import { useDataCode } from '@/composables/useDataCode/useDataCode'
 import { useNprogress } from '@/composables/useNprogress'
@@ -34,13 +34,20 @@ export function useSerial() {
   const { recordCacheEnabled } = useSettingStore()
   const { dataCode } = useDataCode()
   const isSupported = useSupported(() => hasWebSerial())
-  const serial = hasWebSerial() ? navigator.serial : null
   const port = ref(undefined)
   const portName = computed(() => getDeviceName(port.value))
   const ports = ref([])
   const connected = ref(false)
   const connecting = ref(false)
   const disconnecting = ref(false)
+  let cleanupSerialDisconnectListener = null
+
+  function getSerial() {
+    if (!hasWebSerial())
+      return null
+
+    return navigator.serial
+  }
 
   const portInfo = computed(() => {
     if (!port.value)
@@ -58,12 +65,14 @@ export function useSerial() {
   })
 
   async function updatePorts() {
+    const serial = getSerial()
     if (!serial)
       return
     ports.value = await serial.getPorts()
   }
 
   async function requestPort(options = {}) {
+    const serial = getSerial()
     if (!serial) {
       console.warn('Web Serial API 不支持')
       return null
@@ -233,13 +242,26 @@ export function useSerial() {
     updateWorkerSettings().catch(error => console.warn('更新串口 Worker 设置失败:', error))
   }, { immediate: true })
 
-  if (serial) {
-    serial.addEventListener('disconnect', async (event) => {
-      if (port.value === event.target)
-        await closePort({ forceDisconnected: true })
-    })
-    updatePorts()
+  async function handleSerialDisconnect(event) {
+    if (port.value === event.target)
+      await closePort({ forceDisconnected: true })
   }
+
+  watch(isSupported, (supported) => {
+    const serial = getSerial()
+    if (!supported || !serial || cleanupSerialDisconnectListener)
+      return
+
+    serial.addEventListener('disconnect', handleSerialDisconnect)
+    cleanupSerialDisconnectListener = () => {
+      serial.removeEventListener('disconnect', handleSerialDisconnect)
+    }
+    updatePorts()
+  }, { immediate: true })
+
+  onBeforeUnmount(() => {
+    cleanupSerialDisconnectListener?.()
+  })
 
   return {
     isSupported,

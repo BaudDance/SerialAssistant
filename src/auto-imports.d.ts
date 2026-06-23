@@ -50,6 +50,7 @@ declare global {
   const getDeviceName: typeof import('./composables/useSerial/index.js')['getDeviceName']
   const getOS: typeof import('./utils/os.js')['getOS']
   const getSerialBrowserSupportStatus: typeof import('./utils/browserSupport.js')['getSerialBrowserSupportStatus']
+  const getSerialLocationInfo: typeof import('./utils/browserSupport.js')['getSerialLocationInfo']
   const h: typeof import('vue')['h']
   const hasWebSerial: typeof import('./utils/browserSupport.js')['hasWebSerial']
   const ignorableWatch: typeof import('@vueuse/core')['ignorableWatch']
@@ -369,6 +370,7 @@ declare module 'vue' {
     readonly getDeviceName: UnwrapRef<typeof import('./composables/useSerial/index.js')['getDeviceName']>
     readonly getOS: UnwrapRef<typeof import('./utils/os.js')['getOS']>
     readonly getSerialBrowserSupportStatus: UnwrapRef<typeof import('./utils/browserSupport.js')['getSerialBrowserSupportStatus']>
+    readonly getSerialLocationInfo: UnwrapRef<typeof import('./utils/browserSupport.js')['getSerialLocationInfo']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
     readonly hasWebSerial: UnwrapRef<typeof import('./utils/browserSupport.js')['hasWebSerial']>
     readonly ignorableWatch: UnwrapRef<typeof import('@vueuse/core')['ignorableWatch']>

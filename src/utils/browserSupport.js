@@ -33,6 +33,31 @@ export function hasWebSerial(options = {}) {
   return !!currentNavigator && 'serial' in currentNavigator
 }
 
+export function getSerialLocationInfo(options = {}) {
+  const currentWindow = resolveWindow(options.window)
+  const currentLocation = options.location ?? currentWindow?.location
+  const protocol = currentLocation?.protocol ?? ''
+  const hostname = currentLocation?.hostname ?? ''
+  const host = currentLocation?.host ?? hostname
+  const href = currentLocation?.href ?? ''
+  const pathname = currentLocation?.pathname ?? ''
+  const search = currentLocation?.search ?? ''
+  const hash = currentLocation?.hash ?? ''
+  const isTrustedLocalHost = TRUSTED_LOCAL_HOSTS.has(hostname)
+  const recommendedHttpsUrl = protocol === 'http:' && !isTrustedLocalHost && host
+    ? `https://${host}${pathname}${search}${hash}`
+    : ''
+
+  return {
+    href,
+    protocol,
+    hostname,
+    host,
+    isTrustedLocalHost,
+    recommendedHttpsUrl,
+  }
+}
+
 export function isLikelyMobileDevice(options = {}) {
   const currentNavigator = resolveNavigator(options.navigator)
   const userAgentData = currentNavigator?.userAgentData
@@ -57,14 +82,13 @@ export function isSerialSecureContext(options = {}) {
   if (typeof currentWindow?.isSecureContext === 'boolean')
     return currentWindow.isSecureContext
 
-  const currentLocation = options.location ?? currentWindow?.location
-  const protocol = currentLocation?.protocol
-  const hostname = currentLocation?.hostname
+  const { protocol, isTrustedLocalHost } = getSerialLocationInfo(options)
 
-  return protocol === 'https:' || TRUSTED_LOCAL_HOSTS.has(hostname)
+  return protocol === 'https:' || isTrustedLocalHost
 }
 
 export function getSerialBrowserSupportStatus(options = {}) {
+  const location = getSerialLocationInfo(options)
   const isMobile = isLikelyMobileDevice(options)
   const isSecureContext = isSerialSecureContext(options)
   const webSerialSupported = hasWebSerial(options)
@@ -90,5 +114,6 @@ export function getSerialBrowserSupportStatus(options = {}) {
     isMobile,
     hasWebSerial: webSerialSupported,
     isSecureContext,
+    location,
   }
 }

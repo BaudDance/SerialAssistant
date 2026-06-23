@@ -156,9 +156,12 @@ describe('sEO Meta Tags Tests', () => {
 
   describe('other SEO tags', () => {
     it('应该有主题色设置', () => {
-      const themeColor = document.querySelector('meta[name="theme-color"]')
-      expect(themeColor).toBeTruthy()
-      expect(themeColor.getAttribute('content')).toBe('#1f2937')
+      const lightThemeColor = document.querySelector('meta[name="theme-color"][media="(prefers-color-scheme: light)"]')
+      const darkThemeColor = document.querySelector('meta[name="theme-color"][media="(prefers-color-scheme: dark)"]')
+      expect(lightThemeColor).toBeTruthy()
+      expect(darkThemeColor).toBeTruthy()
+      expect(lightThemeColor.getAttribute('content')).toBe('#ffffff')
+      expect(darkThemeColor.getAttribute('content')).toBe('#111827')
     })
 
     it('应该有应用名称', () => {
@@ -240,10 +243,10 @@ describe('sEO Meta Tags Tests', () => {
       expect(app).toBeTruthy()
     })
 
-    it('应该有浏览器不支持时的静态降级提示', () => {
+    it('应该有应用启动时的静态占位提示', () => {
       const app = document.querySelector('#app')
-      expect(app.textContent).toContain('当前环境暂不适合串口调试')
-      expect(app.textContent).toContain('复制当前网址')
+      expect(app.textContent).toContain('启动中')
+      expect(app.textContent).toContain('需要启用 JavaScript')
     })
 
     it('应该有主脚本引用', () => {

@@ -1,7 +1,7 @@
 <script setup>
 import { useTitle } from '@vueuse/core'
-import { Loader2 } from 'lucide-vue-next'
-import { inject, watch } from 'vue'
+import { Loader2, RefreshCw } from 'lucide-vue-next'
+import { computed, inject, ref, watch } from 'vue'
 import { toast } from 'vue-sonner'
 import { useDialog } from '@/components/Dialog'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -18,6 +18,7 @@ import {
 import { useRecordCache } from '@/composables/useRecordCache'
 import { useSerialStore } from '@/store/useSerialStore.js'
 import { useSettingStore } from '@/store/useSettingStore'
+import { getSerialBrowserSupportStatus, SERIAL_BROWSER_SUPPORT_REASONS } from '@/utils/browserSupport'
 
 const {
   port,
@@ -35,7 +36,54 @@ const { baudRate, baudRateList, dataBits, stopBits, parity, flowControl, serialR
 const { open } = useDialog()
 const { createSession } = useRecordCache()
 const { recordCacheEnabled } = useSettingStore()
-const serialUnsupported = computed(() => !isSupported?.value)
+const supportStatus = ref(getSerialBrowserSupportStatus())
+const serialUnsupported = computed(() => supportStatus.value.blocked)
+
+const serialSupportContent = computed(() => {
+  switch (supportStatus.value.reason) {
+    case SERIAL_BROWSER_SUPPORT_REASONS.MOBILE:
+      return {
+        title: '手机暂时不能连接串口',
+        description: 'Web Serial 主要支持桌面版 Chrome 或 Edge，请在电脑浏览器中打开。',
+      }
+    case SERIAL_BROWSER_SUPPORT_REASONS.INSECURE_CONTEXT:
+      return {
+        title: '当前网址无法连接串口',
+        description: 'Web Serial 需要 HTTPS 或 localhost 这类安全上下文，请确认线上地址使用有效 HTTPS 证书访问。',
+      }
+    case SERIAL_BROWSER_SUPPORT_REASONS.UNSUPPORTED_BROWSER:
+      return {
+        title: '当前浏览器未开放 Web Serial',
+        description: '请确认使用桌面版 Chrome 或 Edge，并检查浏览器策略、权限策略或实验功能是否禁用了 Serial。',
+      }
+    default:
+      return {
+        title: '串口功能暂不可用',
+        description: '请重新检测当前浏览器环境。',
+      }
+  }
+})
+
+const serialSupportDetails = computed(() => [
+  {
+    label: '协议',
+    value: supportStatus.value.location?.protocol || '未知',
+  },
+  {
+    label: '安全上下文',
+    value: supportStatus.value.isSecureContext ? '是' : '否',
+  },
+  {
+    label: 'Web Serial',
+    value: supportStatus.value.hasWebSerial ? '已开放' : '未开放',
+  },
+])
+
+function refreshSupportStatus() {
+  supportStatus.value = getSerialBrowserSupportStatus()
+}
+
+watch(isSupported, refreshSupportStatus)
 
 function serialOptions() {
   return {
@@ -72,13 +120,18 @@ watch([baudRate, dataBits, stopBits, parity, flowControl], (_newPort) => {
 })
 
 async function selectPort() {
-  if (await requestPort()) {
-    if (recordCacheEnabled.value) {
-    // 如果启用了缓存，创建一个新缓存会话
-      const _sessionId = createSession()
-    }
-    await openSerialPort()
+  const selectedPort = await requestPort()
+
+  if (!selectedPort) {
+    refreshSupportStatus()
+    return
   }
+
+  if (recordCacheEnabled.value) {
+    // 如果启用了缓存，创建一个新缓存会话
+    const _sessionId = createSession()
+  }
+  await openSerialPort()
 }
 
 // 数据位列表
@@ -247,9 +300,29 @@ useTitle(pageTitle)
     </Button>
 
     <Alert v-if="serialUnsupported" class="mt-1">
-      <AlertTitle>当前浏览器不支持串口</AlertTitle>
-      <AlertDescription>
-        请复制当前网址，在电脑上的 Chrome 或 Edge 中打开。
+      <AlertTitle>{{ serialSupportContent.title }}</AlertTitle>
+      <AlertDescription class="space-y-3">
+        <p>
+          {{ serialSupportContent.description }}
+        </p>
+        <div class="grid gap-2 text-xs sm:grid-cols-3">
+          <div
+            v-for="item in serialSupportDetails"
+            :key="item.label"
+            class="rounded-md border px-2 py-1.5"
+          >
+            <p class="text-muted-foreground">
+              {{ item.label }}
+            </p>
+            <p class="mt-0.5 font-medium text-foreground">
+              {{ item.value }}
+            </p>
+          </div>
+        </div>
+        <Button size="sm" variant="outline" class="cursor-pointer" @click="refreshSupportStatus">
+          <RefreshCw class="size-3.5" />
+          重新检测
+        </Button>
       </AlertDescription>
     </Alert>
   </div>
