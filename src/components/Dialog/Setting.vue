@@ -7,7 +7,7 @@ import { dialogKeys, useDialog } from './composable'
 
 const { visible } = useDialog()
 const { dataCode } = useDataCode()
-const { lineEndingMode, lineSelfEnding } = useSettingStore()
+const { lineEndingMode, lineSelfEnding, terminalEnterMode } = useSettingStore()
 const showCustomInput = computed(() => lineEndingMode.value === '自定义')
 const { hasDecTyps } = useSerialStore()
 </script>
@@ -60,6 +60,28 @@ const { hasDecTyps } = useSerialStore()
               class="w-full"
             />
           </div>
+        </div>
+
+        <div class="flex h-9">
+          <Label class="w-36">终端回车发送</Label>
+          <Select v-model="terminalEnterMode">
+            <SelectTrigger class="w-full">
+              <SelectValue placeholder="请选择回车发送内容" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="CR">
+                  CR (0D)
+                </SelectItem>
+                <SelectItem value="LF">
+                  LF (0A)
+                </SelectItem>
+                <SelectItem value="CRLF">
+                  CRLF (0D 0A)
+                </SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
 
         <div class="flex h-9">

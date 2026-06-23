@@ -4,6 +4,7 @@ import { FitAddon } from '@xterm/addon-fit'
 import { Terminal } from '@xterm/xterm'
 import { inject, nextTick, onBeforeUnmount } from 'vue'
 import { useSettingStore } from '@/store/useSettingStore.js'
+import { normalizeTerminalInput } from './terminalInput'
 import darkThemeJson from './theme/xterm/vscode/DarkModern.json'
 // import darkThemeJson from './theme/xterm/vscode/Dark+.json'
 import lightThemeJson from './theme/xterm/vscode/GitHub-Light-Default.json'
@@ -12,7 +13,7 @@ import WelcomeToTerminal from './WelcomeToTerminal.vue'
 
 import '@xterm/xterm/css/xterm.css'
 
-const { deviceType } = useSettingStore()
+const { deviceType, terminalEnter } = useSettingStore()
 // 获取串口和蓝牙连接状态
 const serial = inject('serial')
 const ble = inject('ble')
@@ -81,7 +82,7 @@ function initTerminal(el) {
   // 输入事件
   window.term.onData((word) => {
     console.log('term.onData', word)
-    sendData(word)
+    sendData(normalizeTerminalInput(word, terminalEnter.value))
   })
 
   cleanupTerminalData = serial.onTerminalData?.(({ dataBuffer }) => {
