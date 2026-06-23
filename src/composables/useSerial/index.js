@@ -7,6 +7,7 @@ import { useRecordCache } from '@/composables/useRecordCache'
 import { useSerialWorker } from '@/composables/useSerialWorker'
 import { useSerialStore } from '@/store/useSerialStore'
 import { useSettingStore } from '@/store/useSettingStore'
+import { hasWebSerial } from '@/utils/browserSupport'
 
 /**
  * Get device name from USBJson
@@ -32,8 +33,8 @@ export function useSerial() {
   const { readType } = useSerialStore()
   const { recordCacheEnabled } = useSettingStore()
   const { dataCode } = useDataCode()
-  const isSupported = useSupported(() => navigator && 'serial' in navigator)
-  const serial = isSupported.value ? navigator.serial : null
+  const isSupported = useSupported(() => hasWebSerial())
+  const serial = hasWebSerial() ? navigator.serial : null
   const port = ref(undefined)
   const portName = computed(() => getDeviceName(port.value))
   const ports = ref([])

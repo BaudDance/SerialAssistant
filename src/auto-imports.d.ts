@@ -11,6 +11,7 @@ declare global {
   const FILE_RECORD_DISPLAY: typeof import('./utils/filePayload.js')['FILE_RECORD_DISPLAY']
   const FILE_SEND_CHUNK_SIZE: typeof import('./utils/filePayload.js')['FILE_SEND_CHUNK_SIZE']
   const LARGE_FILE_WARNING_SIZE: typeof import('./utils/filePayload.js')['LARGE_FILE_WARNING_SIZE']
+  const SERIAL_BROWSER_SUPPORT_REASONS: typeof import('./utils/browserSupport.js')['SERIAL_BROWSER_SUPPORT_REASONS']
   const asyncComputed: typeof import('@vueuse/core')['asyncComputed']
   const autoResetRef: typeof import('@vueuse/core')['autoResetRef']
   const computed: typeof import('vue')['computed']
@@ -48,16 +49,20 @@ declare global {
   const getCurrentScope: typeof import('vue')['getCurrentScope']
   const getDeviceName: typeof import('./composables/useSerial/index.js')['getDeviceName']
   const getOS: typeof import('./utils/os.js')['getOS']
+  const getSerialBrowserSupportStatus: typeof import('./utils/browserSupport.js')['getSerialBrowserSupportStatus']
   const h: typeof import('vue')['h']
+  const hasWebSerial: typeof import('./utils/browserSupport.js')['hasWebSerial']
   const ignorableWatch: typeof import('@vueuse/core')['ignorableWatch']
   const inject: typeof import('vue')['inject']
   const injectLocal: typeof import('@vueuse/core')['injectLocal']
   const isDefined: typeof import('@vueuse/core')['isDefined']
   const isHexString: typeof import('./composables/useDataCode/useDataCode.js')['isHexString']
+  const isLikelyMobileDevice: typeof import('./utils/browserSupport.js')['isLikelyMobileDevice']
   const isProxy: typeof import('vue')['isProxy']
   const isReactive: typeof import('vue')['isReactive']
   const isReadonly: typeof import('vue')['isReadonly']
   const isRef: typeof import('vue')['isRef']
+  const isSerialSecureContext: typeof import('./utils/browserSupport.js')['isSerialSecureContext']
   const listenNetworkStatus: typeof import('./utils/network.js')['listenNetworkStatus']
   const makeDestructurable: typeof import('@vueuse/core')['makeDestructurable']
   const markRaw: typeof import('vue')['markRaw']
@@ -325,6 +330,7 @@ declare module 'vue' {
     readonly FILE_RECORD_DISPLAY: UnwrapRef<typeof import('./utils/filePayload.js')['FILE_RECORD_DISPLAY']>
     readonly FILE_SEND_CHUNK_SIZE: UnwrapRef<typeof import('./utils/filePayload.js')['FILE_SEND_CHUNK_SIZE']>
     readonly LARGE_FILE_WARNING_SIZE: UnwrapRef<typeof import('./utils/filePayload.js')['LARGE_FILE_WARNING_SIZE']>
+    readonly SERIAL_BROWSER_SUPPORT_REASONS: UnwrapRef<typeof import('./utils/browserSupport.js')['SERIAL_BROWSER_SUPPORT_REASONS']>
     readonly asyncComputed: UnwrapRef<typeof import('@vueuse/core')['asyncComputed']>
     readonly autoResetRef: UnwrapRef<typeof import('@vueuse/core')['autoResetRef']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
@@ -362,16 +368,20 @@ declare module 'vue' {
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly getDeviceName: UnwrapRef<typeof import('./composables/useSerial/index.js')['getDeviceName']>
     readonly getOS: UnwrapRef<typeof import('./utils/os.js')['getOS']>
+    readonly getSerialBrowserSupportStatus: UnwrapRef<typeof import('./utils/browserSupport.js')['getSerialBrowserSupportStatus']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
+    readonly hasWebSerial: UnwrapRef<typeof import('./utils/browserSupport.js')['hasWebSerial']>
     readonly ignorableWatch: UnwrapRef<typeof import('@vueuse/core')['ignorableWatch']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
     readonly injectLocal: UnwrapRef<typeof import('@vueuse/core')['injectLocal']>
     readonly isDefined: UnwrapRef<typeof import('@vueuse/core')['isDefined']>
     readonly isHexString: UnwrapRef<typeof import('./composables/useDataCode/useDataCode.js')['isHexString']>
+    readonly isLikelyMobileDevice: UnwrapRef<typeof import('./utils/browserSupport.js')['isLikelyMobileDevice']>
     readonly isProxy: UnwrapRef<typeof import('vue')['isProxy']>
     readonly isReactive: UnwrapRef<typeof import('vue')['isReactive']>
     readonly isReadonly: UnwrapRef<typeof import('vue')['isReadonly']>
     readonly isRef: UnwrapRef<typeof import('vue')['isRef']>
+    readonly isSerialSecureContext: UnwrapRef<typeof import('./utils/browserSupport.js')['isSerialSecureContext']>
     readonly listenNetworkStatus: UnwrapRef<typeof import('./utils/network.js')['listenNetworkStatus']>
     readonly makeDestructurable: UnwrapRef<typeof import('@vueuse/core')['makeDestructurable']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>

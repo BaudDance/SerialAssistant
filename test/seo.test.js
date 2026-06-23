@@ -240,6 +240,12 @@ describe('sEO Meta Tags Tests', () => {
       expect(app).toBeTruthy()
     })
 
+    it('应该有浏览器不支持时的静态降级提示', () => {
+      const app = document.querySelector('#app')
+      expect(app.textContent).toContain('当前环境暂不适合串口调试')
+      expect(app.textContent).toContain('复制当前网址')
+    })
+
     it('应该有主脚本引用', () => {
       const script = document.querySelector('script[src="/src/main.js"]')
       expect(script).toBeTruthy()

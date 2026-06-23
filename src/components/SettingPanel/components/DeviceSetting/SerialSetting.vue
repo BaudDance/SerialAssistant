@@ -4,6 +4,7 @@ import { Loader2 } from 'lucide-vue-next'
 import { inject, watch } from 'vue'
 import { toast } from 'vue-sonner'
 import { useDialog } from '@/components/Dialog'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -28,11 +29,13 @@ const {
   openPort,
   reopenPort,
   requestPort,
+  isSupported,
 } = inject('serial')
 const { baudRate, baudRateList, dataBits, stopBits, parity, flowControl, serialRate, defaultBaudRateList } = useSerialStore()
 const { open } = useDialog()
 const { createSession } = useRecordCache()
 const { recordCacheEnabled } = useSettingStore()
+const serialUnsupported = computed(() => !isSupported?.value)
 
 function serialOptions() {
   return {
@@ -216,7 +219,7 @@ useTitle(pageTitle)
     <Button
       v-if="!connected"
       class="cursor-pointer mb-3"
-      :disabled="connecting || disconnecting"
+      :disabled="serialUnsupported || connecting || disconnecting"
       @click="selectPort"
     >
       <Loader2 v-if="connecting" class="w-4 h-4 mr-2 animate-spin" />
@@ -236,11 +239,18 @@ useTitle(pageTitle)
       v-if="!connected && port"
       class="cursor-pointer mb-3"
       variant="secondary"
-      :disabled="connecting || disconnecting"
+      :disabled="serialUnsupported || connecting || disconnecting"
       @click="openSerialPort"
     >
       <Loader2 v-if="connecting" class="w-4 h-4 mr-2 animate-spin" />
       {{ connecting ? '连接中...' : '重 连' }}
     </Button>
+
+    <Alert v-if="serialUnsupported" class="mt-1">
+      <AlertTitle>当前浏览器不支持串口</AlertTitle>
+      <AlertDescription>
+        请复制当前网址，在电脑上的 Chrome 或 Edge 中打开。
+      </AlertDescription>
+    </Alert>
   </div>
 </template>
