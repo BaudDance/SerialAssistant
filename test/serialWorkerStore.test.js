@@ -212,3 +212,90 @@ describe('serial worker migration marker fallback', () => {
     expect(errorSpy).not.toHaveBeenCalledWith('初始化串口 Worker 失败:', expect.anything())
   })
 })
+
+describe('serial worker plotter event facade', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+  })
+
+  it('dispatches plotter data events and supports unsubscribe', async () => {
+    vi.resetModules()
+
+    class FakeWorker {
+      static instance = null
+
+      constructor() {
+        this.listeners = new Map()
+        this.messages = []
+        FakeWorker.instance = this
+      }
+
+      addEventListener(type, handler) {
+        if (!this.listeners.has(type))
+          this.listeners.set(type, [])
+        this.listeners.get(type).push(handler)
+      }
+
+      postMessage(message) {
+        this.messages.push(message)
+        queueMicrotask(() => {
+          this.emit('message', {
+            data: {
+              id: message.id,
+              payload: {
+                sessions: [],
+                currentSessionId: null,
+                stats: {
+                  rxCount: 0,
+                  txCount: 0,
+                  recordCount: 0,
+                  liveRecordPreview: null,
+                },
+              },
+            },
+          })
+        })
+      }
+
+      emit(type, event) {
+        for (const handler of this.listeners.get(type) || [])
+          handler(event)
+      }
+    }
+
+    vi.stubGlobal('Worker', FakeWorker)
+    const module = await import('../src/composables/useSerialWorker/index.js')
+    const worker = module.useSerialWorker()
+    await worker.ready()
+
+    const received = []
+    const unsubscribe = worker.onPlotterData(payload => received.push(payload))
+    const firstBuffer = new Uint8Array([1, 2, 3]).buffer
+
+    FakeWorker.instance.emit('message', {
+      data: {
+        type: 'plotterData',
+        payload: {
+          dataBuffer: firstBuffer,
+          time: 123,
+        },
+      },
+    })
+
+    unsubscribe()
+    FakeWorker.instance.emit('message', {
+      data: {
+        type: 'plotterData',
+        payload: {
+          dataBuffer: new Uint8Array([4]).buffer,
+          time: 124,
+        },
+      },
+    })
+
+    expect(received).toHaveLength(1)
+    expect(new Uint8Array(received[0].dataBuffer)).toEqual(new Uint8Array([1, 2, 3]))
+    expect(received[0].time).toBe(123)
+  })
+})

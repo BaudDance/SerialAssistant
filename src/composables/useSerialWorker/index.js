@@ -340,6 +340,7 @@ export const useSerialWorker = createGlobalState(() => {
   const liveRecordPreview = ref(null)
 
   const terminalHandlers = new Set()
+  const plotterHandlers = new Set()
   const localBackend = createLocalBackend()
   const pending = new Map()
   let worker = null
@@ -400,6 +401,10 @@ export const useSerialWorker = createGlobalState(() => {
         }
         else if (type === 'terminalData') {
           for (const handler of terminalHandlers)
+            handler(payload)
+        }
+        else if (type === 'plotterData') {
+          for (const handler of plotterHandlers)
             handler(payload)
         }
       })
@@ -508,6 +513,10 @@ export const useSerialWorker = createGlobalState(() => {
     onTerminalData(handler) {
       terminalHandlers.add(handler)
       return () => terminalHandlers.delete(handler)
+    },
+    onPlotterData(handler) {
+      plotterHandlers.add(handler)
+      return () => plotterHandlers.delete(handler)
     },
   }
 })

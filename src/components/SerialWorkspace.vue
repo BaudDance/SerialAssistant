@@ -2,6 +2,7 @@
 import { defineAsyncComponent, onBeforeUnmount, provide, ref, watch } from 'vue'
 import ActivityBar from '@/components/ActivityBar/ActivityBar.vue'
 import ControlPanel from '@/components/ControlPanel/ControlPanel.vue'
+import PlotterPanel from '@/components/PlotterPanel/PlotterPanel.vue'
 import RecordPanel from '@/components/RecordPanel/RecordPanel.vue'
 import SendPanel from '@/components/SendPanel/SendPanel.vue'
 import DeviceSetting from '@/components/SettingPanel/DeviceSetting.vue'
@@ -15,6 +16,7 @@ import {
 import { Toaster } from '@/components/ui/sonner'
 import { useBle } from '@/composables/useBle'
 import { useLayout } from '@/composables/useLayout'
+import { connectPlotterData } from '@/composables/usePlotterDataBridge'
 import { useSerial } from '@/composables/useSerial'
 import { useRecordStore } from '@/store/useRecordStore'
 import { useSerialStore } from '@/store/useSerialStore'
@@ -29,7 +31,7 @@ const DialogProvider = defineAsyncComponent(() => import('@/components/Dialog/Pr
 
 const { addRecord } = useRecordStore()
 const { readType } = useSerialStore()
-const { showFullScreen, showTerminalMode, fullScreenBreakpoint, showSettingPanel, showQuickInputPanel, showSendPanel } = useLayout()
+const { showFullScreen, showTerminalMode, showPlotterMode, fullScreenBreakpoint, showSettingPanel, showQuickInputPanel, showSendPanel } = useLayout()
 const settingPanelRef = ref()
 const sendPanelRef = ref()
 
@@ -85,6 +87,7 @@ async function onBleReadFrame(frame) {
 }
 
 const serial = useSerial()
+const cleanupPlotterData = connectPlotterData(serial)
 provide('serial', serial)
 
 const ble = useBle({ onReadFrame: onBleReadFrame })
@@ -99,6 +102,7 @@ function onTerminalAreaResize(_size, _prevSize) {
 // 资源清理 - 防止内存泄露
 onBeforeUnmount(async () => {
   console.log('App组件卸载，开始清理资源...')
+  cleanupPlotterData()
 
   try {
     // 关闭串口连接
@@ -191,7 +195,8 @@ if (typeof window !== 'undefined') {
           <ResizablePanel v-if="!showTerminalMode" :default-size="80">
             <ResizablePanelGroup direction="vertical">
               <ResizablePanel :default-size="70">
-                <RecordPanel class="bg-background w-full h-full" />
+                <PlotterPanel v-if="showPlotterMode" class="bg-background w-full h-full" />
+                <RecordPanel v-else class="bg-background w-full h-full" />
               </ResizablePanel>
               <ResizableHandle with-handle />
               <ResizablePanel ref="sendPanelRef" :default-size="30" :min-size="30" collapsible>

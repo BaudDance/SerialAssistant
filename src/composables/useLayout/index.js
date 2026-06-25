@@ -1,15 +1,23 @@
 import { breakpointsTailwind, createGlobalState, useBreakpoints, useLocalStorage } from '@vueuse/core'
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 export const DEFAULT_LAYOUT_CONFIG = Object.freeze({
+  workspaceMode: 'record',
   showFullScreen: true,
   showTerminalMode: false,
+  showPlotterMode: false,
   showSettingPanel: true,
   showQuickInputPanel: true,
   showTopBar: true,
   showActivityBar: true,
   showSendPanel: true,
 })
+
+const WORKSPACE_MODES = ['record', 'plotter', 'terminal']
+
+function normalizeWorkspaceMode(mode) {
+  return WORKSPACE_MODES.includes(mode) ? mode : DEFAULT_LAYOUT_CONFIG.workspaceMode
+}
 
 /**
  * 布局管理 Composable
@@ -32,14 +40,53 @@ export const useLayout = createGlobalState(() => {
     showFullScreen.value = !showFullScreen.value
   }
 
-  // 终端模式
-  const showTerminalMode = useLocalStorage(
+  const legacyShowTerminalMode = useLocalStorage(
     'layout:showTerminalMode',
     ref(DEFAULT_LAYOUT_CONFIG.showTerminalMode),
     { listenToStorageChanges: false },
   )
+
+  // 工作区模式
+  const workspaceMode = useLocalStorage(
+    'layout:workspaceMode',
+    ref(legacyShowTerminalMode.value ? 'terminal' : DEFAULT_LAYOUT_CONFIG.workspaceMode),
+    { listenToStorageChanges: false },
+  )
+  workspaceMode.value = normalizeWorkspaceMode(workspaceMode.value)
+
+  function setWorkspaceMode(mode) {
+    workspaceMode.value = normalizeWorkspaceMode(mode)
+  }
+
+  // 终端模式兼容层
+  const showTerminalMode = computed({
+    get: () => workspaceMode.value === 'terminal',
+    set: (value) => {
+      workspaceMode.value = value ? 'terminal' : 'record'
+    },
+  })
+
+  const showPlotterMode = computed({
+    get: () => workspaceMode.value === 'plotter',
+    set: (value) => {
+      workspaceMode.value = value ? 'plotter' : 'record'
+    },
+  })
+
+  watch(workspaceMode, (mode) => {
+    const normalized = normalizeWorkspaceMode(mode)
+    if (normalized !== mode) {
+      workspaceMode.value = normalized
+      return
+    }
+    legacyShowTerminalMode.value = normalized === 'terminal'
+  }, { immediate: true })
+
   const toggleTerminalMode = () => {
-    showTerminalMode.value = !showTerminalMode.value
+    workspaceMode.value = showTerminalMode.value ? 'record' : 'terminal'
+  }
+  const togglePlotterMode = () => {
+    workspaceMode.value = showPlotterMode.value ? 'record' : 'plotter'
   }
 
   // 设置面板
@@ -96,8 +143,10 @@ export const useLayout = createGlobalState(() => {
   const updateLayoutConfig = (config) => {
     // 定义更新器函数映射 - 只需要在这里添加新的配置项
     const updaters = {
+      workspaceMode: setWorkspaceMode,
       showFullScreen: value => showFullScreen.value = value,
       showTerminalMode: value => showTerminalMode.value = value,
+      showPlotterMode: value => showPlotterMode.value = value,
       showSettingPanel: value => showSettingPanel.value = value,
       showQuickInputPanel: value => showQuickInputPanel.value = value,
       showTopBar: value => showTopBar.value = value,
@@ -122,8 +171,10 @@ export const useLayout = createGlobalState(() => {
 
   // 获取当前完整配置
   const getCurrentConfig = () => ({
+    workspaceMode: workspaceMode.value,
     showFullScreen: showFullScreen.value,
     showTerminalMode: showTerminalMode.value,
+    showPlotterMode: showPlotterMode.value,
     showSettingPanel: showSettingPanel.value,
     showQuickInputPanel: showQuickInputPanel.value,
     showTopBar: showTopBar.value,
@@ -136,8 +187,10 @@ export const useLayout = createGlobalState(() => {
     fullScreenBreakpoint,
 
     // 状态
+    workspaceMode,
     showFullScreen,
     showTerminalMode,
+    showPlotterMode,
     showSettingPanel,
     showQuickInputPanel,
     showTopBar,
@@ -148,7 +201,9 @@ export const useLayout = createGlobalState(() => {
     toggleFullScreen,
 
     // 终端模式控制
+    setWorkspaceMode,
     toggleTerminalMode,
+    togglePlotterMode,
 
     // 设置面板控制
     toggleSettingPanel,

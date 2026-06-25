@@ -109,8 +109,8 @@ async function loadSessions() {
   return sessionsCache
 }
 
-function emit(type, payload = {}) {
-  self.postMessage({ type, payload })
+function emit(type, payload = {}, transfer = []) {
+  self.postMessage({ type, payload }, transfer)
 }
 
 function emitSessions() {
@@ -833,6 +833,8 @@ async function flushFrame() {
   frameFirstSeenAt = 0
   frameLastSeenAt = 0
   liveRecordPreview = null
+  const plotterBuffer = toArrayBuffer(data)
+  emit('plotterData', { dataBuffer: plotterBuffer, time: lastSeenAt, flush: true }, [plotterBuffer])
 
   await appendRecord({
     type: 'read',

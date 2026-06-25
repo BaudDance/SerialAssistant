@@ -281,6 +281,7 @@ export function useSerial() {
     isConnected: connected,
     setTerminalActive: worker.setTerminalActive,
     onTerminalData: worker.onTerminalData,
+    onPlotterData: worker.onPlotterData,
     ackTerminalData: worker.ackTerminalData,
   }
 }
