@@ -505,6 +505,13 @@ onBeforeUnmount(() => {
         v-if="!pointCount"
         class="absolute inset-0 flex flex-col items-center justify-center gap-3 text-base text-muted-foreground pointer-events-none"
       >
+        <img
+          src="/串口助手_64.png"
+          alt=""
+          aria-hidden="true"
+          class="size-12 rounded-xl opacity-40 grayscale select-none"
+          draggable="false"
+        >
         <div class="text-lg text-foreground">
           等待数字数据...
         </div>

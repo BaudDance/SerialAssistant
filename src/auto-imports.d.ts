@@ -341,6 +341,7 @@ declare module 'vue' {
     readonly computedEager: UnwrapRef<typeof import('@vueuse/core')['computedEager']>
     readonly computedInject: UnwrapRef<typeof import('@vueuse/core')['computedInject']>
     readonly computedWithControl: UnwrapRef<typeof import('@vueuse/core')['computedWithControl']>
+    readonly connectPlotterData: UnwrapRef<typeof import('./composables/usePlotterDataBridge/index.js')['connectPlotterData']>
     readonly controlledComputed: UnwrapRef<typeof import('@vueuse/core')['controlledComputed']>
     readonly controlledRef: UnwrapRef<typeof import('@vueuse/core')['controlledRef']>
     readonly copyToUint8Array: UnwrapRef<typeof import('./utils/filePayload.js')['copyToUint8Array']>

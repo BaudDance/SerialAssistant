@@ -61,6 +61,15 @@ function cancelOpenRecord() {
 <template>
   <div class="bg-input flex flex-col h-full p-2 justify-between">
     <div class="flex items-center flex-col space-y-1">
+      <div class="mb-1 flex size-9 items-center justify-center">
+        <img
+          src="/串口助手_64.png"
+          alt="串口助手"
+          class="size-8 rounded-lg object-contain shadow-sm select-none"
+          draggable="false"
+        >
+      </div>
+
       <!-- GitHub -->
       <a href="https://github.com/BaudDance/SerialAssistant" target="_blank">
         <Button as-child variant="ghost" size="icon" :class="buttonClass">

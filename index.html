@@ -2,7 +2,7 @@
 <html lang="zh-CN" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/serial.svg" />
+    <link rel="icon" type="image/png" href="/串口助手_64.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- SEO Meta Tags -->
@@ -81,7 +81,7 @@
         --app-fallback-foreground: #171717;
         --app-fallback-muted: #737373;
         --app-fallback-border: rgb(0 0 0 / 10%);
-        --app-fallback-spinner-track: rgb(0 0 0 / 12%);
+        --app-fallback-accent: #0ea5e9;
       }
 
       .dark {
@@ -90,7 +90,7 @@
         --app-fallback-foreground: #f8fafc;
         --app-fallback-muted: #cbd5e1;
         --app-fallback-border: rgb(255 255 255 / 12%);
-        --app-fallback-spinner-track: rgb(203 213 225 / 28%);
+        --app-fallback-accent: #38bdf8;
       }
 
       .app-fallback {
@@ -125,8 +125,11 @@
       }
 
       .app-fallback__brand img {
-        width: 48px;
-        height: 48px;
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        box-shadow: 0 12px 32px rgb(14 165 233 / 18%);
+        animation: app-fallback-breathe 1.8s ease-in-out infinite;
       }
 
       .app-fallback__eyebrow {
@@ -155,19 +158,52 @@
         margin-top: 18px;
       }
 
-      .app-fallback__spinner {
-        width: 20px;
+      .app-fallback__dots {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
         height: 20px;
-        flex: 0 0 auto;
-        border: 2px solid var(--border, var(--app-fallback-spinner-track));
-        border-top-color: var(--foreground, var(--app-fallback-foreground));
-        border-radius: 999px;
-        animation: app-fallback-spin 0.8s linear infinite;
       }
 
-      @keyframes app-fallback-spin {
-        to {
-          transform: rotate(360deg);
+      .app-fallback__dots span {
+        width: 6px;
+        height: 6px;
+        border-radius: 999px;
+        background: var(--app-fallback-accent);
+        opacity: 0.36;
+        animation: app-fallback-dot 1.15s ease-in-out infinite;
+      }
+
+      .app-fallback__dots span:nth-child(2) {
+        animation-delay: 0.16s;
+      }
+
+      .app-fallback__dots span:nth-child(3) {
+        animation-delay: 0.32s;
+      }
+
+      @keyframes app-fallback-breathe {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+
+        50% {
+          transform: scale(1.045);
+        }
+      }
+
+      @keyframes app-fallback-dot {
+        0%,
+        100% {
+          opacity: 0.32;
+          transform: translateY(0);
+        }
+
+        50% {
+          opacity: 1;
+          transform: translateY(-4px);
         }
       }
     </style>
@@ -201,14 +237,18 @@
       <div class="app-fallback" role="status" aria-live="polite">
         <div class="app-fallback__panel">
           <div class="app-fallback__brand">
-            <img src="/serial.svg" alt="" aria-hidden="true" />
+            <img src="/串口助手_64.png" alt="" aria-hidden="true" />
             <div>
               <p class="app-fallback__eyebrow">波特律动</p>
               <strong>串口助手</strong>
             </div>
           </div>
           <div class="app-fallback__status">
-            <div class="app-fallback__spinner" aria-hidden="true"></div>
+            <div class="app-fallback__dots" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
             <div>
               <h1>启动中</h1>
             </div>
@@ -219,7 +259,7 @@
         <div class="app-fallback" role="alert">
           <div class="app-fallback__panel">
             <div class="app-fallback__brand">
-              <img src="/serial.svg" alt="" aria-hidden="true" />
+              <img src="/串口助手_64.png" alt="" aria-hidden="true" />
               <div>
                 <p class="app-fallback__eyebrow">波特律动</p>
                 <strong>串口助手</strong>

@@ -546,9 +546,13 @@ defineExpose({
   >
     <div v-if="totalCount === 0" class="h-full flex items-center justify-center text-center text-muted-foreground">
       <div>
-        <div class="w-12 h-12 mx-auto mb-4 opacity-50">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8m8 4H8m2-8H8" /></svg>
-        </div>
+        <img
+          src="/串口助手_64.png"
+          alt=""
+          aria-hidden="true"
+          class="mx-auto mb-4 size-12 rounded-xl opacity-35 grayscale select-none"
+          draggable="false"
+        >
         <p class="text-sm">
           {{ emptyText }}
         </p>

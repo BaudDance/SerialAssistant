@@ -186,10 +186,10 @@ const pageTitle = computed(() => {
       str = `串口已连接`
     }
     else {
-      str = `串口设置`
+      str = ``
     }
   }
-  return str
+  return `${str} 波特律动串口助手`
 })
 // 注入页面标题
 useTitle(pageTitle)

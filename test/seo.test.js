@@ -210,8 +210,8 @@ describe('sEO Meta Tags Tests', () => {
     it('应该有正确的图标链接', () => {
       const icon = document.querySelector('link[rel="icon"]')
       expect(icon).toBeTruthy()
-      expect(icon.getAttribute('href')).toBe('/serial.svg')
-      expect(icon.getAttribute('type')).toBe('image/svg+xml')
+      expect(icon.getAttribute('href')).toBe('/串口助手_64.png')
+      expect(icon.getAttribute('type')).toBe('image/png')
     })
 
     it('应该有清单文件链接', () => {
