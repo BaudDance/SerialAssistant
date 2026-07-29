@@ -263,7 +263,9 @@ src/
 
 - 支持 Web Bluetooth API
 - BLE 设备连接和通信
-- 自定义服务和特征值配置
+- 内置 DX-BT24、DX-BT16 等常见串口透传模块配置
+- 支持自定义 16 位、32 位或 128 位 GATT 服务、写入特征和通知特征 UUID
+- 根据 GATT 特征属性自动选择带响应或无响应写入
 
 ### 数据处理 / Data Processing
 

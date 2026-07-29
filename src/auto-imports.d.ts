@@ -27,6 +27,7 @@ declare global {
   const createEventHook: typeof import('@vueuse/core')['createEventHook']
   const createFileMeta: typeof import('./utils/filePayload.js')['createFileMeta']
   const createFilePayload: typeof import('./utils/filePayload.js')['createFilePayload']
+  const createGattRequestOptions: typeof import('./utils/bleGatt.js')['createGattRequestOptions']
   const createGlobalState: typeof import('@vueuse/core')['createGlobalState']
   const createInjectionState: typeof import('@vueuse/core')['createInjectionState']
   const createReactiveFn: typeof import('@vueuse/core')['createReactiveFn']
@@ -69,6 +70,8 @@ declare global {
   const makeDestructurable: typeof import('@vueuse/core')['makeDestructurable']
   const markRaw: typeof import('vue')['markRaw']
   const nextTick: typeof import('vue')['nextTick']
+  const normalizeGattProfile: typeof import('./utils/bleGatt.js')['normalizeGattProfile']
+  const normalizeGattUuid: typeof import('./utils/bleGatt.js')['normalizeGattUuid']
   const onActivated: typeof import('vue')['onActivated']
   const onBeforeMount: typeof import('vue')['onBeforeMount']
   const onBeforeUnmount: typeof import('vue')['onBeforeUnmount']
@@ -299,6 +302,7 @@ declare global {
   const useWindowFocus: typeof import('@vueuse/core')['useWindowFocus']
   const useWindowScroll: typeof import('@vueuse/core')['useWindowScroll']
   const useWindowSize: typeof import('@vueuse/core')['useWindowSize']
+  const validateGattProfile: typeof import('./utils/bleGatt.js')['validateGattProfile']
   const watch: typeof import('vue')['watch']
   const watchArray: typeof import('@vueuse/core')['watchArray']
   const watchAtMost: typeof import('@vueuse/core')['watchAtMost']
@@ -315,6 +319,7 @@ declare global {
   const watchTriggerable: typeof import('@vueuse/core')['watchTriggerable']
   const watchWithFilter: typeof import('@vueuse/core')['watchWithFilter']
   const whenever: typeof import('@vueuse/core')['whenever']
+  const writeGattValue: typeof import('./utils/bleGatt.js')['writeGattValue']
 }
 // for type re-export
 declare global {
@@ -349,6 +354,7 @@ declare module 'vue' {
     readonly createEventHook: UnwrapRef<typeof import('@vueuse/core')['createEventHook']>
     readonly createFileMeta: UnwrapRef<typeof import('./utils/filePayload.js')['createFileMeta']>
     readonly createFilePayload: UnwrapRef<typeof import('./utils/filePayload.js')['createFilePayload']>
+    readonly createGattRequestOptions: UnwrapRef<typeof import('./utils/bleGatt.js')['createGattRequestOptions']>
     readonly createGlobalState: UnwrapRef<typeof import('@vueuse/core')['createGlobalState']>
     readonly createInjectionState: UnwrapRef<typeof import('@vueuse/core')['createInjectionState']>
     readonly createReactiveFn: UnwrapRef<typeof import('@vueuse/core')['createReactiveFn']>
@@ -391,6 +397,8 @@ declare module 'vue' {
     readonly makeDestructurable: UnwrapRef<typeof import('@vueuse/core')['makeDestructurable']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>
     readonly nextTick: UnwrapRef<typeof import('vue')['nextTick']>
+    readonly normalizeGattProfile: UnwrapRef<typeof import('./utils/bleGatt.js')['normalizeGattProfile']>
+    readonly normalizeGattUuid: UnwrapRef<typeof import('./utils/bleGatt.js')['normalizeGattUuid']>
     readonly onActivated: UnwrapRef<typeof import('vue')['onActivated']>
     readonly onBeforeMount: UnwrapRef<typeof import('vue')['onBeforeMount']>
     readonly onBeforeUnmount: UnwrapRef<typeof import('vue')['onBeforeUnmount']>
@@ -621,6 +629,7 @@ declare module 'vue' {
     readonly useWindowFocus: UnwrapRef<typeof import('@vueuse/core')['useWindowFocus']>
     readonly useWindowScroll: UnwrapRef<typeof import('@vueuse/core')['useWindowScroll']>
     readonly useWindowSize: UnwrapRef<typeof import('@vueuse/core')['useWindowSize']>
+    readonly validateGattProfile: UnwrapRef<typeof import('./utils/bleGatt.js')['validateGattProfile']>
     readonly watch: UnwrapRef<typeof import('vue')['watch']>
     readonly watchArray: UnwrapRef<typeof import('@vueuse/core')['watchArray']>
     readonly watchAtMost: UnwrapRef<typeof import('@vueuse/core')['watchAtMost']>
@@ -637,5 +646,6 @@ declare module 'vue' {
     readonly watchTriggerable: UnwrapRef<typeof import('@vueuse/core')['watchTriggerable']>
     readonly watchWithFilter: UnwrapRef<typeof import('@vueuse/core')['watchWithFilter']>
     readonly whenever: UnwrapRef<typeof import('@vueuse/core')['whenever']>
+    readonly writeGattValue: UnwrapRef<typeof import('./utils/bleGatt.js')['writeGattValue']>
   }
 }
