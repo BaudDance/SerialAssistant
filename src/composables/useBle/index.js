@@ -1,14 +1,17 @@
 import { useSupported } from '@vueuse/core'
-import { computed, ref } from 'vue'
+import { computed, ref, shallowRef } from 'vue'
 import { useNprogress } from '@/composables/useNprogress'
 import { useRecordCache } from '@/composables/useRecordCache'
+import { createGattRequestOptions, normalizeGattProfile, writeGattValue } from '@/utils/bleGatt'
 
-export function useBle(
-  options = {
-    onReadFrame: (data) => {},
-  },
-) {
-  const { onReadFrame } = options
+/**
+ * 创建 BLE GATT 串口连接及收发状态
+ * @param {object} options BLE 连接回调配置
+ * @param {(data: Uint8Array) => void | Promise<void>} [options.onReadFrame] 收到通知数据时执行的回调
+ * @returns {object} BLE 设备、连接状态和收发操作
+ */
+export function useBle(options = {}) {
+  const onReadFrame = options.onReadFrame ?? (() => {})
   const isSupported = useSupported(
     async () =>
       navigator
@@ -18,15 +21,20 @@ export function useBle(
   const nprogress = useNprogress()
   // 安全地访问 navigator.bluetooth，避免在不支持的环境中报错
   const bluetooth = (typeof navigator !== 'undefined' && 'bluetooth' in navigator) ? navigator.bluetooth : null
-  const device = ref(undefined)
+  const device = shallowRef(undefined)
   const deviceName = computed(() => device.value?.name)
-  const server = ref(undefined)
-  const writeCharacteristic = ref(undefined)
-  const state = ref('disconnected') // disconnected, connecting, connected, disconnecting
+  const server = shallowRef(undefined)
+  const writeCharacteristic = shallowRef(undefined)
+  const notifyCharacteristic = shallowRef(undefined)
   const connected = ref(false)
   const connecting = ref(false)
   const disconnecting = ref(false)
 
+  /**
+   * 根据 GATT 配置打开系统蓝牙设备选择器
+   * @param {object} type 预设或自定义 GATT 配置
+   * @returns {Promise<BluetoothDevice | null>} 用户选择的设备，取消或失败时返回 null
+   */
   async function requestDevice(type) {
     if (!bluetooth) {
       console.warn('Web Bluetooth API 不支持')
@@ -35,18 +43,18 @@ export function useBle(
     try {
       connecting.value = true
       nprogress.start()
-      const d = await bluetooth.requestDevice({
-        filters: [{ services: [type.service] }],
-      })
-      if (d) {
-        device.value = d
-        return d
+      const profile = normalizeGattProfile(type)
+      const selectedDevice = await bluetooth.requestDevice(createGattRequestOptions(profile))
+      if (selectedDevice) {
+        if (device.value && device.value !== selectedDevice)
+          device.value.removeEventListener('gattserverdisconnected', onDisconnected)
+        device.value = selectedDevice
+        return selectedDevice
       }
-      console.log('requestDevice', d)
       return null
     }
-    catch (e) {
-      console.error(e)
+    catch (error) {
+      console.error('选择蓝牙设备失败:', error)
       return null
     }
     finally {
@@ -55,25 +63,95 @@ export function useBle(
     }
   }
 
-  async function connectDevice(type) {
-    console.log('connectDevice', device.value)
-    if (!device.value)
+  /**
+   * 将 GATT 通知数据转换为精确字节范围并交给现有接收链路
+   * @param {Event} event 特征值变化事件
+   * @returns {void} 此方法不返回数据
+   */
+  function handleCharacteristicValueChanged(event) {
+    const value = event.target?.value
+    if (!value)
       return
+
+    const uint8Data = new Uint8Array(value.buffer, value.byteOffset, value.byteLength).slice()
+    onReadFrame(uint8Data)
+    if (typeof window !== 'undefined' && window.term) {
+      const text = new TextDecoder('utf-8').decode(uint8Data)
+      window.term.write(text)
+    }
+  }
+
+  /**
+   * 移除通知监听器并在连接仍有效时停止通知
+   * @returns {Promise<void>} 通知资源清理完成后解决的 Promise
+   */
+  async function cleanupCharacteristicNotifications() {
+    const characteristic = notifyCharacteristic.value
+    if (!characteristic)
+      return
+
+    characteristic.removeEventListener('characteristicvaluechanged', handleCharacteristicValueChanged)
+    if (device.value?.gatt?.connected && typeof characteristic.stopNotifications === 'function') {
+      try {
+        await characteristic.stopNotifications()
+      }
+      catch (error) {
+        console.warn('停止 GATT 通知失败:', error)
+      }
+    }
+    notifyCharacteristic.value = undefined
+  }
+
+  /**
+   * 获取并校验写入和通知特征，随后启动通知监听
+   * @param {object} profile 已标准化的 GATT 配置
+   * @returns {Promise<void>} 特征初始化完成后解决的 Promise
+   */
+  async function initializeGattCharacteristics(profile) {
+    const service = await server.value.getPrimaryService(profile.service)
+    const nextWriteCharacteristic = await service.getCharacteristic(profile.writeCharacteristic)
+    const writeProperties = nextWriteCharacteristic.properties
+    if (!writeProperties?.write && !writeProperties?.writeWithoutResponse)
+      throw new Error('所选写入特征不支持 GATT 写入')
+
+    if (profile.notifyCharacteristic !== undefined) {
+      const nextNotifyCharacteristic = await service.getCharacteristic(profile.notifyCharacteristic)
+      const notifyProperties = nextNotifyCharacteristic.properties
+      if (!notifyProperties?.notify && !notifyProperties?.indicate)
+        throw new Error('所选通知特征不支持 GATT 通知或指示')
+
+      notifyCharacteristic.value = nextNotifyCharacteristic
+      await nextNotifyCharacteristic.startNotifications()
+      nextNotifyCharacteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueChanged)
+    }
+
+    writeCharacteristic.value = nextWriteCharacteristic
+  }
+
+  /**
+   * 将已选设备连接到指定 GATT 串口服务并初始化收发特征
+   * @param {object} type 预设或自定义 GATT 配置
+   * @returns {Promise<void>} GATT 通道可收发后解决的 Promise
+   */
+  async function connectDevice(type) {
+    if (!device.value)
+      throw new Error('请先选择蓝牙设备')
+
+    const profile = normalizeGattProfile(type)
     try {
       connecting.value = true
+      connected.value = false
+      await cleanupCharacteristicNotifications()
+      writeCharacteristic.value = undefined
+      device.value.removeEventListener('gattserverdisconnected', onDisconnected)
       server.value = await device.value.gatt.connect()
-      console.log('server', server.value)
-      state.value = 'connected'
+      device.value.addEventListener('gattserverdisconnected', onDisconnected)
+      await initializeGattCharacteristics(profile)
       connected.value = true
 
-      // 添加断开连接事件
-      device.value.addEventListener('gattserverdisconnected', onDisconnected)
-      listenCharacteristic(type)
-
-      // 连接成功后，尝试更新当前会话的设备信息
       try {
         const { updateCurrentSessionDevice, createDeviceInfo, currentSessionId } = useRecordCache()
-        if (device.value && currentSessionId.value) {
+        if (currentSessionId.value) {
           const deviceInfo = createDeviceInfo(
             'bluetooth',
             device.value.id,
@@ -81,100 +159,92 @@ export function useBle(
             {
               deviceId: device.value.id,
               gatt: device.value.gatt?.connected || false,
-              serviceUUID: type.service,
+              serviceUUID: profile.service,
+              writeCharacteristicUUID: profile.writeCharacteristic,
+              notifyCharacteristicUUID: profile.notifyCharacteristic,
             },
           )
-          updateCurrentSessionDevice(currentSessionId.value, deviceInfo)
+          await updateCurrentSessionDevice(currentSessionId.value, deviceInfo)
         }
       }
       catch (error) {
         console.warn('更新会话设备信息失败:', error)
       }
     }
-    catch (e) {
-      console.log(e)
-      throw e
+    catch (error) {
+      await cleanupCharacteristicNotifications()
+      writeCharacteristic.value = undefined
+      server.value = undefined
+      connected.value = false
+      device.value.removeEventListener('gattserverdisconnected', onDisconnected)
+      if (device.value.gatt?.connected)
+        device.value.gatt.disconnect()
+      throw error
     }
     finally {
       connecting.value = false
     }
   }
 
-  async function listenCharacteristic(type) {
-    const service = await server.value.getPrimaryService(type.service)
-    console.log('service', service)
-    const characteristic = await service.getCharacteristic(
-      type.notifyCharacteristic,
-    )
-    console.log('characteristic', characteristic)
-    await characteristic.startNotifications()
-    characteristic.addEventListener('characteristicvaluechanged', (event) => {
-      const value = event.target.value
-      console.log(
-        'characteristicvaluechanged',
-        value.buffer,
-        typeof value.buffer,
-      )
-      const uint8Data = new Uint8Array(value.buffer)
-      onReadFrame(uint8Data)
-      if (window.term) {
-        const text = new TextDecoder('utf-8').decode(uint8Data)
-        window.term.write(text)
-      }
-    })
-
-    writeCharacteristic.value = await service.getCharacteristic(
-      type.writeCharacteristic,
-    )
-  }
-
+  /**
+   * 通过当前 GATT 写入特征发送二进制数据
+   * @param {BufferSource} data 待发送的二进制数据
+   * @returns {Promise<void>} 数据写入完成后解决的 Promise
+   */
   async function sendHex(data) {
     if (!writeCharacteristic.value)
-      return
-    await writeCharacteristic.value.writeValueWithoutResponse(data)
+      throw new Error('GATT 写入特征尚未就绪')
+    await writeGattValue(writeCharacteristic.value, data)
   }
 
-  async function onDisconnected() {
-    console.log('gattserverdisconnected', event)
-    state.value = 'disconnected'
+  /**
+   * 处理设备主动断开事件并清理本地 GATT 状态
+   * @param {Event} event GATT 服务断开事件
+   * @returns {Promise<void>} 本地状态清理完成后解决的 Promise
+   */
+  async function onDisconnected(event) {
+    if (event?.target && event.target !== device.value)
+      return
+
+    device.value?.removeEventListener('gattserverdisconnected', onDisconnected)
+    await cleanupCharacteristicNotifications()
+    writeCharacteristic.value = undefined
+    server.value = undefined
     connected.value = false
   }
 
+  /**
+   * 主动停止通知并断开当前 GATT 连接
+   * @returns {Promise<void>} 连接和本地状态均清理完成后解决的 Promise
+   */
   async function disconnectDevice() {
     if (!device.value)
       return
     nprogress.start()
-    console.log('开始断开蓝牙连接...')
     disconnecting.value = true
 
     try {
-      // 移除事件监听器
+      await cleanupCharacteristicNotifications()
       device.value.removeEventListener('gattserverdisconnected', onDisconnected)
-
-      // 断开GATT连接
-      if (device.value.gatt && device.value.gatt.connected) {
-        console.log('断开GATT连接')
-        await device.value.gatt.disconnect()
-      }
-
-      // 清理引用
-      writeCharacteristic.value = undefined
-      server.value = undefined
-
-      console.log('蓝牙连接已断开')
+      if (device.value.gatt?.connected)
+        device.value.gatt.disconnect()
     }
     catch (error) {
       console.error('断开蓝牙连接时出现错误:', error)
-      // 即使出错也要设置为未连接状态
-      state.value = 'disconnected'
-      connected.value = false
+      throw error
     }
     finally {
+      writeCharacteristic.value = undefined
+      notifyCharacteristic.value = undefined
+      server.value = undefined
+      connected.value = false
       disconnecting.value = false
       nprogress.done()
     }
   }
+
   return {
+    isSupported,
     device,
     deviceName,
     connected,
