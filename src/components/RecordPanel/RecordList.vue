@@ -4,9 +4,11 @@ import dayjs from 'dayjs'
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { dialogKeys, useDialog } from '@/components/Dialog/composable'
 import FilePayloadCard from '@/components/FilePayload/FilePayloadCard.vue'
+import { useSerialDataFont } from '@/composables/useSerialDataFont'
 import { useRecordStore } from '@/store/useRecordStore'
 import { useSerialStore } from '@/store/useSerialStore'
 import { FILE_RECORD_DISPLAY } from '@/utils/filePayload'
+import { remeasureRecordListAfterFontChange } from './recordListFontLayout'
 
 const props = defineProps({
   sessionId: {
@@ -46,6 +48,7 @@ const PROGRAMMATIC_SCROLL_IGNORE_MS = 160
 
 const { fetchRecordRows, setRecordDisplay, copyRecordContent, getRecordPayload, recordCount } = useRecordStore()
 const { recordTypes } = useSerialStore()
+const { serialDataFontVersion } = useSerialDataFont()
 const { open: openDialog } = useDialog()
 
 const rootEl = ref(null)
@@ -466,6 +469,22 @@ function handleScroll() {
     emitStickToBottom(false)
 }
 
+async function remeasureAfterFontChange() {
+  await remeasureRecordListAfterFontChange({
+    cancelFollowScroll,
+    flushLayout: nextTick,
+    jumpToBottom,
+    markProgrammaticScroll,
+    measureVisibleElements,
+    scrollElement: rootEl.value,
+    stickToBottom: props.stickToBottom,
+    virtualizer: rowVirtualizer.value,
+    virtualRows: virtualRows.value,
+  })
+  if (rootEl.value)
+    lastScrollTop = rootEl.value.scrollTop
+}
+
 watch(
   () => [props.sessionId, totalCount.value],
   ([, value], [, oldValue] = []) => {
@@ -512,6 +531,10 @@ watch(
 watch(refreshKey, () => {
   loadVisibleRows()
 })
+
+watch(serialDataFontVersion, () => {
+  remeasureAfterFontChange()
+}, { flush: 'post' })
 
 watch(
   () => virtualRows.value.map(row => row.index).join(','),
@@ -599,8 +622,12 @@ defineExpose({
                 :payload="rowsByIndex[virtualRow.index]"
                 @view="() => openFilePreview(rowsByIndex[virtualRow.index])"
               />
-              <div v-else-if="rowsByIndex[virtualRow.index].display === 'ascii'" v-html="rowsByIndex[virtualRow.index].html" />
-              <div v-else>
+              <div
+                v-else-if="rowsByIndex[virtualRow.index].display === 'ascii'"
+                class="serial-data-font whitespace-pre-wrap"
+                v-text="rowsByIndex[virtualRow.index].text"
+              />
+              <div v-else class="serial-data-font">
                 {{ rowsByIndex[virtualRow.index].text }}
               </div>
             </div>

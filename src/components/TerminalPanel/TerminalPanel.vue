@@ -3,6 +3,7 @@ import { useDark } from '@vueuse/core'
 import { FitAddon } from '@xterm/addon-fit'
 import { Terminal } from '@xterm/xterm'
 import { inject, nextTick, onBeforeUnmount } from 'vue'
+import { useSerialDataFont } from '@/composables/useSerialDataFont'
 import { useSettingStore } from '@/store/useSettingStore.js'
 import { normalizeTerminalInput } from './terminalInput'
 import darkThemeJson from './theme/xterm/vscode/DarkModern.json'
@@ -13,7 +14,8 @@ import WelcomeToTerminal from './WelcomeToTerminal.vue'
 
 import '@xterm/xterm/css/xterm.css'
 
-const { deviceType, terminalEnter } = useSettingStore()
+const { deviceType, terminalEnter, serialDataFontFamily } = useSettingStore()
+const { activeSerialDataFontStack, ensureSerialDataFontReady } = useSerialDataFont()
 // 获取串口和蓝牙连接状态
 const serial = inject('serial')
 const ble = inject('ble')
@@ -22,14 +24,17 @@ const ble = inject('ble')
 const isConnected = computed(() => serial.connected.value || ble.connected.value)
 
 const isDark = useDark()
-const fitAddon = new FitAddon()
 
 // xterm 实例
 window.term = null
 let cleanupTerminalData = null
+let fitAddon = null
+let terminalOpened = false
+let terminalInitToken = 0
+let fontApplyToken = 0
 
 const xtermOptions = computed(() => ({
-  fontFamily: 'Consolas, \'Courier New\', monospace',
+  fontFamily: activeSerialDataFontStack.value,
   cursorBlink: true,
   cursorStyle: 'block',
   fontSize: 20,
@@ -39,7 +44,8 @@ const xtermOptions = computed(() => ({
 }))
 
 function fitTerm() {
-  console.log('fitTerm')
+  if (!window.term || !fitAddon || !terminalOpened)
+    return
   fitAddon.fit()
 }
 
@@ -72,40 +78,61 @@ function sendData(data) {
   console.debug('数据发送成功:', buffer)
 }
 
-function initTerminal(el) {
-  window.term = new Terminal(xtermOptions.value)
-  window.term.loadAddon(fitAddon)
-  window.term.open(el)
-  // 聚焦
-  window.term.focus()
+async function initTerminal(el) {
+  if (!el || window.term)
+    return
+
+  const initToken = ++terminalInitToken
+  const term = new Terminal(xtermOptions.value)
+  const currentFitAddon = new FitAddon()
+  window.term = term
+  fitAddon = currentFitAddon
+  term.loadAddon(currentFitAddon)
 
   // 输入事件
-  window.term.onData((word) => {
+  term.onData((word) => {
     console.log('term.onData', word)
     sendData(normalizeTerminalInput(word, terminalEnter.value))
   })
 
   cleanupTerminalData = serial.onTerminalData?.(({ dataBuffer }) => {
-    if (!window.term) {
+    if (window.term !== term) {
       serial.ackTerminalData?.()
       return
     }
-    window.term.write(new Uint8Array(dataBuffer), () => {
+    term.write(new Uint8Array(dataBuffer), () => {
       serial.ackTerminalData?.()
     })
   })
   updateTerminalActive()
+
+  const fontStack = await ensureSerialDataFontReady(serialDataFontFamily.value)
+  if (initToken !== terminalInitToken || window.term !== term || !isConnected.value)
+    return
+
+  term.options.fontFamily = fontStack
+  term.open(el)
+  terminalOpened = true
+  term.focus()
+  fitTerm()
+  onTerminalResize()
 }
 
 function disposeTerminal() {
+  terminalInitToken += 1
+  fontApplyToken += 1
   updateTerminalActive(false)
   cleanupTerminalData?.()
   cleanupTerminalData = null
+  removeResizeListener()
   window.term?.dispose()
   window.term = null
+  fitAddon = null
+  terminalOpened = false
 }
 
 function onTerminalResize() {
+  removeResizeListener()
   window.addEventListener('resize', fitTerm)
 }
 function removeResizeListener() {
@@ -133,18 +160,32 @@ watch(isDark, (val) => {
   }
 })
 
+watch(serialDataFontFamily, async (family) => {
+  const applyToken = ++fontApplyToken
+  const fontStack = await ensureSerialDataFontReady(family)
+  const term = window.term
+  if (!term || applyToken !== fontApplyToken)
+    return
+
+  term.options.fontFamily = fontStack
+  if (!terminalOpened)
+    return
+
+  term.clearTextureAtlas()
+  fitTerm()
+  term.refresh(0, term.rows - 1)
+})
+
 watch(isConnected, (val) => {
   if (val) {
     nextTick(() => {
       initTerminal(document.getElementById('terminalArea'))
-      fitTerm()
-      onTerminalResize()
     })
   }
   else {
     disposeTerminal()
   }
-})
+}, { immediate: true })
 
 watch(deviceType, () => {
   updateTerminalActive()

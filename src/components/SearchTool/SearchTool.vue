@@ -150,7 +150,7 @@ onMounted(() => {
           </div>
 
           <div class="text-sm w-full">
-            <div class="font-mono text-xs bg-muted p-2 rounded max-h-20 overflow-y-auto break-all">
+            <div class="serial-data-font whitespace-pre-wrap text-xs bg-muted p-2 rounded max-h-20 overflow-y-auto break-all">
               <span v-html="highlightMatch(record.dataText || record.text, searchQuery)" />
             </div>
           </div>

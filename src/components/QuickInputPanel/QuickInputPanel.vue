@@ -574,6 +574,7 @@ onUnmounted(() => {
                     <Input
                       v-model="item.content"
                       placeholder="请输入内容"
+                      class="serial-data-font"
                     />
                     <div v-if="showRemarks">
                       <div

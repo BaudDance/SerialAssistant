@@ -6,12 +6,15 @@
 // biome-ignore lint: disable
 export {}
 declare global {
+  const BUILTIN_SERIAL_DATA_FONT_FAMILY: typeof import('./utils/serialDataFont.js')['BUILTIN_SERIAL_DATA_FONT_FAMILY']
   const DEFAULT_LAYOUT_CONFIG: typeof import('./composables/useLayout/index.js')['DEFAULT_LAYOUT_CONFIG']
   const EffectScope: typeof import('vue')['EffectScope']
   const FILE_RECORD_DISPLAY: typeof import('./utils/filePayload.js')['FILE_RECORD_DISPLAY']
   const FILE_SEND_CHUNK_SIZE: typeof import('./utils/filePayload.js')['FILE_SEND_CHUNK_SIZE']
   const LARGE_FILE_WARNING_SIZE: typeof import('./utils/filePayload.js')['LARGE_FILE_WARNING_SIZE']
   const SERIAL_BROWSER_SUPPORT_REASONS: typeof import('./utils/browserSupport.js')['SERIAL_BROWSER_SUPPORT_REASONS']
+  const SERIAL_DATA_FONT_CSS_VARIABLE: typeof import('./composables/useSerialDataFont/index.js')['SERIAL_DATA_FONT_CSS_VARIABLE']
+  const SYSTEM_SERIAL_DATA_FONT_FAMILY: typeof import('./utils/serialDataFont.js')['SYSTEM_SERIAL_DATA_FONT_FAMILY']
   const asyncComputed: typeof import('@vueuse/core')['asyncComputed']
   const autoResetRef: typeof import('@vueuse/core')['autoResetRef']
   const computed: typeof import('vue')['computed']
@@ -32,6 +35,7 @@ declare global {
   const createInjectionState: typeof import('@vueuse/core')['createInjectionState']
   const createReactiveFn: typeof import('@vueuse/core')['createReactiveFn']
   const createReusableTemplate: typeof import('@vueuse/core')['createReusableTemplate']
+  const createSerialDataFontStack: typeof import('./utils/serialDataFont.js')['createSerialDataFontStack']
   const createSharedComposable: typeof import('@vueuse/core')['createSharedComposable']
   const createTemplatePromise: typeof import('@vueuse/core')['createTemplatePromise']
   const createUnrefFn: typeof import('@vueuse/core')['createUnrefFn']
@@ -58,6 +62,7 @@ declare global {
   const ignorableWatch: typeof import('@vueuse/core')['ignorableWatch']
   const inject: typeof import('vue')['inject']
   const injectLocal: typeof import('@vueuse/core')['injectLocal']
+  const isBuiltinSerialDataFont: typeof import('./utils/serialDataFont.js')['isBuiltinSerialDataFont']
   const isDefined: typeof import('@vueuse/core')['isDefined']
   const isHexString: typeof import('./composables/useDataCode/useDataCode.js')['isHexString']
   const isLikelyMobileDevice: typeof import('./utils/browserSupport.js')['isLikelyMobileDevice']
@@ -70,8 +75,10 @@ declare global {
   const makeDestructurable: typeof import('@vueuse/core')['makeDestructurable']
   const markRaw: typeof import('vue')['markRaw']
   const nextTick: typeof import('vue')['nextTick']
+  const normalizeFontFamilies: typeof import('./composables/useLocalFonts/index.js')['normalizeFontFamilies']
   const normalizeGattProfile: typeof import('./utils/bleGatt.js')['normalizeGattProfile']
   const normalizeGattUuid: typeof import('./utils/bleGatt.js')['normalizeGattUuid']
+  const normalizeSerialDataFontFamily: typeof import('./utils/serialDataFont.js')['normalizeSerialDataFontFamily']
   const onActivated: typeof import('vue')['onActivated']
   const onBeforeMount: typeof import('vue')['onBeforeMount']
   const onBeforeUnmount: typeof import('vue')['onBeforeUnmount']
@@ -94,6 +101,7 @@ declare global {
   const pausableWatch: typeof import('@vueuse/core')['pausableWatch']
   const provide: typeof import('vue')['provide']
   const provideLocal: typeof import('@vueuse/core')['provideLocal']
+  const quoteFontFamily: typeof import('./utils/serialDataFont.js')['quoteFontFamily']
   const reactify: typeof import('@vueuse/core')['reactify']
   const reactifyObject: typeof import('@vueuse/core')['reactifyObject']
   const reactive: typeof import('vue')['reactive']
@@ -213,6 +221,7 @@ declare global {
   const useKeyModifier: typeof import('@vueuse/core')['useKeyModifier']
   const useLastChanged: typeof import('@vueuse/core')['useLastChanged']
   const useLayout: typeof import('./composables/useLayout/index.js')['useLayout']
+  const useLocalFonts: typeof import('./composables/useLocalFonts/index.js')['useLocalFonts']
   const useLocalStorage: typeof import('@vueuse/core')['useLocalStorage']
   const useMagicKeys: typeof import('@vueuse/core')['useMagicKeys']
   const useManualRefHistory: typeof import('@vueuse/core')['useManualRefHistory']
@@ -257,6 +266,7 @@ declare global {
   const useScroll: typeof import('@vueuse/core')['useScroll']
   const useScrollLock: typeof import('@vueuse/core')['useScrollLock']
   const useSerial: typeof import('./composables/useSerial/index.js')['useSerial']
+  const useSerialDataFont: typeof import('./composables/useSerialDataFont/index.js')['useSerialDataFont']
   const useSerialWorker: typeof import('./composables/useSerialWorker/index.js')['useSerialWorker']
   const useSessionStorage: typeof import('@vueuse/core')['useSessionStorage']
   const useShare: typeof import('@vueuse/core')['useShare']
@@ -333,12 +343,15 @@ import { UnwrapRef } from 'vue'
 declare module 'vue' {
   interface GlobalComponents {}
   interface ComponentCustomProperties {
+    readonly BUILTIN_SERIAL_DATA_FONT_FAMILY: UnwrapRef<typeof import('./utils/serialDataFont.js')['BUILTIN_SERIAL_DATA_FONT_FAMILY']>
     readonly DEFAULT_LAYOUT_CONFIG: UnwrapRef<typeof import('./composables/useLayout/index.js')['DEFAULT_LAYOUT_CONFIG']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly FILE_RECORD_DISPLAY: UnwrapRef<typeof import('./utils/filePayload.js')['FILE_RECORD_DISPLAY']>
     readonly FILE_SEND_CHUNK_SIZE: UnwrapRef<typeof import('./utils/filePayload.js')['FILE_SEND_CHUNK_SIZE']>
     readonly LARGE_FILE_WARNING_SIZE: UnwrapRef<typeof import('./utils/filePayload.js')['LARGE_FILE_WARNING_SIZE']>
     readonly SERIAL_BROWSER_SUPPORT_REASONS: UnwrapRef<typeof import('./utils/browserSupport.js')['SERIAL_BROWSER_SUPPORT_REASONS']>
+    readonly SERIAL_DATA_FONT_CSS_VARIABLE: UnwrapRef<typeof import('./composables/useSerialDataFont/index.js')['SERIAL_DATA_FONT_CSS_VARIABLE']>
+    readonly SYSTEM_SERIAL_DATA_FONT_FAMILY: UnwrapRef<typeof import('./utils/serialDataFont.js')['SYSTEM_SERIAL_DATA_FONT_FAMILY']>
     readonly asyncComputed: UnwrapRef<typeof import('@vueuse/core')['asyncComputed']>
     readonly autoResetRef: UnwrapRef<typeof import('@vueuse/core')['autoResetRef']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
@@ -359,6 +372,7 @@ declare module 'vue' {
     readonly createInjectionState: UnwrapRef<typeof import('@vueuse/core')['createInjectionState']>
     readonly createReactiveFn: UnwrapRef<typeof import('@vueuse/core')['createReactiveFn']>
     readonly createReusableTemplate: UnwrapRef<typeof import('@vueuse/core')['createReusableTemplate']>
+    readonly createSerialDataFontStack: UnwrapRef<typeof import('./utils/serialDataFont.js')['createSerialDataFontStack']>
     readonly createSharedComposable: UnwrapRef<typeof import('@vueuse/core')['createSharedComposable']>
     readonly createTemplatePromise: UnwrapRef<typeof import('@vueuse/core')['createTemplatePromise']>
     readonly createUnrefFn: UnwrapRef<typeof import('@vueuse/core')['createUnrefFn']>
@@ -385,6 +399,7 @@ declare module 'vue' {
     readonly ignorableWatch: UnwrapRef<typeof import('@vueuse/core')['ignorableWatch']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
     readonly injectLocal: UnwrapRef<typeof import('@vueuse/core')['injectLocal']>
+    readonly isBuiltinSerialDataFont: UnwrapRef<typeof import('./utils/serialDataFont.js')['isBuiltinSerialDataFont']>
     readonly isDefined: UnwrapRef<typeof import('@vueuse/core')['isDefined']>
     readonly isHexString: UnwrapRef<typeof import('./composables/useDataCode/useDataCode.js')['isHexString']>
     readonly isLikelyMobileDevice: UnwrapRef<typeof import('./utils/browserSupport.js')['isLikelyMobileDevice']>
@@ -397,8 +412,10 @@ declare module 'vue' {
     readonly makeDestructurable: UnwrapRef<typeof import('@vueuse/core')['makeDestructurable']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>
     readonly nextTick: UnwrapRef<typeof import('vue')['nextTick']>
+    readonly normalizeFontFamilies: UnwrapRef<typeof import('./composables/useLocalFonts/index.js')['normalizeFontFamilies']>
     readonly normalizeGattProfile: UnwrapRef<typeof import('./utils/bleGatt.js')['normalizeGattProfile']>
     readonly normalizeGattUuid: UnwrapRef<typeof import('./utils/bleGatt.js')['normalizeGattUuid']>
+    readonly normalizeSerialDataFontFamily: UnwrapRef<typeof import('./utils/serialDataFont.js')['normalizeSerialDataFontFamily']>
     readonly onActivated: UnwrapRef<typeof import('vue')['onActivated']>
     readonly onBeforeMount: UnwrapRef<typeof import('vue')['onBeforeMount']>
     readonly onBeforeUnmount: UnwrapRef<typeof import('vue')['onBeforeUnmount']>
@@ -421,6 +438,7 @@ declare module 'vue' {
     readonly pausableWatch: UnwrapRef<typeof import('@vueuse/core')['pausableWatch']>
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
     readonly provideLocal: UnwrapRef<typeof import('@vueuse/core')['provideLocal']>
+    readonly quoteFontFamily: UnwrapRef<typeof import('./utils/serialDataFont.js')['quoteFontFamily']>
     readonly reactify: UnwrapRef<typeof import('@vueuse/core')['reactify']>
     readonly reactifyObject: UnwrapRef<typeof import('@vueuse/core')['reactifyObject']>
     readonly reactive: UnwrapRef<typeof import('vue')['reactive']>
@@ -540,6 +558,7 @@ declare module 'vue' {
     readonly useKeyModifier: UnwrapRef<typeof import('@vueuse/core')['useKeyModifier']>
     readonly useLastChanged: UnwrapRef<typeof import('@vueuse/core')['useLastChanged']>
     readonly useLayout: UnwrapRef<typeof import('./composables/useLayout/index.js')['useLayout']>
+    readonly useLocalFonts: UnwrapRef<typeof import('./composables/useLocalFonts/index.js')['useLocalFonts']>
     readonly useLocalStorage: UnwrapRef<typeof import('@vueuse/core')['useLocalStorage']>
     readonly useMagicKeys: UnwrapRef<typeof import('@vueuse/core')['useMagicKeys']>
     readonly useManualRefHistory: UnwrapRef<typeof import('@vueuse/core')['useManualRefHistory']>
@@ -584,6 +603,7 @@ declare module 'vue' {
     readonly useScroll: UnwrapRef<typeof import('@vueuse/core')['useScroll']>
     readonly useScrollLock: UnwrapRef<typeof import('@vueuse/core')['useScrollLock']>
     readonly useSerial: UnwrapRef<typeof import('./composables/useSerial/index.js')['useSerial']>
+    readonly useSerialDataFont: UnwrapRef<typeof import('./composables/useSerialDataFont/index.js')['useSerialDataFont']>
     readonly useSerialWorker: UnwrapRef<typeof import('./composables/useSerialWorker/index.js')['useSerialWorker']>
     readonly useSessionStorage: UnwrapRef<typeof import('@vueuse/core')['useSessionStorage']>
     readonly useShare: UnwrapRef<typeof import('@vueuse/core')['useShare']>

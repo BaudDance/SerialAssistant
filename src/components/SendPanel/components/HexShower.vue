@@ -84,7 +84,7 @@ async function onDeleteDown(index, e) {
 </script>
 
 <template>
-  <div class="flex flex-wrap gap-y-1 content-start">
+  <div class="serial-data-font flex flex-wrap gap-y-1 content-start">
     <span v-for="(g, i) in groups" ref="items">
       <label>0x</label>
       <input

@@ -97,7 +97,7 @@ function nextPage() {
       </div>
 
       <div class="grid min-h-0 flex-1 gap-3 lg:grid-cols-[minmax(34rem,1.35fr)_minmax(26rem,0.9fr)]">
-        <div class="min-h-0 overflow-auto rounded-md border bg-muted/30 p-3 font-mono text-xs leading-5">
+        <div class="serial-data-font min-h-0 overflow-auto rounded-md border bg-muted/30 p-3 text-xs leading-5">
           <div v-if="rows.length === 0" class="text-muted-foreground">
             空文件
           </div>
@@ -107,7 +107,7 @@ function nextPage() {
           </div>
         </div>
 
-        <pre class="min-h-0 overflow-auto rounded-md border bg-muted/30 p-3 font-mono text-xs leading-5 whitespace-pre-wrap">{{ pageText || '空文件' }}</pre>
+        <pre class="serial-data-font min-h-0 overflow-auto rounded-md border bg-muted/30 p-3 text-xs leading-5 whitespace-pre-wrap">{{ pageText || '空文件' }}</pre>
       </div>
     </DialogContent>
   </Dialog>

@@ -1,6 +1,14 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
+@font-face {
+  font-family: 'SerialAssistant Data Mono';
+  src: url('/fonts/JetBrainsMapleMono-Regular-1.2304.79.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -43,6 +51,7 @@
 }
 
 :root {
+  --serial-data-font-family: monospace;
   --radius: 0.65rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -76,6 +85,12 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+}
+
+.serial-data-font {
+  font-family: var(--serial-data-font-family, monospace);
+  font-variant-ligatures: none;
+  tab-size: 8;
 }
 
 .dark {

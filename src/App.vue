@@ -1,7 +1,9 @@
 <script setup>
 import { useDark } from '@vueuse/core'
+import { useSerialDataFont } from '@/composables/useSerialDataFont'
 
 useDark()
+useSerialDataFont()
 </script>
 
 <template>

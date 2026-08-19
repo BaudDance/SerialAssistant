@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue'
+import SerialDataFontSetting from '@/components/SerialDataFontSetting.vue'
 import { useDataCode } from '@/composables/useDataCode/useDataCode'
 import { useSerialStore } from '@/store/useSerialStore'
 import { useSettingStore } from '@/store/useSettingStore'
@@ -84,6 +85,8 @@ const { hasDecTyps } = useSerialStore()
               </SelectContent>
             </Select>
           </div>
+
+          <SerialDataFontSetting />
 
           <div class="flex h-9">
             <Label class="w-36">中文编码</Label>

@@ -1,5 +1,10 @@
 import { computedAsync, useLocalStorage, useStorage } from '@vueuse/core'
 import { computed, ref } from 'vue'
+import {
+  BUILTIN_SERIAL_DATA_FONT_FAMILY,
+  createSerialDataFontStack,
+  normalizeSerialDataFontFamily,
+} from '@/utils/serialDataFont'
 
 const deviceType = useLocalStorage('deviceType', 'serial', {
   listenToStorageChanges: false,
@@ -13,6 +18,10 @@ const lineSelfEnding = useLocalStorage('LineEnding:Self', '', {
 })
 
 const terminalEnterMode = useLocalStorage('Terminal:EnterMode', 'CR', {
+  listenToStorageChanges: false,
+})
+
+const serialDataFontFamily = useLocalStorage('SerialData:FontFamily', BUILTIN_SERIAL_DATA_FONT_FAMILY, {
   listenToStorageChanges: false,
 })
 
@@ -44,6 +53,13 @@ const terminalEnter = computed(() => {
   return endings[terminalEnterMode.value]
 })
 
+const serialDataFontStack = computed(() => {
+  const normalized = normalizeSerialDataFontFamily(serialDataFontFamily.value)
+  if (normalized !== serialDataFontFamily.value)
+    serialDataFontFamily.value = normalized
+  return createSerialDataFontStack(normalized)
+})
+
 // 发送输入框 hex 模式的输入模式 normal: 正常输入 format: 格式化输入
 const sendHexInputMode = useLocalStorage('sendInputHexMode', 'format', {
   listenToStorageChanges: false,
@@ -59,6 +75,8 @@ export function useSettingStore() {
     lineEnding,
     terminalEnterMode,
     terminalEnter,
+    serialDataFontFamily,
+    serialDataFontStack,
     deviceType,
     sendHexInputMode,
     recordCacheEnabled,

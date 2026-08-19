@@ -136,6 +136,7 @@ declare module 'vue' {
     SelectValue: typeof import('./components/ui/select/SelectValue.vue')['default']
     SendPanel: typeof import('./components/SendPanel/SendPanel.vue')['default']
     Separator: typeof import('./components/ui/separator/Separator.vue')['default']
+    SerialDataFontSetting: typeof import('./components/SerialDataFontSetting.vue')['default']
     SerialRate: typeof import('./components/Dialog/SerialRate.vue')['default']
     SerialSetting: typeof import('./components/SettingPanel/components/DeviceSetting/SerialSetting.vue')['default']
     SerialWorkspace: typeof import('./components/SerialWorkspace.vue')['default']
