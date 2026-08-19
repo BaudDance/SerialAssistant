@@ -66,9 +66,6 @@ export default defineConfig(({ mode }) => {
             if (id.includes('node_modules')) {
               return 'vendor'
             }
-            else if (id.includes('src/components')) {
-              return 'components'
-            }
             return null
           },
         },
