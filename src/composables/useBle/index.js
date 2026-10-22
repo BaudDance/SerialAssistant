@@ -75,10 +75,6 @@ export function useBle(options = {}) {
 
     const uint8Data = new Uint8Array(value.buffer, value.byteOffset, value.byteLength).slice()
     onReadFrame(uint8Data)
-    if (typeof window !== 'undefined' && window.term) {
-      const text = new TextDecoder('utf-8').decode(uint8Data)
-      window.term.write(text)
-    }
   }
 
   /**

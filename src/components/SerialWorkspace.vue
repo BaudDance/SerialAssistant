@@ -94,9 +94,15 @@ const ble = useBle({ onReadFrame: onBleReadFrame })
 provide('ble', ble)
 
 const terminalPanelRef = ref(null)
+const terminalHasBeenShown = ref(showTerminalMode.value)
+watch(showTerminalMode, (visible) => {
+  if (visible)
+    terminalHasBeenShown.value = true
+})
+
 function onTerminalAreaResize(_size, _prevSize) {
-  console.log('终端区域调整大小')
-  terminalPanelRef.value?.fit()
+  if (showTerminalMode.value)
+    terminalPanelRef.value?.fit()
 }
 
 // 资源清理 - 防止内存泄露
@@ -192,8 +198,8 @@ if (typeof window !== 'undefined') {
 
           <ResizableHandle with-handle />
 
-          <ResizablePanel v-if="!showTerminalMode" :default-size="80">
-            <ResizablePanelGroup direction="vertical">
+          <ResizablePanel :default-size="80" @resize="onTerminalAreaResize">
+            <ResizablePanelGroup v-if="!showTerminalMode" direction="vertical">
               <ResizablePanel :default-size="70">
                 <PlotterPanel v-if="showPlotterMode" class="bg-background w-full h-full" />
                 <RecordPanel v-else class="bg-background w-full h-full" />
@@ -206,10 +212,7 @@ if (typeof window !== 'undefined') {
                 </div>
               </ResizablePanel>
             </ResizablePanelGroup>
-          </ResizablePanel>
-
-          <ResizablePanel v-else :default-size="80" @resize="onTerminalAreaResize">
-            <TerminalPanel ref="terminalPanelRef" />
+            <TerminalPanel v-if="terminalHasBeenShown" v-show="showTerminalMode" ref="terminalPanelRef" />
           </ResizablePanel>
         </ResizablePanelGroup>
 

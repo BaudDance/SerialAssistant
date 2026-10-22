@@ -2,12 +2,14 @@
 import { useDark } from '@vueuse/core'
 import { FitAddon } from '@xterm/addon-fit'
 import { Terminal } from '@xterm/xterm'
-import { inject, nextTick, onBeforeUnmount } from 'vue'
+import { Eraser } from 'lucide-vue-next'
+import { computed, inject, nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { toast } from 'vue-sonner'
+import { useLayout } from '@/composables/useLayout'
 import { useSerialDataFont } from '@/composables/useSerialDataFont'
 import { useSettingStore } from '@/store/useSettingStore.js'
-import { normalizeTerminalInput } from './terminalInput'
+import { normalizeTerminalInput, shouldCopySelection } from './terminalInput'
 import darkThemeJson from './theme/xterm/vscode/DarkModern.json'
-// import darkThemeJson from './theme/xterm/vscode/Dark+.json'
 import lightThemeJson from './theme/xterm/vscode/GitHub-Light-Default.json'
 
 import WelcomeToTerminal from './WelcomeToTerminal.vue'
@@ -16,35 +18,40 @@ import '@xterm/xterm/css/xterm.css'
 
 const { deviceType, terminalEnter, serialDataFontFamily } = useSettingStore()
 const { activeSerialDataFontStack, ensureSerialDataFontReady } = useSerialDataFont()
-// 获取串口和蓝牙连接状态
+const { showTerminalMode } = useLayout()
 const serial = inject('serial')
 const ble = inject('ble')
-// const { isConnected, terminalTmplRef, terminalInstance: term, setInstance } = useTerminalStore()
-// 是否已连接设备
 const isConnected = computed(() => serial.connected.value || ble.connected.value)
-
 const isDark = useDark()
+const terminalAreaRef = ref(null)
+const terminalExists = ref(false)
+const clearingTerminal = ref(false)
 
-// xterm 实例
-window.term = null
+let term = null
 let cleanupTerminalData = null
 let fitAddon = null
 let terminalOpened = false
 let terminalInitToken = 0
 let fontApplyToken = 0
+let terminalGeneration = 0
+
+function currentTheme() {
+  return isDark.value
+    ? { ...darkThemeJson, background: 'oklch(0.145 0 0)' }
+    : lightThemeJson
+}
 
 const xtermOptions = computed(() => ({
   fontFamily: activeSerialDataFontStack.value,
   cursorBlink: true,
   cursorStyle: 'block',
   fontSize: 20,
-  theme: isDark.value
-    ? Object.assign({}, darkThemeJson, { background: 'oklch(0.145 0 0)' })
-    : lightThemeJson,
+  scrollback: 10000,
+  theme: currentTheme(),
 }))
 
 function fitTerm() {
-  if (!window.term || !fitAddon || !terminalOpened)
+  if (!term || !fitAddon || !terminalOpened || !isConnected.value || !showTerminalMode.value)
     return
   fitAddon.fit()
 }
@@ -78,41 +85,53 @@ function sendData(data) {
   console.debug('数据发送成功:', buffer)
 }
 
-async function initTerminal(el) {
-  if (!el || window.term)
+async function initTerminal() {
+  const el = terminalAreaRef.value
+  if (!el || !isConnected.value || !showTerminalMode.value)
     return
 
-  const initToken = ++terminalInitToken
-  const term = new Terminal(xtermOptions.value)
-  const currentFitAddon = new FitAddon()
-  window.term = term
-  fitAddon = currentFitAddon
-  term.loadAddon(currentFitAddon)
+  if (!term) {
+    term = new Terminal(xtermOptions.value)
+    fitAddon = new FitAddon()
+    term.loadAddon(fitAddon)
 
-  // 输入事件
-  term.onData((word) => {
-    console.log('term.onData', word)
-    sendData(normalizeTerminalInput(word, terminalEnter.value))
-  })
-
-  cleanupTerminalData = serial.onTerminalData?.(({ dataBuffer }) => {
-    if (window.term !== term) {
-      serial.ackTerminalData?.()
-      return
-    }
-    term.write(new Uint8Array(dataBuffer), () => {
-      serial.ackTerminalData?.()
+    const currentTerm = term
+    currentTerm.attachCustomKeyEventHandler((event) => {
+      if (shouldCopySelection(event, currentTerm.hasSelection()))
+        return false
+      return true
     })
-  })
+    currentTerm.onData((word) => {
+      sendData(normalizeTerminalInput(word, terminalEnter.value))
+    })
+    cleanupTerminalData = serial.onTerminalData?.(({ dataBuffer, batchId, generation }) => {
+      if (term !== currentTerm || generation < terminalGeneration) {
+        serial.ackTerminalData?.(batchId)
+        return
+      }
+      currentTerm.write(new Uint8Array(dataBuffer), () => {
+        serial.ackTerminalData?.(batchId)
+      })
+    })
+  }
+
   updateTerminalActive()
 
+  if (terminalOpened) {
+    fitTerm()
+    term.focus()
+    return
+  }
+
+  const initToken = ++terminalInitToken
   const fontStack = await ensureSerialDataFontReady(serialDataFontFamily.value)
-  if (initToken !== terminalInitToken || window.term !== term || !isConnected.value)
+  if (initToken !== terminalInitToken || !term || !isConnected.value || !showTerminalMode.value)
     return
 
   term.options.fontFamily = fontStack
   term.open(el)
   terminalOpened = true
+  terminalExists.value = true
   term.focus()
   fitTerm()
   onTerminalResize()
@@ -125,8 +144,9 @@ function disposeTerminal() {
   cleanupTerminalData?.()
   cleanupTerminalData = null
   removeResizeListener()
-  window.term?.dispose()
-  window.term = null
+  term?.dispose()
+  term = null
+  terminalExists.value = false
   fitAddon = null
   terminalOpened = false
 }
@@ -143,27 +163,55 @@ function updateTerminalActive(forceActive) {
   const active = typeof forceActive === 'boolean'
     ? forceActive
     : Boolean(
-        window.term
+        term
         && isConnected.value
-        && deviceType.value === 'serial'
-        && document.visibilityState === 'visible',
+        && showTerminalMode.value
+        && document.visibilityState === 'visible'
+        && !clearingTerminal.value,
       )
   const result = serial.setTerminalActive?.(active)
   result?.catch?.((error) => {
     console.warn('更新终端接收状态失败:', error)
   })
+  return result
 }
 
-watch(isDark, (val) => {
-  if (window.term) {
-    window.term.options.theme = val ? Object.assign({}, darkThemeJson, { background: 'oklch(0.145 0 0)' }) : lightThemeJson
+async function clearTerminal() {
+  if (!term || clearingTerminal.value)
+    return
+
+  clearingTerminal.value = true
+  updateTerminalActive(false)
+  try {
+    const { generation } = await serial.clearTerminalOutput()
+    terminalGeneration = generation
+    const currentTerm = term
+    await new Promise(resolve => currentTerm.write('', resolve))
+    if (term !== currentTerm)
+      return
+    currentTerm.clear()
+    currentTerm.clearSelection()
+    if (isConnected.value && showTerminalMode.value)
+      currentTerm.focus()
   }
+  catch (error) {
+    console.error('清空终端失败:', error)
+    toast.error('清空终端失败')
+  }
+  finally {
+    clearingTerminal.value = false
+    updateTerminalActive()
+  }
+}
+
+watch(isDark, () => {
+  if (term)
+    term.options.theme = currentTheme()
 })
 
 watch(serialDataFontFamily, async (family) => {
   const applyToken = ++fontApplyToken
   const fontStack = await ensureSerialDataFontReady(family)
-  const term = window.term
   if (!term || applyToken !== fontApplyToken)
     return
 
@@ -176,15 +224,14 @@ watch(serialDataFontFamily, async (family) => {
   term.refresh(0, term.rows - 1)
 })
 
-watch(isConnected, (val) => {
-  if (val) {
-    nextTick(() => {
-      initTerminal(document.getElementById('terminalArea'))
-    })
+watch([isConnected, showTerminalMode], async ([connected, visible]) => {
+  if (!connected || !visible) {
+    terminalInitToken += 1
+    updateTerminalActive(false)
+    return
   }
-  else {
-    disposeTerminal()
-  }
+  await nextTick()
+  initTerminal().catch(error => console.error('初始化终端失败:', error))
 }, { immediate: true })
 
 watch(deviceType, () => {
@@ -213,9 +260,17 @@ defineExpose({
 </script>
 
 <template>
-  <div class="h-full w-full relative p-2 overflow-hidden">
-    <WelcomeToTerminal v-if="!isConnected" />
-    <div v-else id="terminalArea" class="h-full w-full" />
+  <div class="h-full w-full relative p-2 overflow-hidden flex flex-col">
+    <div class="shrink-0 flex justify-end pb-2">
+      <Button variant="outline" size="sm" class="cursor-pointer" :disabled="!terminalExists || clearingTerminal" @click="clearTerminal">
+        <Eraser class="size-4" />
+        清空终端
+      </Button>
+    </div>
+    <div class="min-h-0 flex-1">
+      <WelcomeToTerminal v-if="!isConnected" />
+      <div v-show="isConnected" id="terminalArea" ref="terminalAreaRef" class="h-full w-full" />
+    </div>
   </div>
 </template>
 

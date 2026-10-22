@@ -30,6 +30,7 @@ let frameBytes = 0
 let frameFirstSeenAt = 0
 let frameLastSeenAt = 0
 let frameTimer = null
+let recordSaveQueue = Promise.resolve(null)
 
 let rxCount = 0
 let txCount = 0
@@ -38,7 +39,11 @@ let liveRecordPreview = null
 let statsTimer = null
 
 let terminalActive = false
-let terminalAwaitingAck = false
+let terminalAwaitingBatchId = null
+let terminalNextBatchId = 0
+let terminalGeneration = 0
+let terminalCatchUpVersion = 0
+let terminalCatchUpRequested = false
 let terminalQueue = []
 let terminalQueueBytes = 0
 let terminalFlushTimer = null
@@ -383,11 +388,22 @@ async function appendRecord(payload) {
   }
 
   scheduleStats()
-  if (record.type === 'read' && terminalActive) {
-    enqueueTerminalData(new Uint8Array(dataBuffer.slice(0)))
-    terminalCursorIndex = record.index + 1
+  if (record.type === 'read' && terminalActive && terminalHasStarted && sessionId === currentSessionId) {
+    if (!terminalCatchingUp && terminalCursorIndex === record.index) {
+      enqueueTerminalData(new Uint8Array(dataBuffer.slice(0)))
+      terminalCursorIndex = record.index + 1
+    }
+    else {
+      pumpTerminalCatchUp().catch(error => console.warn('终端补发数据失败:', error))
+    }
   }
   return record
+}
+
+function queueRecordSave(payload) {
+  const save = recordSaveQueue.catch(() => null).then(() => appendRecord(payload))
+  recordSaveQueue = save
+  return save
 }
 
 async function fetchRecordByIndex(sessionId, index) {
@@ -495,6 +511,7 @@ async function handleInit(payload) {
 
 async function handleCreateSession(payload) {
   currentSessionId = payload.session.id
+  terminalCatchUpVersion += 1
   terminalCursorIndex = 0
   terminalHasStarted = false
   await putSession(payload.session)
@@ -513,6 +530,7 @@ async function handleCreateSession(payload) {
 
 async function handleSetCurrentSession(payload) {
   currentSessionId = payload.sessionId
+  terminalCatchUpVersion += 1
   terminalCursorIndex = 0
   terminalHasStarted = false
   await recomputeCurrentStats(currentSessionId)
@@ -716,6 +734,8 @@ async function handleClearRecords(payload) {
   }
   recordCounts.set(sessionId, 0)
   if (sessionId === currentSessionId) {
+    terminalCatchUpVersion += 1
+    terminalCursorIndex = 0
     rxCount = 0
     txCount = 0
     recordCount = 0
@@ -823,7 +843,7 @@ async function flushFrame() {
     frameTimer = null
   }
   if (!frameBytes)
-    return
+    return recordSaveQueue
 
   const data = concatChunks(frameChunks, frameBytes)
   const firstSeenAt = frameFirstSeenAt
@@ -836,7 +856,7 @@ async function flushFrame() {
   const plotterBuffer = toArrayBuffer(data)
   emit('plotterData', { dataBuffer: plotterBuffer, time: lastSeenAt, flush: true }, [plotterBuffer])
 
-  await appendRecord({
+  return queueRecordSave({
     type: 'read',
     dataBuffer: data.buffer,
     time: firstSeenAt,
@@ -895,6 +915,7 @@ async function startReadLoop() {
 }
 
 async function handleAttachSerialStreams(payload) {
+  const previousSessionId = currentSessionId
   await handleCloseSerialStreams()
   readableStream = payload.readable
   writableStream = payload.writable
@@ -905,8 +926,11 @@ async function handleAttachSerialStreams(payload) {
     currentSessionId = payload.sessionId
   await ensureSession(currentSessionId)
   await recomputeCurrentStats(currentSessionId)
-  terminalCursorIndex = recordCounts.get(currentSessionId) || 0
-  terminalHasStarted = false
+  if (!terminalHasStarted || previousSessionId !== currentSessionId) {
+    terminalCursorIndex = recordCounts.get(currentSessionId) || 0
+    terminalHasStarted = false
+    resetTerminalQueue()
+  }
   writeQueue = Promise.resolve()
   writer = writableStream?.getWriter()
   readLoopPromise = startReadLoop()
@@ -918,6 +942,13 @@ async function handleAttachSerialStreams(payload) {
 
 async function handleCloseSerialStreams() {
   keepReading = false
+  terminalActive = false
+  terminalCatchUpVersion += 1
+  terminalCatchUpRequested = false
+  if (terminalFlushTimer)
+    clearTimeout(terminalFlushTimer)
+  terminalFlushTimer = null
+  terminalAwaitingBatchId = null
   const activeReader = reader
   const activeWriter = writer
   const activeReadLoop = readLoopPromise
@@ -925,10 +956,6 @@ async function handleCloseSerialStreams() {
   if (frameTimer) {
     clearTimeout(frameTimer)
     frameTimer = null
-  }
-  if (terminalFlushTimer) {
-    clearTimeout(terminalFlushTimer)
-    terminalFlushTimer = null
   }
   try {
     await flushFrame()
@@ -978,9 +1005,6 @@ async function handleCloseSerialStreams() {
   readableStream = null
   writableStream = null
   readLoopPromise = null
-  terminalQueue = []
-  terminalQueueBytes = 0
-  terminalAwaitingAck = false
   return { stats: currentStats() }
 }
 
@@ -1005,21 +1029,40 @@ function enqueueTerminalData(data) {
   flushTerminalQueue()
 }
 
+function resetTerminalQueue() {
+  if (terminalFlushTimer) {
+    clearTimeout(terminalFlushTimer)
+    terminalFlushTimer = null
+  }
+  terminalQueue = []
+  terminalQueueBytes = 0
+  terminalAwaitingBatchId = null
+  lastTerminalSentAt = 0
+}
+
 async function pumpTerminalCatchUp() {
-  if (terminalCatchingUp || !terminalActive || !terminalHasStarted || !currentSessionId)
+  if (terminalCatchingUp) {
+    terminalCatchUpRequested = true
+    return
+  }
+  if (!terminalActive || !terminalHasStarted || !currentSessionId)
     return
 
   terminalCatchingUp = true
+  const version = terminalCatchUpVersion
+  const sessionId = currentSessionId
   try {
-    const total = recordCounts.get(currentSessionId) || 0
     for (;;) {
-      if (!terminalActive || terminalCursorIndex >= total || terminalQueueBytes >= 512 * 1024)
+      const total = recordCounts.get(sessionId) || 0
+      if (!terminalActive || version !== terminalCatchUpVersion || sessionId !== currentSessionId || terminalCursorIndex >= total || terminalQueueBytes >= 512 * 1024)
         break
       const records = await fetchRecordRange(
-        currentSessionId,
+        sessionId,
         terminalCursorIndex,
         Math.min(total, terminalCursorIndex + 100),
       )
+      if (!terminalActive || version !== terminalCatchUpVersion || sessionId !== currentSessionId)
+        break
       if (!records.length)
         break
       for (const record of records) {
@@ -1034,12 +1077,18 @@ async function pumpTerminalCatchUp() {
   }
   finally {
     terminalCatchingUp = false
+    if (terminalCatchUpRequested && terminalActive) {
+      terminalCatchUpRequested = false
+      queueMicrotask(() => {
+        pumpTerminalCatchUp().catch(error => console.warn('终端补发数据失败:', error))
+      })
+    }
   }
   flushTerminalQueue()
 }
 
 function flushTerminalQueue() {
-  if (!terminalActive || terminalAwaitingAck || !terminalQueueBytes)
+  if (!terminalActive || terminalAwaitingBatchId !== null || !terminalQueueBytes)
     return
 
   const elapsed = Date.now() - lastTerminalSentAt
@@ -1069,13 +1118,16 @@ function flushTerminalQueue() {
     }
   }
   terminalQueueBytes -= targetLength
-  terminalAwaitingAck = true
+  const batchId = ++terminalNextBatchId
+  terminalAwaitingBatchId = batchId
   lastTerminalSentAt = Date.now()
-  self.postMessage({ type: 'terminalData', payload: { dataBuffer: out.buffer } }, [out.buffer])
+  self.postMessage({ type: 'terminalData', payload: { dataBuffer: out.buffer, batchId, generation: terminalGeneration } }, [out.buffer])
 }
 
-function handleAckTerminalData() {
-  terminalAwaitingAck = false
+function handleAckTerminalData(payload) {
+  if (payload.batchId !== terminalAwaitingBatchId)
+    return { ok: true }
+  terminalAwaitingBatchId = null
   flushTerminalQueue()
   pumpTerminalCatchUp().catch(error => console.warn('终端补发数据失败:', error))
   return { ok: true }
@@ -1084,11 +1136,10 @@ function handleAckTerminalData() {
 function handleSetTerminalActive(payload) {
   terminalActive = !!payload.active
   if (!terminalActive) {
-    terminalAwaitingAck = false
-    if (terminalFlushTimer) {
+    terminalAwaitingBatchId = null
+    if (terminalFlushTimer)
       clearTimeout(terminalFlushTimer)
-      terminalFlushTimer = null
-    }
+    terminalFlushTimer = null
   }
   else {
     if (!terminalHasStarted) {
@@ -1099,6 +1150,24 @@ function handleSetTerminalActive(payload) {
     flushTerminalQueue()
   }
   return { ok: true }
+}
+
+async function handleClearTerminalOutput() {
+  terminalActive = false
+  terminalGeneration += 1
+  terminalCatchUpVersion += 1
+  terminalCatchUpRequested = false
+  resetTerminalQueue()
+
+  const sessionId = currentSessionId
+  const countAtClear = recordCounts.get(sessionId) || 0
+  const lastPendingRecord = await flushFrame()
+  terminalCursorIndex = Math.max(
+    countAtClear,
+    lastPendingRecord?.sessionId === sessionId ? lastPendingRecord.index + 1 : 0,
+  )
+  terminalHasStarted = true
+  return { generation: terminalGeneration }
 }
 
 async function dispatch(type, payload) {
@@ -1112,7 +1181,7 @@ async function dispatch(type, payload) {
     case 'updateSessionInfo':
       return handleUpdateSessionInfo(payload)
     case 'appendRecord':
-      return { record: await appendRecord(payload), stats: currentStats(), sessions: sessionsCache }
+      return { record: await queueRecordSave(payload), stats: currentStats(), sessions: sessionsCache }
     case 'fetchRecordRows':
       return handleFetchRecordRows(payload)
     case 'setRecordDisplay':
@@ -1150,7 +1219,9 @@ async function dispatch(type, payload) {
     case 'setTerminalActive':
       return handleSetTerminalActive(payload)
     case 'ackTerminalData':
-      return handleAckTerminalData()
+      return handleAckTerminalData(payload)
+    case 'clearTerminalOutput':
+      return handleClearTerminalOutput()
     default:
       throw new Error(`未知 Worker 指令: ${type}`)
   }

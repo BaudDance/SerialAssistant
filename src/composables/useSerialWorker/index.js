@@ -78,10 +78,16 @@ function readLegacySnapshot() {
   }
 }
 
-function createLocalBackend() {
+function createLocalBackend(emitTerminalData) {
   const sessions = []
   const recordsBySession = new Map()
   let currentSessionId = null
+  let terminalGeneration = 0
+  let terminalActive = false
+  let terminalHasStarted = false
+  let terminalCursorIndex = 0
+  let terminalAwaitingBatchId = null
+  let terminalNextBatchId = 0
   let stats = {
     rxCount: 0,
     txCount: 0,
@@ -95,6 +101,21 @@ function createLocalBackend() {
     if (!recordsBySession.has(sessionId))
       recordsBySession.set(sessionId, [])
     return recordsBySession.get(sessionId)
+  }
+
+  function pumpTerminalData() {
+    if (!terminalActive || terminalAwaitingBatchId !== null || !terminalHasStarted)
+      return
+    const records = getRecords()
+    while (terminalCursorIndex < records.length) {
+      const record = records[terminalCursorIndex++]
+      if (record.type !== 'read')
+        continue
+      const batchId = ++terminalNextBatchId
+      terminalAwaitingBatchId = batchId
+      emitTerminalData({ dataBuffer: record.dataBuffer.slice(0), batchId, generation: terminalGeneration })
+      return
+    }
   }
 
   function renderText(record) {
@@ -168,11 +189,17 @@ function createLocalBackend() {
       sessions.unshift(payload.session)
       currentSessionId = payload.session.id
       recordsBySession.set(currentSessionId, [])
+      terminalHasStarted = false
+      terminalCursorIndex = 0
+      terminalAwaitingBatchId = null
       return { session: payload.session, sessions, currentSessionId, stats }
     }
     if (type === 'setCurrentSession') {
       currentSessionId = payload.sessionId
       const records = getRecords()
+      terminalHasStarted = false
+      terminalCursorIndex = 0
+      terminalAwaitingBatchId = null
       stats = {
         rxCount: records.filter(r => r.type === 'read').reduce((sum, r) => sum + r.byteLength, 0),
         txCount: records.filter(r => r.type === 'write').reduce((sum, r) => sum + r.byteLength, 0),
@@ -230,6 +257,8 @@ function createLocalBackend() {
         recordCount: list.length,
         liveRecordPreview: null,
       }
+      if (sessionId === currentSessionId)
+        pumpTerminalData()
       return { record, stats, sessions }
     }
     if (type === 'fetchRecordRows') {
@@ -294,8 +323,39 @@ function createLocalBackend() {
     if (type === 'clearRecords') {
       const list = getRecords(payload.sessionId)
       list.length = 0
+      if (payload.sessionId === currentSessionId)
+        terminalCursorIndex = 0
       stats = { rxCount: 0, txCount: 0, recordCount: 0, liveRecordPreview: null }
       return { stats, sessions }
+    }
+    if (type === 'setTerminalActive') {
+      terminalActive = !!payload.active
+      if (!terminalActive) {
+        terminalAwaitingBatchId = null
+      }
+      else {
+        if (!terminalHasStarted) {
+          terminalCursorIndex = getRecords().length
+          terminalHasStarted = true
+        }
+        pumpTerminalData()
+      }
+      return { ok: true }
+    }
+    if (type === 'ackTerminalData') {
+      if (payload.batchId === terminalAwaitingBatchId) {
+        terminalAwaitingBatchId = null
+        pumpTerminalData()
+      }
+      return { ok: true }
+    }
+    if (type === 'clearTerminalOutput') {
+      terminalActive = false
+      terminalAwaitingBatchId = null
+      terminalCursorIndex = getRecords().length
+      terminalHasStarted = true
+      terminalGeneration += 1
+      return { generation: terminalGeneration }
     }
     if (type === 'deleteSession') {
       const index = sessions.findIndex(item => item.id === payload.sessionId)
@@ -341,7 +401,7 @@ export const useSerialWorker = createGlobalState(() => {
 
   const terminalHandlers = new Set()
   const plotterHandlers = new Set()
-  const localBackend = createLocalBackend()
+  const localBackend = createLocalBackend(payload => terminalHandlers.forEach(handler => handler(payload)))
   const pending = new Map()
   let worker = null
   let requestId = 0
@@ -509,7 +569,8 @@ export const useSerialWorker = createGlobalState(() => {
       return (result.records || []).map(normalizeRecord)
     },
     setTerminalActive: active => request('setTerminalActive', { active }),
-    ackTerminalData: () => request('ackTerminalData'),
+    ackTerminalData: batchId => request('ackTerminalData', { batchId }),
+    clearTerminalOutput: () => request('clearTerminalOutput'),
     onTerminalData(handler) {
       terminalHandlers.add(handler)
       return () => terminalHandlers.delete(handler)

@@ -283,5 +283,6 @@ export function useSerial() {
     onTerminalData: worker.onTerminalData,
     onPlotterData: worker.onPlotterData,
     ackTerminalData: worker.ackTerminalData,
+    clearTerminalOutput: worker.clearTerminalOutput,
   }
 }

@@ -59,6 +59,33 @@ describe('serial worker record access facade', () => {
     expect(worker.txCount.value).toBe(2)
   })
 
+  it('replays local terminal reads after a mode switch and skips pre-clear data', async () => {
+    await worker.createSession({ id: 'local_terminal', title: 'Terminal', createdAt: 1000, updatedAt: 1000, recordCount: 0 })
+    const batches = []
+    const unsubscribe = worker.onTerminalData(payload => batches.push(payload))
+    const appendRead = text => worker.appendRecord({ type: 'read', display: 'ascii', data: new TextEncoder().encode(text) })
+
+    await worker.setTerminalActive(true)
+    await appendRead('first')
+    expect(new TextDecoder().decode(batches[0].dataBuffer)).toBe('first')
+    await worker.ackTerminalData(batches[0].batchId)
+
+    await worker.setTerminalActive(false)
+    await appendRead('hidden')
+    await worker.setTerminalActive(true)
+    expect(new TextDecoder().decode(batches[1].dataBuffer)).toBe('hidden')
+
+    const { generation } = await worker.clearTerminalOutput()
+    await worker.ackTerminalData(batches[1].batchId)
+    await worker.setTerminalActive(true)
+    expect(batches).toHaveLength(2)
+    await appendRead('fresh')
+    expect(batches[2].generation).toBe(generation)
+    expect(new TextDecoder().decode(batches[2].dataBuffer)).toBe('fresh')
+    expect((await worker.fetchRecordRows('local_terminal', 0, 3)).rows).toHaveLength(3)
+    unsubscribe()
+  })
+
   it('searches and changes display without exposing raw data in rows', async () => {
     await worker.createSession({
       id: 'session_search',
